@@ -36,7 +36,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\",\n    \"password_confirmation\": \"Password123!\"\n}"
+                    "raw": "{\n    \"name\": \"John Doe\",\n    \"username\": \"johndoe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\",\n    \"password_confirmation\": \"Password123!\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/auth/register",
@@ -82,7 +82,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
+                    "raw": "{\n    \"login\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/auth/login",
@@ -94,7 +94,7 @@
                         "login"
                     ]
                 },
-                "description": "Login with email and password. Returns JWT token for authentication."
+                "description": "Login with email or username and password. Returns JWT token for authentication."
             },
             "response": []
         },
@@ -160,7 +160,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"email\": \"john@example.com\"\n}"
+                    "raw": "{\n    \"login\": \"john@example.com\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/auth/forgot-password",
@@ -172,7 +172,7 @@
                         "forgot-password"
                     ]
                 },
-                "description": "Request password reset. Sends reset link to user's email if it exists."
+                "description": "Request password reset. Sends reset link to user's email if account exists. Can use email or username."
             },
             "response": []
         },

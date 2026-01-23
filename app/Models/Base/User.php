@@ -8,27 +8,37 @@ class User extends ActiveRecord
 {
     protected string $table = 'users';
     protected string $primaryKey = 'id';
-    
+
     protected array $fillable = [
-        'name', 'email', 'password', 'phone', 'avatar', 'role', 'status', 'email_verified_at', 'remember_token', 'last_login_at'
+        'name',
+        'username',
+        'email',
+        'password',
+        'phone',
+        'avatar',
+        'role',
+        'status',
+        'email_verified_at',
+        'remember_token',
+        'last_login_at'
     ];
-    
+
     protected array $hidden = ['password'];
-    
+
     /**
      * Search users
      */
     public function search(string $keyword): array
     {
         $searchTerm = "%$keyword%";
-        
+
         $sql = "SELECT * FROM {$this->table} 
                 WHERE name LIKE :keyword
-                   OR email LIKE :keyword2
-                   OR status LIKE :keyword3
-                   OR email_verified_at LIKE :keyword4
+                   OR username LIKE :keyword2
+                   OR email LIKE :keyword3
+                   OR status LIKE :keyword4
                 LIMIT 100";
-        
+
         return $this->query($sql, [
             'keyword' => $searchTerm,
             'keyword2' => $searchTerm,

@@ -23,6 +23,7 @@ class AuthController extends Controller
     {
         $validated = $this->validate([
             'name' => 'required|min:3|max:100',
+            'username' => 'min:3|max:50|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
             'password_confirmation' => 'required'
@@ -72,12 +73,21 @@ class AuthController extends Controller
     public function login(): void
     {
         $validated = $this->validate([
-            'email' => 'required|email',
+            'login' => 'required', // Can be email or username
             'password' => 'required'
         ]);
 
-        // Find active user only
-        $user = $this->model->findActiveByEmail($validated['email']);
+        // Determine if login is email or username
+        $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
+
+        // Find active user by email or username
+        if ($isEmail) {
+            $user = $this->model->findActiveByEmail($validated['login']);
+            $field = 'email';
+        } else {
+            $user = $this->model->findActiveByUsername($validated['login']);
+            $field = 'username';
+        }
 
         if (!$user) {
             $this->unauthorized('Invalid credentials or account is inactive');
@@ -85,8 +95,8 @@ class AuthController extends Controller
 
         // Get user with password for verification
         $stmt = $this->model->query(
-            "SELECT * FROM users WHERE email = :email",
-            ['email' => $validated['email']]
+            "SELECT * FROM users WHERE {$field} = :{$field}",
+            [$field => $validated['login']]
         );
 
         $userWithPassword = $stmt[0] ?? null;
@@ -153,14 +163,21 @@ class AuthController extends Controller
     public function forgotPassword(): void
     {
         $validated = $this->validate([
-            'email' => 'required|email'
+            'login' => 'required' // Can be email or username
         ]);
 
-        $user = $this->model->findByEmail($validated['email']);
+        // Determine if login is email or username
+        $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
+
+        if ($isEmail) {
+            $user = $this->model->findByEmail($validated['login']);
+        } else {
+            $user = $this->model->findByUsername($validated['login']);
+        }
 
         // Always return success to prevent email enumeration
         if (!$user) {
-            $this->success(null, 'If the email exists, a password reset link has been sent.');
+            $this->success(null, 'If the account exists, a password reset link has been sent.');
             return;
         }
 
@@ -173,7 +190,7 @@ class AuthController extends Controller
 
         // Delete old tokens for this email
         $stmt = $db->prepare("DELETE FROM password_resets WHERE email = :email");
-        $stmt->execute(['email' => $validated['email']]);
+        $stmt->execute(['email' => $user['email']]);
 
         // Insert new token
         $stmt = $db->prepare("
@@ -181,13 +198,13 @@ class AuthController extends Controller
             VALUES (:email, :token, :expires_at)
         ");
         $stmt->execute([
-            'email' => $validated['email'],
+            'email' => $user['email'],
             'token' => $token,
             'expires_at' => $expiresAt
         ]);
 
         // Generate reset URL
-        $resetUrl = ($_ENV['FRONTEND_URL'] ?? 'http://localhost:3000') . '/reset-password?token=' . $token . '&email=' . urlencode($validated['email']);
+        $resetUrl = ($_ENV['FRONTEND_URL'] ?? 'http://localhost:3000') . '/reset-password?token=' . $token . '&email=' . urlencode($user['email']);
 
         // Send email
         $emailBody = "
@@ -203,12 +220,12 @@ class AuthController extends Controller
 
         // Push email job to queue
         \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
-            'email' => $validated['email'],
+            'email' => $user['email'],
             'subject' => 'Password Reset Request - ' . ($_ENV['APP_NAME'] ?? 'Our API'),
             'body' => $emailBody
         ]);
 
-        $this->success(null, 'If the email exists, a password reset link has been sent.');
+        $this->success(null, 'If the account exists, a password reset link has been sent.');
     }
 
     /**

@@ -254,15 +254,15 @@ try {
     echo Colors::colorize("[5/7] Database Migrations", 'yellow') . PHP_EOL;
 
     $migrateChoice = choice("Migration options:", [
-        1 => 'Migrate base tables only (users)',
-        2 => 'Migrate with examples (users, posts, comments, tags)',
+        1 => 'Migrate base tables only (users, password_resets)',
+        2 => 'Migrate with examples (users, password_resets, posts, comments, tags)',
         3 => 'Skip migrations'
     ], 1);
 
     if ($migrateChoice == 1) {
         echo PHP_EOL;
         info("Running base migrations...");
-        runCommand('php scripts/migrate.php migrate --tables=users');
+        runCommand('php scripts/migrate.php migrate --tables=users,password_resets');
         success("Base migrations completed");
     } elseif ($migrateChoice == 2) {
         echo PHP_EOL;

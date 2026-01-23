@@ -54,6 +54,17 @@ class User extends BaseModel
     }
 
     /**
+     * Find user by username
+     * @param string $username
+     * @return array|null
+     */
+    public function findByUsername(string $username): ?array
+    {
+        $results = $this->where(['username' => $username]);
+        return $results[0] ?? null;
+    }
+
+    /**
      * Find active user by email
      * @param string $email
      * @return array|null
@@ -62,6 +73,20 @@ class User extends BaseModel
     {
         $results = $this->where([
             'email' => $email,
+            'status' => 'active'
+        ]);
+        return $results[0] ?? null;
+    }
+
+    /**
+     * Find active user by username
+     * @param string $username
+     * @return array|null
+     */
+    public function findActiveByUsername(string $username): ?array
+    {
+        $results = $this->where([
+            'username' => $username,
             'status' => 'active'
         ]);
         return $results[0] ?? null;

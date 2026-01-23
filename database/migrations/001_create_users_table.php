@@ -15,6 +15,7 @@ return new class
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(100) NOT NULL,
+                username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
@@ -30,12 +31,14 @@ return new class
 
             // Create indexes
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_status ON users(status)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)");
         } elseif ($driver === 'pgsql') {
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
+                username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
@@ -51,6 +54,7 @@ return new class
 
             // Create indexes
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_status ON users(status)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)");
 
@@ -77,6 +81,7 @@ return new class
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
+                username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
@@ -87,6 +92,7 @@ return new class
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_users_email (email),
+                INDEX idx_users_username (username),
                 INDEX idx_users_status (status),
                 INDEX idx_users_role (role)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

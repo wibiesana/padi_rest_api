@@ -10,7 +10,7 @@ $router->get('/', function () {
     $response->json([
         'success' => true,
         'message' => 'Padi REST API is running',
-        'version' => '1.0.0',
+        'version' => '2.0.0',
         'timestamp' => date('Y-m-d H:i:s')
     ]);
 });

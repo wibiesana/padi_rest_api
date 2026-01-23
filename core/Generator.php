@@ -145,6 +145,10 @@ class Generator
         echo "\n3. Generating Routes...\n";
         $this->generateRoutes($tableName, $options);
 
+        // Generate Postman Collection
+        echo "\n4. Generating Postman Collection...\n";
+        $this->generatePostmanCollection($tableName, $options);
+
         echo "\n" . str_repeat('=', 60) . "\n";
         echo "✓ CRUD generation completed!\n";
 
@@ -615,5 +619,258 @@ PHP;
             file_put_contents($filePath, "\n" . $routes, FILE_APPEND);
             echo "✓ Routes for '{$prefix}' appended to end of routes/api.php\n";
         }
+    }
+
+    /**
+     * Generate Postman Collection for REST API
+     */
+    public function generatePostmanCollection(string $tableName, array $options = []): bool
+    {
+        $modelName = $this->tableNameToModelName($tableName);
+        $resourceName = strtolower($modelName);
+        $prefix = $options['prefix'] ?? strtolower($tableName);
+        $protected = $options['protected'] ?? ['store', 'update', 'destroy'];
+
+        // Get schema for generating sample data
+        $schema = $this->getTableSchema($tableName);
+        $sampleData = $this->generateSampleData($schema);
+
+        // Get base URL from env or use default
+        $baseUrl = \Core\Env::get('APP_URL', 'http://localhost:8000');
+        $apiPrefix = '/api';
+
+        $collection = [
+            'info' => [
+                'name' => "{$modelName} API",
+                'description' => "REST API endpoints for {$modelName} resource",
+                'schema' => 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+                '_exporter_id' => '0'
+            ],
+            'item' => [
+                [
+                    'name' => "Get All {$modelName}s (Paginated)",
+                    'request' => [
+                        'method' => 'GET',
+                        'header' => [],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}?page=1&per_page=10",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix],
+                            'query' => [
+                                ['key' => 'page', 'value' => '1'],
+                                ['key' => 'per_page', 'value' => '10']
+                            ]
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Search {$modelName}s",
+                    'request' => [
+                        'method' => 'GET',
+                        'header' => [],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}?search=keyword",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix],
+                            'query' => [
+                                ['key' => 'search', 'value' => 'keyword']
+                            ]
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Get All {$modelName}s (No Pagination)",
+                    'request' => [
+                        'method' => 'GET',
+                        'header' => [],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}/all",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix, 'all']
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Get Single {$modelName}",
+                    'request' => [
+                        'method' => 'GET',
+                        'header' => [],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}/1",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix, '1']
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Create {$modelName}",
+                    'request' => [
+                        'method' => 'POST',
+                        'header' => [
+                            ['key' => 'Content-Type', 'value' => 'application/json']
+                        ],
+                        'body' => [
+                            'mode' => 'raw',
+                            'raw' => json_encode($sampleData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                        ],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix]
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Update {$modelName}",
+                    'request' => [
+                        'method' => 'PUT',
+                        'header' => [
+                            ['key' => 'Content-Type', 'value' => 'application/json']
+                        ],
+                        'body' => [
+                            'mode' => 'raw',
+                            'raw' => json_encode($sampleData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                        ],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}/1",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix, '1']
+                        ]
+                    ],
+                    'response' => []
+                ],
+                [
+                    'name' => "Delete {$modelName}",
+                    'request' => [
+                        'method' => 'DELETE',
+                        'header' => [],
+                        'url' => [
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}/1",
+                            'host' => ['{{base_url}}'],
+                            'path' => [ltrim($apiPrefix, '/'), $prefix, '1']
+                        ]
+                    ],
+                    'response' => []
+                ]
+            ],
+            'variable' => [
+                [
+                    'key' => 'base_url',
+                    'value' => $baseUrl,
+                    'type' => 'string'
+                ],
+                [
+                    'key' => 'token',
+                    'value' => '',
+                    'type' => 'string'
+                ]
+            ]
+        ];
+
+        // Add auth header to protected endpoints
+        if (!empty($protected)) {
+            foreach ($collection['item'] as &$item) {
+                $method = $item['request']['method'] ?? '';
+
+                // Check if this endpoint should be protected
+                $isProtected = false;
+                if (in_array('store', $protected) && $method === 'POST') $isProtected = true;
+                if (in_array('update', $protected) && $method === 'PUT') $isProtected = true;
+                if (in_array('destroy', $protected) && $method === 'DELETE') $isProtected = true;
+
+                if ($isProtected) {
+                    $item['request']['header'][] = [
+                        'key' => 'Authorization',
+                        'value' => 'Bearer {{token}}',
+                        'type' => 'text'
+                    ];
+                }
+            }
+        }
+
+        // Create postman directory if not exists
+        $postmanDir = $this->baseDir . '/postman';
+        if (!is_dir($postmanDir)) {
+            mkdir($postmanDir, 0755, true);
+        }
+
+        // Save collection to file
+        $filename = strtolower($modelName) . '_api_collection.json';
+        $filePath = $postmanDir . '/' . $filename;
+
+        $jsonContent = json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        file_put_contents($filePath, $jsonContent);
+
+        echo "✓ Postman Collection created at {$filePath}\n";
+        echo "  Import this file to Postman to test the API endpoints\n";
+
+        return true;
+    }
+
+    /**
+     * Generate sample data for Postman requests
+     */
+    private function generateSampleData(array $schema): array
+    {
+        $data = [];
+        $exclude = ['id', 'created_at', 'updated_at', 'deleted_at'];
+
+        foreach ($schema as $column => $info) {
+            if (in_array($column, $exclude)) continue;
+            if (strpos($info['Extra'] ?? '', 'auto_increment') !== false) continue;
+
+            $type = strtolower($info['Type'] ?? '');
+            $columnLower = strtolower($column);
+
+            // Generate appropriate sample value based on column name and type
+            if (strpos($columnLower, 'email') !== false) {
+                $data[$column] = 'user@example.com';
+            } elseif (strpos($columnLower, 'password') !== false) {
+                $data[$column] = 'password123';
+            } elseif (strpos($columnLower, 'phone') !== false) {
+                $data[$column] = '+1234567890';
+            } elseif (strpos($columnLower, 'url') !== false || strpos($columnLower, 'website') !== false) {
+                $data[$column] = 'https://example.com';
+            } elseif (strpos($columnLower, 'name') !== false) {
+                $data[$column] = 'Sample Name';
+            } elseif (strpos($columnLower, 'title') !== false) {
+                $data[$column] = 'Sample Title';
+            } elseif (strpos($columnLower, 'description') !== false) {
+                $data[$column] = 'This is a sample description';
+            } elseif (strpos($columnLower, 'content') !== false || strpos($columnLower, 'body') !== false) {
+                $data[$column] = 'This is sample content';
+            } elseif (strpos($columnLower, 'price') !== false || strpos($columnLower, 'amount') !== false) {
+                $data[$column] = 99.99;
+            } elseif (strpos($columnLower, 'quantity') !== false || strpos($columnLower, 'stock') !== false) {
+                $data[$column] = 10;
+            } elseif (strpos($columnLower, 'status') !== false) {
+                $data[$column] = 'active';
+            } elseif (strpos($columnLower, 'date') !== false) {
+                $data[$column] = date('Y-m-d');
+            } elseif (strpos($columnLower, 'time') !== false) {
+                $data[$column] = date('H:i:s');
+            } elseif (strpos($columnLower, 'is_') !== false || strpos($columnLower, 'has_') !== false) {
+                $data[$column] = true;
+            } elseif (strpos($type, 'int') !== false) {
+                $data[$column] = 1;
+            } elseif (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false || strpos($type, 'double') !== false) {
+                $data[$column] = 0.0;
+            } elseif (strpos($type, 'bool') !== false || strpos($type, 'tinyint(1)') !== false) {
+                $data[$column] = true;
+            } elseif (strpos($type, 'json') !== false) {
+                $data[$column] = [];
+            } elseif (strpos($type, 'text') !== false || strpos($type, 'varchar') !== false) {
+                $data[$column] = 'sample text';
+            } else {
+                $data[$column] = 'value';
+            }
+        }
+
+        return $data;
     }
 }

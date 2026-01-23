@@ -53,6 +53,7 @@ Creates:
 - Model (Base + Concrete)
 - Controller (Base + Concrete)
 - Updates `routes/api.php`
+- **Postman Collection** (NEW! 🎉)
 
 ### Generate CRUD for All Tables
 
@@ -60,7 +61,7 @@ Creates:
 php scripts/generate.php crud-all --write --overwrite
 ```
 
-Generates complete CRUD for every table in the database.
+Generates complete CRUD for every table in the database, including Postman collections.
 
 ---
 
@@ -87,6 +88,85 @@ php scripts/generate.php crud products --write --overwrite
 ```
 
 **⚠️ Warning:** This overwrites Base files only. Concrete files are never overwritten.
+
+---
+
+## 📮 Postman Collection (NEW!)
+
+### Automatic Postman Collection Generation
+
+When you run `crud` or `crud-all` commands, Postman collection JSON files are automatically created in the `postman/` folder.
+
+```bash
+# Generate CRUD + Postman Collection
+php scripts/generate.php crud products --write
+
+# Output:
+# 1. Generating Model...
+# 2. Generating Controller...
+# 3. Generating Routes...
+# 4. Generating Postman Collection...
+#    ✓ Postman Collection created at postman/product_api_collection.json
+```
+
+### What's Included in Collection
+
+Each generated collection contains:
+
+- ✅ **GET** - Get All (Paginated) with page/per_page params
+- ✅ **GET** - Search with keyword param
+- ✅ **GET** - Get All (No Pagination)
+- ✅ **GET** - Get Single by ID
+- ✅ **POST** - Create (with sample data)
+- ✅ **PUT** - Update (with sample data)
+- ✅ **DELETE** - Delete by ID
+
+### Sample Data Generation
+
+The generator intelligently creates sample request bodies based on your database schema:
+
+```json
+{
+  "name": "Sample Name",
+  "email": "user@example.com",
+  "description": "This is a sample description",
+  "price": 99.99,
+  "stock": 10,
+  "status": "active"
+}
+```
+
+### Using the Collection
+
+1. **Import to Postman:**
+   - Open Postman
+   - Click **Import**
+   - Select file from `postman/` folder
+
+2. **Configure Variables:**
+   - `{{base_url}}` - Your API URL (default: `http://localhost:8000`)
+   - `{{token}}` - Auth token (empty by default)
+
+3. **Get Auth Token:**
+   - Run `POST /api/auth/login`
+   - Copy token from response
+   - Set `{{token}}` variable
+
+4. **Test Endpoints:**
+   - All requests are ready to use
+   - Protected endpoints automatically include Bearer token
+
+### File Structure
+
+```
+postman/
+├── README.md                      # Complete usage guide
+├── product_api_collection.json    # Product endpoints
+├── user_api_collection.json       # User endpoints
+└── category_api_collection.json   # Category endpoints
+```
+
+See [postman/README.md](../../postman/README.md) for detailed usage guide.
 
 ---
 
@@ -252,11 +332,12 @@ CREATE TABLE products (
 
 exit;
 
-# 2. Generate CRUD
+# 2. Generate CRUD + Postman Collection
 php scripts/generate.php crud products --write
 
-# 3. Test endpoints
-curl http://localhost:8085/products
+# 3. Import postman/product_api_collection.json to Postman
+
+# 4. Test endpoints using Postman
 ```
 
 ### Example 2: Generate All Resources

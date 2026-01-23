@@ -1,0 +1,12 @@
+# Postman Collections Directory
+
+# You can commit example collections or ignore all generated files
+# Uncomment the lines below if you want to ignore generated collections:
+
+# Ignore all collection files except README and examples
+# *_api_collection.json
+# !example_*_collection.json
+
+# Or ignore everything except README
+# *.json
+# !example_*.json

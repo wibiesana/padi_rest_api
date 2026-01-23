@@ -69,7 +69,7 @@ function printHelp()
     echo "  model [table]          Generate Model from database table\n";
     echo "  controller [model]     Generate Controller with CRUD operations\n";
     echo "  routes [resource]      Generate Routes for a resource\n";
-    echo "  crud [table]           Generate Model + Controller + Routes\n";
+    echo "  crud [table]           Generate Model + Controller + Routes + Postman Collection\n";
     echo "  crud-all               Generate CRUD for all tables in database\n";
     echo "  list                   List all database tables\n";
     echo "  help                   Show this help message\n\n";
@@ -86,6 +86,11 @@ function printHelp()
     echo "  php generate.php controller Post\n";
     echo "  php generate.php routes posts --write\n";
     echo "  php generate.php list\n\n";
+    echo Colors::$green . "NEW! 🎉 Postman Collections\n" . Colors::$reset;
+    echo "  ✓ Automatically generated for each CRUD\n";
+    echo "  ✓ Saved to postman/ folder\n";
+    echo "  ✓ Import to Postman for instant API testing\n";
+    echo "  ✓ See postman/README.md for usage guide\n\n";
 }
 
 function listTables()

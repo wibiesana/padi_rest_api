@@ -106,6 +106,7 @@ curl -X POST http://localhost:8085/auth/login \
 ## 🎯 KEY FEATURES
 
 ✅ **Auto CRUD Generator** - Generate models, controllers, and routes automatically  
+✅ **Postman Collections** - Auto-generate Postman collections for instant API testing 🎉  
 ✅ **JWT Authentication** - Secure token-based auth  
 ✅ **Database Migrations** - Version control for the database  
 ✅ **Security Built-in** - SQL injection protection, CORS, rate limiting  
@@ -135,8 +136,8 @@ curl -X POST http://localhost:8085/auth/login \
 
 ```bash
 # Code Generation
-php scripts/generate.php crud <table> --write
-php scripts/generate.php crud-all --write
+php scripts/generate.php crud <table> --write         # Generate Model, Controller, Routes + Postman Collection
+php scripts/generate.php crud-all --write             # Generate all tables + Postman Collections
 php scripts/generate.php list
 
 # Database Migrations
@@ -150,6 +151,12 @@ php -S localhost:8085 -t public
 # Generate JWT Secret
 php -r "echo bin2hex(random_bytes(32));"
 ```
+
+**NEW! 🎉 Postman Collections**
+
+- Import from `postman/` folder to Postman
+- Ready-to-use API testing collections
+- See [postman/README.md](postman/README.md) for guide
 
 ---
 
@@ -168,6 +175,9 @@ mvc_rest_api/
 │   ├── FRONTEND_INTEGRATION.md    # Frontend guide (all frameworks)
 │   ├── frontend-examples.js       # API client examples
 │   └── API_TESTING.md             # API testing guide
+├── postman/                       # 🎉 Postman Collections (auto-generated)
+│   ├── README.md                  # Postman usage guide
+│   └── *_api_collection.json      # API collections for each resource
 ├── app/
 │   ├── Controllers/               # Controllers (Base + Custom)
 │   ├── Models/                    # Models (Base + Custom)

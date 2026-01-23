@@ -239,13 +239,19 @@ $exists = $product->where(['name' => 'Product'])->exists();
 ```php
 use Core\Query;
 
-// Complex query
+// Complex query with multiple conditions
 $results = Query::table('products')
     ->select(['id', 'name', 'price'])
     ->where('status', '=', 'active')
-    ->where('price', '>', 50)
+    ->andWhere('price', '>', 50)  // Use andWhere() for additional conditions
     ->orderBy('price', 'DESC')
     ->limit(10)
+    ->get();
+
+// With OR conditions
+$results = Query::table('products')
+    ->where('status', '=', 'active')
+    ->orWhere('is_featured', '=', 1)
     ->get();
 
 // With joins

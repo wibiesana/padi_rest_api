@@ -637,7 +637,7 @@ PHP;
 
         // Get base URL from env or use default
         $baseUrl = \Core\Env::get('APP_URL', 'http://localhost:8000');
-        $apiPrefix = '/api';
+        $apiPrefix = '';
 
         $collection = [
             'info' => [

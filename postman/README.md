@@ -35,7 +35,9 @@ Output akan menampilkan:
 
 1. Buka aplikasi Postman
 2. Klik **Import** di pojok kiri atas
-3. Pilih file `.json` dari folder `postman/`
+3. Pilih file `.json` dari folder `postman/`:
+   - **`auth_api_collection.json`** - Authentication endpoints (Login, Register, Get Me, Forgot/Reset Password)
+   - **`*_api_collection.json`** - Resource endpoints (auto-generated)
 4. Collection akan muncul di sidebar Postman Anda
 
 ### 3. Setup Environment Variables
@@ -56,19 +58,37 @@ Collection menggunakan 2 variable:
 
 Setiap collection berisi endpoint standar CRUD:
 
-✅ **GET** - Get All (Paginated) - `GET /api/resource?page=1&per_page=10`
-✅ **GET** - Search - `GET /api/resource?search=keyword`
-✅ **GET** - Get All (No Pagination) - `GET /api/resource/all`
-✅ **GET** - Get Single - `GET /api/resource/1`
-✅ **POST** - Create (Protected) - `POST /api/resource`
-✅ **PUT** - Update (Protected) - `PUT /api/resource/1`
-✅ **DELETE** - Delete (Protected) - `DELETE /api/resource/1`
+✅ **GET** - Get All (Paginated) - `GET /resource?page=1&per_page=10`
+✅ **GET** - Search - `GET /resource?search=keyword`
+✅ **GET** - Get All (No Pagination) - `GET /resource/all`
+✅ **GET** - Get Single - `GET /resource/1`
+✅ **POST** - Create (Protected) - `POST /resource`
+✅ **PUT** - Update (Protected) - `PUT /resource/1`
+✅ **DELETE** - Delete (Protected) - `DELETE /resource/1`
 
 Endpoint dengan label **(Protected)** memerlukan Authentication token.
 
+**Authentication Collection:**
+
+✅ **POST** - Register - `POST /auth/register`
+✅ **POST** - Login - `POST /auth/login`
+✅ **GET** - Get Me (Protected) - `GET /auth/me`
+✅ **POST** - Logout (Protected) - `POST /auth/logout`
+✅ **POST** - Forgot Password - `POST /auth/forgot-password`
+✅ **POST** - Reset Password - `POST /auth/reset-password`
+
 ## 🔐 Mendapatkan Authentication Token
 
-1. Jalankan request **POST /api/auth/register** atau **POST /api/auth/login**
+**Otomatis (Recommended):**
+
+1. Import collection `auth_api_collection.json`
+2. Jalankan request **Register** atau **Login**
+3. Token akan otomatis disimpan ke variable `{{token}}` (via Test Script)
+4. Gunakan untuk request protected endpoints
+
+**Manual:**
+
+1. Jalankan request **POST /auth/register** atau **POST /auth/login**
 2. Copy token dari response
 3. Paste token ke variable `{{token}}` di Collection Variables
 4. Token akan otomatis ditambahkan ke header protected endpoints:
@@ -127,32 +147,39 @@ File collection menggunakan format:
 
 Contoh:
 
-- `product_api_collection.json`
-- `user_api_collection.json`
-- `category_api_collection.json`
+- `auth_api_collection.json` - Authentication endpoints (manual/provided)
+- `product_api_collection.json` - Auto-generated
+- `user_api_collection.json` - Auto-generated
+- `category_api_collection.json` - Auto-generated
 
 ## 🎯 Contoh Workflow
 
 ```bash
-# 1. Generate CRUD + Postman Collection
+# 1. Import Auth Collection
+# File: postman/auth_api_collection.json
+
+# 2. Register atau Login
+# Request: POST {{base_url}}/auth/login
+# Token akan otomatis tersimpan di {{token}} variable
+
+# 3. Test Get Me
+# Request: GET {{base_url}}/auth/me
+# Token otomatis terkirim via Authorization header
+
+# 4. Generate CRUD + Postman Collection untuk resource
 php scripts/generate.php crud products --write
 
-# 2. Import file postman/product_api_collection.json ke Postman
+# 5. Import file postman/product_api_collection.json ke Postman
 
-# 3. Set base_url di Collection Variables
+# 6. Set base_url di Collection Variables (jika berbeda)
 # base_url = http://localhost:8000
 
-# 4. Test endpoint GET All Products
-# Request: GET {{base_url}}/api/products
+# 7. Test endpoint GET All Products
+# Request: GET {{base_url}}/products
 
-# 5. Login untuk mendapatkan token
-# Request: POST {{base_url}}/api/auth/login
-
-# 6. Copy token dan paste ke Collection Variable {{token}}
-
-# 7. Test protected endpoint Create Product
-# Request: POST {{base_url}}/api/products
-# Authorization: Bearer {{token}}
+# 8. Test protected endpoint Create Product
+# Request: POST {{base_url}}/products
+# Authorization: Bearer {{token}} (otomatis dari variable)
 ```
 
 ## 🔧 Customization

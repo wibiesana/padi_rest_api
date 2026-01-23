@@ -145,4 +145,149 @@ class AuthController extends Controller
 
         $this->success(null, 'Logout successful');
     }
+
+    /**
+     * Forgot Password - Send reset email
+     * POST /auth/forgot-password
+     */
+    public function forgotPassword(): void
+    {
+        $validated = $this->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = $this->model->findByEmail($validated['email']);
+
+        // Always return success to prevent email enumeration
+        if (!$user) {
+            $this->success(null, 'If the email exists, a password reset link has been sent.');
+            return;
+        }
+
+        // Generate reset token
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Store reset token in database
+        $db = \Core\Database::getInstance()->getConnection();
+
+        // Delete old tokens for this email
+        $stmt = $db->prepare("DELETE FROM password_resets WHERE email = :email");
+        $stmt->execute(['email' => $validated['email']]);
+
+        // Insert new token
+        $stmt = $db->prepare("
+            INSERT INTO password_resets (email, token, expires_at) 
+            VALUES (:email, :token, :expires_at)
+        ");
+        $stmt->execute([
+            'email' => $validated['email'],
+            'token' => $token,
+            'expires_at' => $expiresAt
+        ]);
+
+        // Generate reset URL
+        $resetUrl = ($_ENV['FRONTEND_URL'] ?? 'http://localhost:3000') . '/reset-password?token=' . $token . '&email=' . urlencode($validated['email']);
+
+        // Send email
+        $emailBody = "
+            <h2>Password Reset Request</h2>
+            <p>Hello,</p>
+            <p>You requested to reset your password. Click the link below to reset your password:</p>
+            <p><a href='{$resetUrl}'>{$resetUrl}</a></p>
+            <p>This link will expire in 1 hour.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+            <br>
+            <p>Best regards,<br>" . ($_ENV['APP_NAME'] ?? 'Our API') . "</p>
+        ";
+
+        // Push email job to queue
+        \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
+            'email' => $validated['email'],
+            'subject' => 'Password Reset Request - ' . ($_ENV['APP_NAME'] ?? 'Our API'),
+            'body' => $emailBody
+        ]);
+
+        $this->success(null, 'If the email exists, a password reset link has been sent.');
+    }
+
+    /**
+     * Reset Password
+     * POST /auth/reset-password
+     */
+    public function resetPassword(): void
+    {
+        $validated = $this->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|min:8',
+            'password_confirmation' => 'required'
+        ]);
+
+        // Additional password complexity validation
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/', $validated['password'])) {
+            $this->error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)', 422);
+        }
+
+        // Check password confirmation
+        if ($validated['password'] !== $validated['password_confirmation']) {
+            $this->error('Password confirmation does not match', 422);
+        }
+
+        // Verify token
+        $db = \Core\Database::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT * FROM password_resets 
+            WHERE email = :email 
+            AND token = :token 
+            AND expires_at > NOW()
+            ORDER BY created_at DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'email' => $validated['email'],
+            'token' => $validated['token']
+        ]);
+        $resetRecord = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$resetRecord) {
+            $this->error('Invalid or expired reset token', 400);
+        }
+
+        // Find user
+        $user = $this->model->findByEmail($validated['email']);
+        if (!$user) {
+            $this->error('User not found', 404);
+        }
+
+        // Update password
+        $hashedPassword = password_hash($validated['password'], PASSWORD_DEFAULT);
+        $updateStmt = $db->prepare("UPDATE users SET password = :password WHERE email = :email");
+        $updateStmt->execute([
+            'password' => $hashedPassword,
+            'email' => $validated['email']
+        ]);
+
+        // Delete used token
+        $deleteStmt = $db->prepare("DELETE FROM password_resets WHERE email = :email");
+        $deleteStmt->execute(['email' => $validated['email']]);
+
+        // Send confirmation email
+        $emailBody = "
+            <h2>Password Reset Successful</h2>
+            <p>Hello,</p>
+            <p>Your password has been successfully reset.</p>
+            <p>If you didn't make this change, please contact us immediately.</p>
+            <br>
+            <p>Best regards,<br>" . ($_ENV['APP_NAME'] ?? 'Our API') . "</p>
+        ";
+
+        \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
+            'email' => $validated['email'],
+            'subject' => 'Password Reset Successful - ' . ($_ENV['APP_NAME'] ?? 'Our API'),
+            'body' => $emailBody
+        ]);
+
+        $this->success(null, 'Password has been reset successfully. You can now login with your new password.');
+    }
 }

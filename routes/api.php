@@ -21,6 +21,8 @@ $router->group(['prefix' => 'auth'], function ($router) {
     $router->post('/login', 'AuthController@login');
     $router->post('/logout', 'AuthController@logout');
     $router->get('/me', 'AuthController@me')->middleware('AuthMiddleware');
+    $router->post('/forgot-password', 'AuthController@forgotPassword');
+    $router->post('/reset-password', 'AuthController@resetPassword');
 });
 
 // User routes (protected)

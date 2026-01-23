@@ -59,12 +59,16 @@
                     "listen": "test",
                     "script": {
                         "exec": [
-                            "// Auto-save token from response",
+                            "// Auto-save token and remember_token from response",
                             "if (pm.response.code === 200) {",
                             "    var jsonData = pm.response.json();",
                             "    if (jsonData.data && jsonData.data.token) {",
                             "        pm.collectionVariables.set('token', jsonData.data.token);",
                             "        console.log('Token saved:', jsonData.data.token);",
+                            "    }",
+                            "    if (jsonData.data && jsonData.data.remember_token) {",
+                            "        pm.collectionVariables.set('remember_token', jsonData.data.remember_token);",
+                            "        console.log('Remember token saved:', jsonData.data.remember_token);",
                             "    }",
                             "}"
                         ],
@@ -82,7 +86,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"login\": \"john@example.com\",\n    \"password\": \"Password123!\"\n}"
+                    "raw": "{\n    \"login\": \"john@example.com\",\n    \"password\": \"Password123!\",\n    \"remember_me\": \"true\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/auth/login",
@@ -94,7 +98,7 @@
                         "login"
                     ]
                 },
-                "description": "Login with email or username and password. Returns JWT token for authentication."
+                "description": "Login with email or username and password. Set remember_me to 'true' for 365-day session (1 year) - ideal for mobile apps. Returns JWT token and remember_token (if remember_me enabled)."
             },
             "response": []
         },
@@ -120,6 +124,52 @@
                     ]
                 },
                 "description": "Get current authenticated user information. Requires valid JWT token."
+            },
+            "response": []
+        },
+        {
+            "name": "Refresh Token",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "// Auto-save refreshed token",
+                            "if (pm.response.code === 200) {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.data && jsonData.data.token) {",
+                            "        pm.collectionVariables.set('token', jsonData.data.token);",
+                            "        console.log('Token refreshed and saved:', jsonData.data.token);",
+                            "    }",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"remember_token\": \"{{remember_token}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/refresh",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "refresh"
+                    ]
+                },
+                "description": "Refresh access token using remember_token. Use this to get a new token when the current one expires. Remember token is valid for 365 days (1 year) - perfect for mobile apps."
             },
             "response": []
         },
@@ -213,6 +263,11 @@
         },
         {
             "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "remember_token",
             "value": "",
             "type": "string"
         }

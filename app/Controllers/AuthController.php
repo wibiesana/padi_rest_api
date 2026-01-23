@@ -73,7 +73,8 @@ class AuthController extends Controller
     {
         $validated = $this->validate([
             'login' => 'required', // Can be email or username
-            'password' => 'required'
+            'password' => 'required',
+            'remember_me' => '' // Optional
         ]);
 
         // Determine if login is email or username
@@ -112,20 +113,41 @@ class AuthController extends Controller
         // Update last login
         $this->model->updateLastLogin($user['id']);
 
+        // Check if remember me is requested
+        $rememberMe = isset($validated['remember_me']) &&
+            in_array(strtolower($validated['remember_me']), ['true', '1', 'yes', 'on']);
+
+        // Set token expiration based on remember me
+        $expiration = $rememberMe ? (365 * 24 * 60 * 60) : null; // 365 days (1 year) for mobile apps
+
         $token = \Core\Auth::generateToken([
             'user_id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role'],
             'status' => $user['status']
-        ]);
+        ], $expiration);
+
+        // Generate and store remember token if requested
+        $rememberToken = null;
+        if ($rememberMe) {
+            $rememberToken = $this->model->generateRememberToken();
+            $this->model->setRememberToken($user['id'], $rememberToken);
+        }
 
         // Refresh user data with updated last_login_at
         $user = $this->model->find($user['id']);
 
-        $this->success([
+        $response = [
             'user' => $user,
             'token' => $token
-        ], 'Login successful');
+        ];
+
+        if ($rememberToken) {
+            $response['remember_token'] = $rememberToken;
+            $response['expires_in'] = 365 * 24 * 60 * 60; // 365 days (1 year) in seconds
+        }
+
+        $this->success($response, 'Login successful');
     }
 
     /**
@@ -153,6 +175,51 @@ class AuthController extends Controller
         // You can implement token blacklisting here if needed
 
         $this->success(null, 'Logout successful');
+    }
+
+    /**
+     * Refresh token using remember token
+     * POST /auth/refresh
+     */
+    public function refresh(): void
+    {
+        $validated = $this->validate([
+            'remember_token' => 'required'
+        ]);
+
+        // Find user by remember token
+        $users = $this->model->where(['remember_token' => $validated['remember_token']]);
+        $user = $users[0] ?? null;
+
+        if (!$user) {
+            $this->unauthorized('Invalid or expired remember token');
+        }
+
+        // Check if user is active
+        if (!$this->model->isActive($user)) {
+            $this->unauthorized('Your account is inactive. Please contact support.');
+        }
+
+        // Generate new access token (365 days / 1 year for mobile apps)
+        $token = \Core\Auth::generateToken([
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'role' => $user['role'],
+            'status' => $user['status']
+        ], 365 * 24 * 60 * 60);
+
+        // Update last login
+        $this->model->updateLastLogin($user['id']);
+
+        // Refresh user data
+        $user = $this->model->find($user['id']);
+
+        $this->success([
+            'user' => $user,
+            'token' => $token,
+            'remember_token' => $validated['remember_token'],
+            'expires_in' => 365 * 24 * 60 * 60 // 365 days (1 year)
+        ], 'Token refreshed successfully');
     }
 
     /**

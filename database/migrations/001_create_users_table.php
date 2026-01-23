@@ -14,7 +14,6 @@ return new class
         if ($driver === 'sqlite') {
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name VARCHAR(100) NOT NULL,
                 username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
@@ -37,7 +36,6 @@ return new class
         } elseif ($driver === 'pgsql') {
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
                 username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
@@ -80,7 +78,6 @@ return new class
             // MySQL/MariaDB
             $sql = "CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
                 username VARCHAR(50) UNIQUE,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,

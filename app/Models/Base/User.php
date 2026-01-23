@@ -10,7 +10,6 @@ class User extends ActiveRecord
     protected string $primaryKey = 'id';
 
     protected array $fillable = [
-        'name',
         'username',
         'email',
         'password',
@@ -33,17 +32,15 @@ class User extends ActiveRecord
         $searchTerm = "%$keyword%";
 
         $sql = "SELECT * FROM {$this->table} 
-                WHERE name LIKE :keyword
-                   OR username LIKE :keyword2
-                   OR email LIKE :keyword3
-                   OR status LIKE :keyword4
+                WHERE username LIKE :keyword
+                   OR email LIKE :keyword2
+                   OR status LIKE :keyword3
                 LIMIT 100";
 
         return $this->query($sql, [
             'keyword' => $searchTerm,
             'keyword2' => $searchTerm,
-            'keyword3' => $searchTerm,
-            'keyword4' => $searchTerm
+            'keyword3' => $searchTerm
         ]);
     }
 }

@@ -22,7 +22,6 @@ class AuthController extends Controller
     public function register(): void
     {
         $validated = $this->validate([
-            'name' => 'required|min:3|max:100',
             'username' => 'min:3|max:50|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',

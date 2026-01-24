@@ -204,29 +204,55 @@ class Generator
         $schema = $this->getTableSchema($tableName);
         $columns = array_keys($schema);
 
-        // Exclude common auto-generated columns
-        $exclude = ['id', 'created_at', 'updated_at'];
+        // Exclude common auto-generated columns (including audit fields)
+        $exclude = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
         return array_diff($columns, $exclude);
     }
 
     /**
-     * Get full table schema from database
+     * Detect which audit columns exist in table
      */
-    private function getTableSchema(string $tableName): array
+    private function detectAuditColumns(string $tableName): array
     {
-        try {
-            $db = Database::getInstance()->getConnection();
-            $stmt = $db->query("DESCRIBE {$tableName}");
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $schema = $this->getTableSchema($tableName);
+        $columns = array_keys($schema);
 
-            $schema = [];
-            foreach ($rows as $row) {
-                $schema[$row['Field']] = $row;
+        $auditColumns = [];
+        $possibleAudit = ['created_at', 'updated_at', 'created_by', 'updated_by'];
+
+        foreach ($possibleAudit as $col) {
+            if (in_array($col, $columns)) {
+                $auditColumns[] = $col;
             }
-            return $schema;
-        } catch (\Exception $e) {
-            return [];
         }
+
+        return $auditColumns;
+    }
+    
+    /**
+     * Detect timestamp format based on column type (INT = unix, DATETIME/TIMESTAMP = datetime)
+     */
+    private function detectTimestampFormat(string $tableName): string
+    {
+        $schema = $this->getTableSchema($tableName);
+        
+        // Check created_at or updated_at column type
+        foreach (['created_at', 'updated_at'] as $col) {
+            if (isset($schema[$col])) {
+                $type = strtolower($schema[$col]['Type'] ?? '');
+                
+                // Check if it's an integer type
+                if (strpos($type, 'int') !== false || strpos($type, 'bigint') !== false) {
+                    return 'unix';
+                }
+                
+                // Default to datetime for DATETIME, TIMESTAMP, etc.
+                return 'datetime';
+            }
+        }
+        
+        return 'datetime'; // Default fallback
+    }
     }
 
     /**
@@ -322,9 +348,25 @@ class Generator
         $fillableStr = "'" . implode("', '", $fillable) . "'";
         $hiddenStr = empty($hidden) ? '' : "'" . implode("', '", $hidden) . "'";
 
-        // Generate smart search query using fillable columns
-        // Only use likely text columns for search
-        $searchableColumns = [];
+        // Detect audit columns
+        $auditColumns = $this->detectAuditColumns($tableName);
+        $auditConfig = '';
+
+        if (!empty($auditColumns)) {
+            $timestampFormat = $this->detectTimestampFormat($tableName);
+            
+            $auditConfig = "\n    /**\n";
+            $auditConfig .= "     * Audit fields detected: " . implode(', ', $auditColumns) . "\n";
+            $auditConfig .= "     * These will be auto-populated by ActiveRecord\n";
+            $auditConfig .= "     */\n";
+            $auditConfig .= "    protected bool \$useAudit = true;\n";
+            $auditConfig .= "    \n";
+            $auditConfig .= "    /**\n";
+            $auditConfig .= "     * Timestamp format: '{$timestampFormat}'\n";
+            $auditConfig .= "     * 'datetime' = Y-m-d H:i:s (DATETIME/TIMESTAMP columns)\n";
+            $auditConfig .= "     * 'unix' = integer timestamp (INT/BIGINT columns)\n";
+            $auditConfig .= "     */\n";
+            $auditConfig .= "    protected string \$timestampFormat = '{$timestampFormat}';\n";
         $textColumnKeywords = ['name', 'title', 'description', 'content', 'email', 'username', 'category', 'type', 'status', 'code', 'sku'];
 
         foreach ($fillable as $column) {
@@ -371,7 +413,7 @@ class {$modelName} extends ActiveRecord
     ];
     
     protected array \$hidden = [{$hiddenStr}];
-    
+{$auditConfig}    
     /**
      * Search {$tableName}
      */

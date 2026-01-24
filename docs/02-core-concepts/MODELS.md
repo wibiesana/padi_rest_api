@@ -185,6 +185,114 @@ Automatically manage `created_at` and `updated_at`.
 
 ---
 
+## Audit Fields (created_by / updated_by)
+
+When your table contains audit columns, the framework can automatically populate
+who created/updated a record and when. This is handled by `Core\ActiveRecord`
+and enabled by default.
+
+Behavior
+
+- If the table has any of these columns they will be auto-populated: `created_at`, `updated_at`, `created_by`, `updated_by`.
+- `created_at`/`updated_at` receive the current server timestamp.
+- `created_by`/`updated_by` are set using `Core\Auth::userId()` when a user is authenticated.
+- Automatic detection uses PDO column metadata and is cached per table.
+
+### Timestamp Format
+
+The framework supports two timestamp formats based on your database column type:
+
+**DATETIME Format (default)**
+
+```sql
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+```
+
+```php
+protected string $timestampFormat = 'datetime'; // Y-m-d H:i:s
+```
+
+**Unix Timestamp (INTEGER)**
+
+```sql
+created_at BIGINT NULL,
+updated_at BIGINT NULL
+```
+
+```php
+protected string $timestampFormat = 'unix'; // time()
+```
+
+The generator automatically detects your column type and sets the appropriate format.
+
+Per-model customization
+
+- To change field names in a model override `$auditFields`:
+
+```php
+protected array $auditFields = [
+    'created_at' => 'created_on',
+    'updated_at' => 'modified_on',
+    'created_by' => 'creator_id',
+    'updated_by' => 'updater_id',
+];
+```
+
+- To disable audit for a model set:
+
+```php
+protected bool $useAudit = false;
+```
+
+- To change timestamp format manually:
+
+```php
+protected string $timestampFormat = 'unix'; // or 'datetime'
+```
+
+Migration example (DATETIME)
+
+```sql
+ALTER TABLE users
+ADD COLUMN created_by INT NULL,
+ADD COLUMN updated_by INT NULL,
+ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+```
+
+Migration example (Unix Timestamp)
+
+```sql
+ALTER TABLE users
+ADD COLUMN created_by INT NULL,
+ADD COLUMN updated_by INT NULL,
+ADD COLUMN created_at BIGINT NULL,
+ADD COLUMN updated_at BIGINT NULL;
+```
+
+Model example
+
+```php
+class Student extends Base\User
+{
+    protected array $fillable = ['username','email','password','role'];
+
+    // Optional: use custom audit field names
+    // protected array $auditFields = ['created_at'=>'created_on','updated_at'=>'modified_on'];
+
+    // Optional: change timestamp format (auto-detected by generator)
+    // protected string $timestampFormat = 'unix';
+}
+```
+
+Notes
+
+- If `Auth::userId()` returns `null` (unauthenticated), `created_by`/`updated_by` will not be set.
+- The audit feature uses the `beforeSave()` hook, so values are applied before insert/update operations.
+- The generator automatically detects INT/BIGINT columns and sets `$timestampFormat = 'unix'`.
+- For DATETIME/TIMESTAMP columns, it sets `$timestampFormat = 'datetime'` (default).
+
 ## Query Methods
 
 ### Important: ActiveRecord vs Query Builder

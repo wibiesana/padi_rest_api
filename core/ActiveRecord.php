@@ -6,7 +6,7 @@ namespace Core;
 
 use PDO;
 use Core\Query;
-
+use Core\Auth;
 
 abstract class ActiveRecord
 {
@@ -16,6 +16,31 @@ abstract class ActiveRecord
     protected array $fillable = [];
     protected array $hidden = [];
     protected array $with = [];
+
+    /**
+     * Enable automatic audit fields (created_at, updated_at, created_by, updated_by)
+     * Set to false to disable, or override `$auditFields` to map custom names per model
+     */
+    protected bool $useAudit = true;
+
+    /**
+     * Audit field names. Models can override this to use different column names.
+     * Example: ['created_at' => 'created_at', 'updated_at' => 'updated_at', 'created_by' => 'created_by', 'updated_by' => 'updated_by']
+     */
+    protected array $auditFields = [];
+
+    /**
+     * Timestamp format for audit fields
+     * 'datetime' - MySQL DATETIME format (Y-m-d H:i:s)
+     * 'unix' - Unix timestamp (integer)
+     */
+    protected string $timestampFormat = 'datetime';
+
+    /**
+     * Cache of table columns to avoid repeated introspection
+     * @var array<string,array>
+     */
+    private static array $columnsCache = [];
 
     /**
      * Database connection name to use
@@ -405,6 +430,48 @@ abstract class ActiveRecord
     }
 
     /**
+     * Get table columns (cached). Uses PDO column metadata when available.
+     */
+    protected function getTableColumns(): array
+    {
+        if (isset(self::$columnsCache[$this->table])) {
+            return self::$columnsCache[$this->table];
+        }
+
+        $columns = [];
+        try {
+            $sql = "SELECT * FROM {$this->table} LIMIT 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $count = $stmt->columnCount();
+            for ($i = 0; $i < $count; $i++) {
+                $meta = $stmt->getColumnMeta($i);
+                if (!empty($meta['name'])) {
+                    $columns[] = $meta['name'];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fallback: try information_schema (best-effort, may not work on all DBs)
+            try {
+                $schemaSql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = :table";
+                $s = $this->db->prepare($schemaSql);
+                $s->execute(['table' => $this->table]);
+                $rows = $s->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($rows as $r) {
+                    if (isset($r['COLUMN_NAME'])) $columns[] = $r['COLUMN_NAME'];
+                }
+            } catch (\Throwable $_) {
+                // give up silently and leave columns empty
+                $columns = [];
+            }
+        }
+
+        self::$columnsCache[$this->table] = $columns;
+        return $columns;
+    }
+
+    /**
      * Hide sensitive fields
      */
     protected function hideFields(array $data): array
@@ -425,6 +492,46 @@ abstract class ActiveRecord
      */
     protected function beforeSave(array &$data, bool $insert): bool
     {
+        // Automatic audit handling
+        if (!$this->useAudit) return true;
+
+        $columns = $this->getTableColumns();
+
+        $defaults = [
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'created_by' => 'created_by',
+            'updated_by' => 'updated_by',
+        ];
+
+        $fields = array_merge($defaults, $this->auditFields ?: []);
+
+        // Get timestamp value based on format
+        $now = $this->timestampFormat === 'unix' ? time() : date('Y-m-d H:i:s');
+        $userId = Auth::userId();
+
+        if ($insert) {
+            if (in_array($fields['created_at'], $columns) && !isset($data[$fields['created_at']])) {
+                $data[$fields['created_at']] = $now;
+            }
+            if (in_array($fields['updated_at'], $columns) && !isset($data[$fields['updated_at']])) {
+                $data[$fields['updated_at']] = $now;
+            }
+            if (in_array($fields['created_by'], $columns) && !isset($data[$fields['created_by']]) && $userId !== null) {
+                $data[$fields['created_by']] = $userId;
+            }
+            if (in_array($fields['updated_by'], $columns) && !isset($data[$fields['updated_by']]) && $userId !== null) {
+                $data[$fields['updated_by']] = $userId;
+            }
+        } else {
+            if (in_array($fields['updated_at'], $columns)) {
+                $data[$fields['updated_at']] = $now;
+            }
+            if (in_array($fields['updated_by'], $columns) && $userId !== null) {
+                $data[$fields['updated_by']] = $userId;
+            }
+        }
+
         return true;
     }
 

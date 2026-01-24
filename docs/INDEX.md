@@ -98,6 +98,16 @@ Essential knowledge for building with Padi REST API.
 - Rate limiting
 - CORS configuration
 
+### Role-Based Access Control (RBAC)
+
+**[📄 RBAC.md](02-core-concepts/RBAC.md)** ✨ NEW
+
+- RoleMiddleware usage
+- Controller helper methods
+- Real-world examples (student, teacher, admin)
+- Best practices
+- Testing authorization
+
 ### Models Guide
 
 **[📄 MODELS.md](02-core-concepts/MODELS.md)** ✨ NEW

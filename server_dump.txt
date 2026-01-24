@@ -2,23 +2,24 @@ Array
 (
     [DOCUMENT_ROOT] => D:\work\my_code\padi_rest_api-main\public
     [REMOTE_ADDR] => ::1
-    [REMOTE_PORT] => 49923
+    [REMOTE_PORT] => 52158
     [SERVER_SOFTWARE] => PHP/8.4.14 (Development Server)
     [SERVER_PROTOCOL] => HTTP/1.1
     [SERVER_NAME] => localhost
     [SERVER_PORT] => 8085
-    [REQUEST_URI] => /auth/login
-    [REQUEST_METHOD] => POST
+    [REQUEST_URI] => /users/1
+    [REQUEST_METHOD] => PUT
     [SCRIPT_NAME] => /index.php
     [SCRIPT_FILENAME] => D:\work\my_code\padi_rest_api-main\public\index.php
-    [PATH_INFO] => /auth/login
-    [PHP_SELF] => /index.php/auth/login
+    [PATH_INFO] => /users/1
+    [PHP_SELF] => /index.php/users/1
     [HTTP_HOST] => localhost:8085
     [CONTENT_TYPE] => application/json
     [HTTP_CONTENT_TYPE] => application/json
+    [HTTP_AUTHORIZATION] => Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsInN0YXR1cyI6ImFjdGl2ZSIsImlhdCI6MTc2OTIyMTA5MSwiZXhwIjoxODAwNzU3MDkxfQ.7tj38xUIN8ADvv0Vcyqe5R8J7RweKxBbZDfh24BjCig
     [HTTP_ACCEPT] => */*
-    [CONTENT_LENGTH] => 85
-    [HTTP_CONTENT_LENGTH] => 85
-    [REQUEST_TIME_FLOAT] => 1769221027.7046
-    [REQUEST_TIME] => 1769221027
+    [CONTENT_LENGTH] => 30
+    [HTTP_CONTENT_LENGTH] => 30
+    [REQUEST_TIME_FLOAT] => 1769221156.367
+    [REQUEST_TIME] => 1769221156
 )

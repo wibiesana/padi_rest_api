@@ -113,7 +113,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"name\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"phone\": \"+1234567890\",\n    \"avatar\": \"sample text\",\n    \"role\": \"sample text\",\n    \"status\": \"active\",\n    \"email_verified_at\": \"user@example.com\",\n    \"remember_token\": \"sample text\",\n    \"last_login_at\": \"value\"\n}"
+                    "raw": "{\n    \"username\": \"johndoe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"SecurePass123!\",\n    \"role\": \"user\",\n    \"status\": \"active\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/users",
@@ -145,7 +145,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"name\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"phone\": \"+1234567890\",\n    \"avatar\": \"sample text\",\n    \"role\": \"sample text\",\n    \"status\": \"active\",\n    \"email_verified_at\": \"user@example.com\",\n    \"remember_token\": \"sample text\",\n    \"last_login_at\": \"value\"\n}"
+                    "raw": "{\n    \"username\": \"johndoe_updated\",\n    \"email\": \"john.updated@example.com\",\n    \"password\": \"NewSecurePass123!\",\n    \"role\": \"admin\",\n    \"status\": \"active\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/users/1",

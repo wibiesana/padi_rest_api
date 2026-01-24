@@ -26,6 +26,7 @@ services:
       - APP_NAME=Padi REST API
       - APP_ENV=development
       - APP_DEBUG=true
+      - APP_VERSION=2.0.0
       - APP_URL=http://localhost:8085
 
       - DEBUG_SHOW_QUERIES=true

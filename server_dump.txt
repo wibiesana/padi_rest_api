@@ -2,17 +2,17 @@ Array
 (
     [DOCUMENT_ROOT] => D:\work\my_code\padi_rest_api-main\public
     [REMOTE_ADDR] => ::1
-    [REMOTE_PORT] => 49666
+    [REMOTE_PORT] => 61030
     [SERVER_SOFTWARE] => PHP/8.4.14 (Development Server)
     [SERVER_PROTOCOL] => HTTP/1.1
     [SERVER_NAME] => localhost
     [SERVER_PORT] => 8085
-    [REQUEST_URI] => /posts/all
+    [REQUEST_URI] => /health
     [REQUEST_METHOD] => GET
     [SCRIPT_NAME] => /index.php
     [SCRIPT_FILENAME] => D:\work\my_code\padi_rest_api-main\public\index.php
-    [PATH_INFO] => /posts/all
-    [PHP_SELF] => /index.php/posts/all
+    [PATH_INFO] => /health
+    [PHP_SELF] => /index.php/health
     [HTTP_HOST] => localhost:8085
     [HTTP_CONNECTION] => keep-alive
     [HTTP_CACHE_CONTROL] => max-age=0
@@ -29,6 +29,6 @@ Array
     [HTTP_SEC_FETCH_DEST] => document
     [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
     [HTTP_ACCEPT_LANGUAGE] => id,en-US;q=0.9,en;q=0.8
-    [REQUEST_TIME_FLOAT] => 1769237517.4786
-    [REQUEST_TIME] => 1769237517
+    [REQUEST_TIME_FLOAT] => 1769241170.6791
+    [REQUEST_TIME] => 1769241170
 )

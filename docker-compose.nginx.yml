@@ -20,6 +20,7 @@ services:
       - APP_NAME=Padi REST API
       - APP_ENV=production
       - APP_DEBUG=false
+      - APP_VERSION=2.0.0
       - APP_URL=https://api.yourdomain.com
 
       - DEBUG_SHOW_QUERIES=false

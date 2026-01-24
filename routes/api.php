@@ -4,16 +4,9 @@ use Core\Router;
 
 $router = new Router();
 
-// Health check
-$router->get('/', function () {
-    $response = new \Core\Response();
-    $response->json([
-        'success' => true,
-        'message' => 'Padi REST API is running',
-        'version' => '2.0.0',
-        'timestamp' => date('Y-m-d H:i:s')
-    ]);
-});
+// Health check routes
+$router->get('/', 'HealthController@index');
+$router->get('/health', 'HealthController@health');
 
 // Authentication routes (public)
 $router->group(['prefix' => 'auth'], function ($router) {

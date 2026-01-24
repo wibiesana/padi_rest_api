@@ -1,12 +1,17 @@
 {
-    "name": "mycode/mvc-rest-api",
+    "name": "wibiesana/padi-rest-api-main",
     "description": "A lightweight PHP REST API framework with MVC pattern",
-    "type": "project",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/wibiesana/padi_rest_api-main",
+    "support": {
+        "issues": "https://github.com/wibiesana/padi_rest_api-main/issues",
+        "source": "https://github.com/wibiesana/padi_rest_api-main"
+    },
     "require": {
         "php": ">=8.4",
         "firebase/php-jwt": "^7.0",
         "monolog/monolog": "^3.10",
-        "zircote/swagger-php": "^6.0",
         "phpmailer/phpmailer": "^7.0",
         "predis/predis": "^3.3"
     },
@@ -23,6 +28,7 @@
         }
     ],
     "minimum-stability": "stable",
+    "prefer-stable": true,
     "require-dev": {
         "phpunit/phpunit": "^12.5"
     },

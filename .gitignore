@@ -5,3 +5,4 @@ storage/cache/*
 *.log
 .DS_Store
 Thumbs.db
+server_dump.txt

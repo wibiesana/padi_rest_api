@@ -1,1 +1,1 @@
-php init.php
+php ./scripts/init.php

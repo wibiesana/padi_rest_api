@@ -35,6 +35,9 @@ function info($message)
     echo Colors::colorize("ℹ ", 'blue') . $message . PHP_EOL;
 }
 
+// Project root (parent of scripts/) so files in project root are found
+$projectRoot = dirname(__DIR__);
+
 function success($message)
 {
     echo Colors::colorize("✓ ", 'green') . $message . PHP_EOL;
@@ -103,7 +106,8 @@ BANNER;
 
 function updateEnv($key, $value)
 {
-    $envFile = __DIR__ . '/.env';
+    global $projectRoot;
+    $envFile = $projectRoot . '/.env';
 
     if (!file_exists($envFile)) {
         error(".env file not found!");
@@ -159,21 +163,21 @@ try {
     // Step 1: Check .env.example
     echo Colors::colorize("[1/7] Checking environment file...", 'yellow') . PHP_EOL;
 
-    if (!file_exists(__DIR__ . '/.env.example')) {
+    if (!file_exists($projectRoot . '/.env.example')) {
         error(".env.example not found!");
         exit(1);
     }
 
-    if (file_exists(__DIR__ . '/.env')) {
+    if (file_exists($projectRoot . '/.env')) {
         $overwrite = ask("File .env already exists. Overwrite? (y/n)", 'n');
         if (strtolower($overwrite) === 'y') {
-            copy(__DIR__ . '/.env.example', __DIR__ . '/.env');
+            copy($projectRoot . '/.env.example', $projectRoot . '/.env');
             success(".env file updated from .env.example");
         } else {
             warning("Skipping .env creation");
         }
     } else {
-        copy(__DIR__ . '/.env.example', __DIR__ . '/.env');
+        copy($projectRoot . '/.env.example', $projectRoot . '/.env');
         success(".env file created from .env.example");
     }
 
@@ -210,7 +214,7 @@ try {
         $dbPath = ask("SQLite database path", "database/database.sqlite");
 
         // Create database directory
-        $dbDir = dirname(__DIR__ . '/' . $dbPath);
+        $dbDir = dirname($projectRoot . '/' . $dbPath);
         if (!is_dir($dbDir)) {
             mkdir($dbDir, 0755, true);
         }
@@ -246,8 +250,8 @@ try {
     echo Colors::colorize("[4/8] Testing Database Connection...", 'yellow') . PHP_EOL;
 
     try {
-        require_once __DIR__ . '/vendor/autoload.php';
-        Core\Env::load(__DIR__ . '/.env');
+        require_once $projectRoot . '/vendor/autoload.php';
+        Core\Env::load($projectRoot . '/.env');
 
         $db = Core\DatabaseManager::connection();
         $db->query('SELECT 1');

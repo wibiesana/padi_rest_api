@@ -8,7 +8,7 @@ Padi REST API Framework is now **100% compatible** with FrankenPHP Worker Mode, 
 
 ## Files Created
 
-### 1. `public/worker.php`
+### 1. `public/frankenphp-worker.php`
 
 **Purpose**: FrankenPHP worker script that keeps the application in memory
 
@@ -25,7 +25,7 @@ Padi REST API Framework is now **100% compatible** with FrankenPHP Worker Mode, 
 
 **Configuration**:
 
-- Enables worker mode with `public/worker.php`
+- Enables worker mode with `public/frankenphp-worker.php`
 - Serves static files
 - Configured for port 8000 (development)
 - Ready for production with minimal changes
@@ -220,7 +220,7 @@ ab -n 1000 -c 10 http://localhost:8085/
 Check the console output - you should see:
 
 ```
-Worker mode enabled with public/worker.php
+Worker mode enabled with public/frankenphp-worker.php
 ```
 
 ---
@@ -237,7 +237,7 @@ Worker mode enabled with public/worker.php
 
 ```caddyfile
 php_server {
-    worker public/worker.php  # This line enables worker mode
+    worker public/frankenphp-worker.php  # This line enables worker mode
 }
 ```
 

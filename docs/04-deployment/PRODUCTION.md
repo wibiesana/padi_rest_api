@@ -172,7 +172,7 @@ curl -L https://github.com/dunglas/frankenphp/releases/latest/download/frankenph
 chmod +x frankenphp
 
 # Run in worker mode
-./frankenphp php-server --worker public/worker.php --listen :8085
+./frankenphp php-server --worker public/frankenphp-worker.php --listen :8085
 ```
 
 ---

@@ -83,7 +83,7 @@ The `Caddyfile` in your project root is already configured to use worker mode!
 
 We've made Padi REST API **100% compatible** with FrankenPHP worker mode:
 
-### 1. **Worker Script** (`public/worker.php`)
+### 1. **Worker Script** (`public/frankenphp-worker.php`)
 
 - Keeps the application in memory
 - Handles requests in a loop
@@ -141,7 +141,7 @@ ab -n 1000 -c 10 http://localhost:8085/auth/me
     root * public
 
     php_server {
-        worker public/worker.php  # Enable worker mode
+        worker public/frankenphp-worker.php  # Enable worker mode
     }
 
     file_server  # Serve static files
@@ -200,7 +200,7 @@ This is expected in worker mode! Make sure to:
 2. Clear caches
 3. Don't store request-specific data in global scope
 
-Padi REST API already handles this automatically in `worker.php`:
+Padi REST API already handles this automatically in `frankenphp-worker.php`:
 
 ```php
 // Reset state for each request

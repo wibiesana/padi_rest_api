@@ -33,7 +33,7 @@ if (!function_exists('frankenphp_handle_request')) {
         'success' => false,
         'message' => 'FrankenPHP worker mode is not available',
         'error' => 'This script requires FrankenPHP with worker mode enabled',
-        'solution' => 'Run with: frankenphp php-server --worker public/worker.php'
+        'solution' => 'Run with: frankenphp php-server --worker public/frankenphp-worker.php'
     ];
     header('Content-Type: application/json');
     http_response_code(500);

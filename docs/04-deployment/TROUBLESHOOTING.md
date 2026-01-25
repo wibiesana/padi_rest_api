@@ -484,7 +484,7 @@ CREATE INDEX idx_status ON products(status);
 3. Use FrankenPHP worker mode:
 
 ```bash
-./frankenphp php-server --worker public/worker.php
+./frankenphp php-server --worker public/frankenphp-worker.php
 ```
 
 See [FRANKENPHP_SETUP.md](FRANKENPHP_SETUP.md)

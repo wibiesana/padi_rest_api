@@ -185,7 +185,7 @@ Edit `Dockerfile` to adjust worker settings:
 ```dockerfile
 # Increase worker count for high traffic
 CMD ["frankenphp", "php-server", \
-     "--worker", "public/worker.php", \
+     "--worker", "public/frankenphp-worker.php", \
      "--listen", ":8085", \
      "--workers", "4"]
 ```

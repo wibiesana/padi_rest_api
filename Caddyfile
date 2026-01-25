@@ -11,7 +11,7 @@
 
     # Enable PHP with worker mode for maximum performance
     php_server {
-        worker /app/public/worker.php
+        worker /app/public/frankenphp-worker.php
     }
 
     # Rewrite all requests to index.php

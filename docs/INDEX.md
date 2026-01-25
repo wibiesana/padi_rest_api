@@ -310,6 +310,13 @@ Production-ready deployment and performance optimization.
 
 ### FrankenPHP Worker Mode (3-10x Faster!)
 
+**[📄 WORKER_SCRIPTS.md](04-deployment/WORKER_SCRIPTS.md)** ✨ NEW
+
+- Queue worker vs FrankenPHP worker
+- Clear naming conventions
+- Usage examples
+- Migration from old naming
+
 **[📄 FRANKENPHP_SETUP.md](04-deployment/FRANKENPHP_SETUP.md)**
 
 - Installation guide

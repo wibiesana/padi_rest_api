@@ -41,6 +41,18 @@ if (!function_exists('frankenphp_handle_request')) {
     exit(1);
 }
 
+// Undefine frankenphp_handle_request to disable worker mode
+if (function_exists('frankenphp_handle_request')) {
+    // Create a dummy function to replace frankenphp_handle_request
+    function frankenphp_handle_request_disabled($callback)
+    {
+        log_message("WARNING: FrankenPHP worker mode disabled");
+        // Execute callback once and return false to stop loop
+        $callback();
+        return false;
+    }
+}
+
 // Global exception handler for initialization phase
 set_exception_handler(function ($e) {
     log_message("FATAL EXCEPTION: " . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -99,11 +111,11 @@ try {
     exit(1);
 }
 
-// FrankenPHP Worker Loop
+// FrankenPHP Worker Loop (disabled mode)
 for ($nbRequests = 0, $running = true; $running; ++$nbRequests) {
     // Wait for next request and execute handler
     try {
-        $running = frankenphp_handle_request(function () use ($router, $config, $nbRequests) {
+        $running = frankenphp_handle_request_disabled(function () use ($router, $config, $nbRequests) {
 
             // Debug request
             // if ($config['app_debug']) {

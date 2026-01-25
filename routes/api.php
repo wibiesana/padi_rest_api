@@ -4,9 +4,15 @@ use Core\Router;
 
 $router = new Router();
 
-// Health check routes
-$router->get('/', 'HealthController@index');
-$router->get('/health', 'HealthController@health');
+// Site and health check routes
+$router->get('/', 'SiteController@index');
+$router->get('/health', 'SiteController@health');
+
+// Site information routes
+$router->group(['prefix' => 'site'], function ($router) {
+    $router->get('/info', 'SiteController@info');
+    $router->get('/endpoints', 'SiteController@endpoints');
+});
 
 // Authentication routes (public)
 $router->group(['prefix' => 'auth'], function ($router) {
@@ -32,7 +38,7 @@ $router->group(['prefix' => 'users', 'middleware' => ['AuthMiddleware']], functi
 
 
 // comments routes
-$router->group(['prefix' => 'comments'], function($router) {
+$router->group(['prefix' => 'comments'], function ($router) {
     $router->get('/', 'CommentController@index');
     $router->get('/all', 'CommentController@all');
     $router->get('/{id}', 'CommentController@show');
@@ -43,7 +49,7 @@ $router->group(['prefix' => 'comments'], function($router) {
 
 
 // post_tags routes
-$router->group(['prefix' => 'post_tags'], function($router) {
+$router->group(['prefix' => 'post_tags'], function ($router) {
     $router->get('/', 'PostTagController@index');
     $router->get('/all', 'PostTagController@all');
     $router->get('/{id}', 'PostTagController@show');
@@ -54,7 +60,7 @@ $router->group(['prefix' => 'post_tags'], function($router) {
 
 
 // posts routes
-$router->group(['prefix' => 'posts'], function($router) {
+$router->group(['prefix' => 'posts'], function ($router) {
     $router->get('/', 'PostController@index');
     $router->get('/all', 'PostController@all');
     $router->get('/{id}', 'PostController@show');
@@ -65,7 +71,7 @@ $router->group(['prefix' => 'posts'], function($router) {
 
 
 // tags routes
-$router->group(['prefix' => 'tags'], function($router) {
+$router->group(['prefix' => 'tags'], function ($router) {
     $router->get('/', 'TagController@index');
     $router->get('/all', 'TagController@all');
     $router->get('/{id}', 'TagController@show');
@@ -76,7 +82,7 @@ $router->group(['prefix' => 'tags'], function($router) {
 
 
 // activity_log routes
-$router->group(['prefix' => 'activity_log'], function($router) {
+$router->group(['prefix' => 'activity_log'], function ($router) {
     $router->get('/', 'ActivityLogController@index');
     $router->get('/all', 'ActivityLogController@all');
     $router->get('/{id}', 'ActivityLogController@show');
@@ -87,7 +93,7 @@ $router->group(['prefix' => 'activity_log'], function($router) {
 
 
 // article routes
-$router->group(['prefix' => 'article'], function($router) {
+$router->group(['prefix' => 'article'], function ($router) {
     $router->get('/', 'ArticleController@index');
     $router->get('/all', 'ArticleController@all');
     $router->get('/{id}', 'ArticleController@show');
@@ -98,7 +104,7 @@ $router->group(['prefix' => 'article'], function($router) {
 
 
 // article_class routes
-$router->group(['prefix' => 'article_class'], function($router) {
+$router->group(['prefix' => 'article_class'], function ($router) {
     $router->get('/', 'ArticleClaController@index');
     $router->get('/all', 'ArticleClaController@all');
     $router->get('/{id}', 'ArticleClaController@show');
@@ -109,7 +115,7 @@ $router->group(['prefix' => 'article_class'], function($router) {
 
 
 // article_comment routes
-$router->group(['prefix' => 'article_comment'], function($router) {
+$router->group(['prefix' => 'article_comment'], function ($router) {
     $router->get('/', 'ArticleCommentController@index');
     $router->get('/all', 'ArticleCommentController@all');
     $router->get('/{id}', 'ArticleCommentController@show');
@@ -120,7 +126,7 @@ $router->group(['prefix' => 'article_comment'], function($router) {
 
 
 // article_comment_like routes
-$router->group(['prefix' => 'article_comment_like'], function($router) {
+$router->group(['prefix' => 'article_comment_like'], function ($router) {
     $router->get('/', 'ArticleCommentLikeController@index');
     $router->get('/all', 'ArticleCommentLikeController@all');
     $router->get('/{id}', 'ArticleCommentLikeController@show');
@@ -131,7 +137,7 @@ $router->group(['prefix' => 'article_comment_like'], function($router) {
 
 
 // article_like routes
-$router->group(['prefix' => 'article_like'], function($router) {
+$router->group(['prefix' => 'article_like'], function ($router) {
     $router->get('/', 'ArticleLikeController@index');
     $router->get('/all', 'ArticleLikeController@all');
     $router->get('/{id}', 'ArticleLikeController@show');
@@ -142,7 +148,7 @@ $router->group(['prefix' => 'article_like'], function($router) {
 
 
 // asc_import_log routes
-$router->group(['prefix' => 'asc_import_log'], function($router) {
+$router->group(['prefix' => 'asc_import_log'], function ($router) {
     $router->get('/', 'AscImportLogController@index');
     $router->get('/all', 'AscImportLogController@all');
     $router->get('/{id}', 'AscImportLogController@show');
@@ -153,7 +159,7 @@ $router->group(['prefix' => 'asc_import_log'], function($router) {
 
 
 // asc_mapping routes
-$router->group(['prefix' => 'asc_mapping'], function($router) {
+$router->group(['prefix' => 'asc_mapping'], function ($router) {
     $router->get('/', 'AscMappingController@index');
     $router->get('/all', 'AscMappingController@all');
     $router->get('/{id}', 'AscMappingController@show');
@@ -164,7 +170,7 @@ $router->group(['prefix' => 'asc_mapping'], function($router) {
 
 
 // asset routes
-$router->group(['prefix' => 'asset'], function($router) {
+$router->group(['prefix' => 'asset'], function ($router) {
     $router->get('/', 'AssetController@index');
     $router->get('/all', 'AssetController@all');
     $router->get('/{id}', 'AssetController@show');
@@ -175,7 +181,7 @@ $router->group(['prefix' => 'asset'], function($router) {
 
 
 // asset_borrowing routes
-$router->group(['prefix' => 'asset_borrowing'], function($router) {
+$router->group(['prefix' => 'asset_borrowing'], function ($router) {
     $router->get('/', 'AssetBorrowingController@index');
     $router->get('/all', 'AssetBorrowingController@all');
     $router->get('/{id}', 'AssetBorrowingController@show');
@@ -186,7 +192,7 @@ $router->group(['prefix' => 'asset_borrowing'], function($router) {
 
 
 // assignment routes
-$router->group(['prefix' => 'assignment'], function($router) {
+$router->group(['prefix' => 'assignment'], function ($router) {
     $router->get('/', 'AssignmentController@index');
     $router->get('/all', 'AssignmentController@all');
     $router->get('/{id}', 'AssignmentController@show');
@@ -197,7 +203,7 @@ $router->group(['prefix' => 'assignment'], function($router) {
 
 
 // assignment_class routes
-$router->group(['prefix' => 'assignment_class'], function($router) {
+$router->group(['prefix' => 'assignment_class'], function ($router) {
     $router->get('/', 'AssignmentClaController@index');
     $router->get('/all', 'AssignmentClaController@all');
     $router->get('/{id}', 'AssignmentClaController@show');
@@ -208,7 +214,7 @@ $router->group(['prefix' => 'assignment_class'], function($router) {
 
 
 // assignment_result routes
-$router->group(['prefix' => 'assignment_result'], function($router) {
+$router->group(['prefix' => 'assignment_result'], function ($router) {
     $router->get('/', 'AssignmentResultController@index');
     $router->get('/all', 'AssignmentResultController@all');
     $router->get('/{id}', 'AssignmentResultController@show');
@@ -219,7 +225,7 @@ $router->group(['prefix' => 'assignment_result'], function($router) {
 
 
 // attendance_daily_student routes
-$router->group(['prefix' => 'attendance_daily_student'], function($router) {
+$router->group(['prefix' => 'attendance_daily_student'], function ($router) {
     $router->get('/', 'AttendanceDailyStudentController@index');
     $router->get('/all', 'AttendanceDailyStudentController@all');
     $router->get('/{id}', 'AttendanceDailyStudentController@show');
@@ -230,7 +236,7 @@ $router->group(['prefix' => 'attendance_daily_student'], function($router) {
 
 
 // attendance_student routes
-$router->group(['prefix' => 'attendance_student'], function($router) {
+$router->group(['prefix' => 'attendance_student'], function ($router) {
     $router->get('/', 'AttendanceStudentController@index');
     $router->get('/all', 'AttendanceStudentController@all');
     $router->get('/{id}', 'AttendanceStudentController@show');
@@ -241,7 +247,7 @@ $router->group(['prefix' => 'attendance_student'], function($router) {
 
 
 // attendance_teacher routes
-$router->group(['prefix' => 'attendance_teacher'], function($router) {
+$router->group(['prefix' => 'attendance_teacher'], function ($router) {
     $router->get('/', 'AttendanceTeacherController@index');
     $router->get('/all', 'AttendanceTeacherController@all');
     $router->get('/{id}', 'AttendanceTeacherController@show');
@@ -252,7 +258,7 @@ $router->group(['prefix' => 'attendance_teacher'], function($router) {
 
 
 // billing routes
-$router->group(['prefix' => 'billing'], function($router) {
+$router->group(['prefix' => 'billing'], function ($router) {
     $router->get('/', 'BillingController@index');
     $router->get('/all', 'BillingController@all');
     $router->get('/{id}', 'BillingController@show');
@@ -263,7 +269,7 @@ $router->group(['prefix' => 'billing'], function($router) {
 
 
 // book routes
-$router->group(['prefix' => 'book'], function($router) {
+$router->group(['prefix' => 'book'], function ($router) {
     $router->get('/', 'BookController@index');
     $router->get('/all', 'BookController@all');
     $router->get('/{id}', 'BookController@show');
@@ -274,7 +280,7 @@ $router->group(['prefix' => 'book'], function($router) {
 
 
 // book_borrowing routes
-$router->group(['prefix' => 'book_borrowing'], function($router) {
+$router->group(['prefix' => 'book_borrowing'], function ($router) {
     $router->get('/', 'BookBorrowingController@index');
     $router->get('/all', 'BookBorrowingController@all');
     $router->get('/{id}', 'BookBorrowingController@show');
@@ -285,7 +291,7 @@ $router->group(['prefix' => 'book_borrowing'], function($router) {
 
 
 // class_semester routes
-$router->group(['prefix' => 'class_semester'], function($router) {
+$router->group(['prefix' => 'class_semester'], function ($router) {
     $router->get('/', 'ClassSemesterController@index');
     $router->get('/all', 'ClassSemesterController@all');
     $router->get('/{id}', 'ClassSemesterController@show');
@@ -296,7 +302,7 @@ $router->group(['prefix' => 'class_semester'], function($router) {
 
 
 // classroom routes
-$router->group(['prefix' => 'classroom'], function($router) {
+$router->group(['prefix' => 'classroom'], function ($router) {
     $router->get('/', 'ClassroomController@index');
     $router->get('/all', 'ClassroomController@all');
     $router->get('/{id}', 'ClassroomController@show');
@@ -307,7 +313,7 @@ $router->group(['prefix' => 'classroom'], function($router) {
 
 
 // counseling_session routes
-$router->group(['prefix' => 'counseling_session'], function($router) {
+$router->group(['prefix' => 'counseling_session'], function ($router) {
     $router->get('/', 'CounselingSessionController@index');
     $router->get('/all', 'CounselingSessionController@all');
     $router->get('/{id}', 'CounselingSessionController@show');
@@ -318,7 +324,7 @@ $router->group(['prefix' => 'counseling_session'], function($router) {
 
 
 // department routes
-$router->group(['prefix' => 'department'], function($router) {
+$router->group(['prefix' => 'department'], function ($router) {
     $router->get('/', 'DepartmentController@index');
     $router->get('/all', 'DepartmentController@all');
     $router->get('/{id}', 'DepartmentController@show');
@@ -329,7 +335,7 @@ $router->group(['prefix' => 'department'], function($router) {
 
 
 // department_semester routes
-$router->group(['prefix' => 'department_semester'], function($router) {
+$router->group(['prefix' => 'department_semester'], function ($router) {
     $router->get('/', 'DepartmentSemesterController@index');
     $router->get('/all', 'DepartmentSemesterController@all');
     $router->get('/{id}', 'DepartmentSemesterController@show');
@@ -340,7 +346,7 @@ $router->group(['prefix' => 'department_semester'], function($router) {
 
 
 // exam routes
-$router->group(['prefix' => 'exam'], function($router) {
+$router->group(['prefix' => 'exam'], function ($router) {
     $router->get('/', 'ExamController@index');
     $router->get('/all', 'ExamController@all');
     $router->get('/{id}', 'ExamController@show');
@@ -351,7 +357,7 @@ $router->group(['prefix' => 'exam'], function($router) {
 
 
 // exam_class routes
-$router->group(['prefix' => 'exam_class'], function($router) {
+$router->group(['prefix' => 'exam_class'], function ($router) {
     $router->get('/', 'ExamClaController@index');
     $router->get('/all', 'ExamClaController@all');
     $router->get('/{id}', 'ExamClaController@show');
@@ -362,7 +368,7 @@ $router->group(['prefix' => 'exam_class'], function($router) {
 
 
 // exam_class_user routes
-$router->group(['prefix' => 'exam_class_user'], function($router) {
+$router->group(['prefix' => 'exam_class_user'], function ($router) {
     $router->get('/', 'ExamClassUserController@index');
     $router->get('/all', 'ExamClassUserController@all');
     $router->get('/{id}', 'ExamClassUserController@show');
@@ -373,7 +379,7 @@ $router->group(['prefix' => 'exam_class_user'], function($router) {
 
 
 // exam_result routes
-$router->group(['prefix' => 'exam_result'], function($router) {
+$router->group(['prefix' => 'exam_result'], function ($router) {
     $router->get('/', 'ExamResultController@index');
     $router->get('/all', 'ExamResultController@all');
     $router->get('/{id}', 'ExamResultController@show');
@@ -384,7 +390,7 @@ $router->group(['prefix' => 'exam_result'], function($router) {
 
 
 // exam_result_answer routes
-$router->group(['prefix' => 'exam_result_answer'], function($router) {
+$router->group(['prefix' => 'exam_result_answer'], function ($router) {
     $router->get('/', 'ExamResultAnswerController@index');
     $router->get('/all', 'ExamResultAnswerController@all');
     $router->get('/{id}', 'ExamResultAnswerController@show');
@@ -395,7 +401,7 @@ $router->group(['prefix' => 'exam_result_answer'], function($router) {
 
 
 // exercise routes
-$router->group(['prefix' => 'exercise'], function($router) {
+$router->group(['prefix' => 'exercise'], function ($router) {
     $router->get('/', 'ExerciseController@index');
     $router->get('/all', 'ExerciseController@all');
     $router->get('/{id}', 'ExerciseController@show');
@@ -406,7 +412,7 @@ $router->group(['prefix' => 'exercise'], function($router) {
 
 
 // exercise_comment routes
-$router->group(['prefix' => 'exercise_comment'], function($router) {
+$router->group(['prefix' => 'exercise_comment'], function ($router) {
     $router->get('/', 'ExerciseCommentController@index');
     $router->get('/all', 'ExerciseCommentController@all');
     $router->get('/{id}', 'ExerciseCommentController@show');
@@ -417,7 +423,7 @@ $router->group(['prefix' => 'exercise_comment'], function($router) {
 
 
 // exercise_group routes
-$router->group(['prefix' => 'exercise_group'], function($router) {
+$router->group(['prefix' => 'exercise_group'], function ($router) {
     $router->get('/', 'ExerciseGroupController@index');
     $router->get('/all', 'ExerciseGroupController@all');
     $router->get('/{id}', 'ExerciseGroupController@show');
@@ -428,7 +434,7 @@ $router->group(['prefix' => 'exercise_group'], function($router) {
 
 
 // financial_transaction routes
-$router->group(['prefix' => 'financial_transaction'], function($router) {
+$router->group(['prefix' => 'financial_transaction'], function ($router) {
     $router->get('/', 'FinancialTransactionController@index');
     $router->get('/all', 'FinancialTransactionController@all');
     $router->get('/{id}', 'FinancialTransactionController@show');
@@ -439,7 +445,7 @@ $router->group(['prefix' => 'financial_transaction'], function($router) {
 
 
 // grade_level routes
-$router->group(['prefix' => 'grade_level'], function($router) {
+$router->group(['prefix' => 'grade_level'], function ($router) {
     $router->get('/', 'GradeLevelController@index');
     $router->get('/all', 'GradeLevelController@all');
     $router->get('/{id}', 'GradeLevelController@show');
@@ -450,7 +456,7 @@ $router->group(['prefix' => 'grade_level'], function($router) {
 
 
 // lesson_score_student routes
-$router->group(['prefix' => 'lesson_score_student'], function($router) {
+$router->group(['prefix' => 'lesson_score_student'], function ($router) {
     $router->get('/', 'LessonScoreStudentController@index');
     $router->get('/all', 'LessonScoreStudentController@all');
     $router->get('/{id}', 'LessonScoreStudentController@show');
@@ -461,7 +467,7 @@ $router->group(['prefix' => 'lesson_score_student'], function($router) {
 
 
 // lesson_session routes
-$router->group(['prefix' => 'lesson_session'], function($router) {
+$router->group(['prefix' => 'lesson_session'], function ($router) {
     $router->get('/', 'LessonSessionController@index');
     $router->get('/all', 'LessonSessionController@all');
     $router->get('/{id}', 'LessonSessionController@show');
@@ -472,7 +478,7 @@ $router->group(['prefix' => 'lesson_session'], function($router) {
 
 
 // migration routes
-$router->group(['prefix' => 'migration'], function($router) {
+$router->group(['prefix' => 'migration'], function ($router) {
     $router->get('/', 'MigrationController@index');
     $router->get('/all', 'MigrationController@all');
     $router->get('/{id}', 'MigrationController@show');
@@ -483,7 +489,7 @@ $router->group(['prefix' => 'migration'], function($router) {
 
 
 // notification routes
-$router->group(['prefix' => 'notification'], function($router) {
+$router->group(['prefix' => 'notification'], function ($router) {
     $router->get('/', 'NotificationController@index');
     $router->get('/all', 'NotificationController@all');
     $router->get('/{id}', 'NotificationController@show');
@@ -494,7 +500,7 @@ $router->group(['prefix' => 'notification'], function($router) {
 
 
 // payment routes
-$router->group(['prefix' => 'payment'], function($router) {
+$router->group(['prefix' => 'payment'], function ($router) {
     $router->get('/', 'PaymentController@index');
     $router->get('/all', 'PaymentController@all');
     $router->get('/{id}', 'PaymentController@show');
@@ -505,7 +511,7 @@ $router->group(['prefix' => 'payment'], function($router) {
 
 
 // period routes
-$router->group(['prefix' => 'period'], function($router) {
+$router->group(['prefix' => 'period'], function ($router) {
     $router->get('/', 'PeriodController@index');
     $router->get('/all', 'PeriodController@all');
     $router->get('/{id}', 'PeriodController@show');
@@ -516,7 +522,7 @@ $router->group(['prefix' => 'period'], function($router) {
 
 
 // question routes
-$router->group(['prefix' => 'question'], function($router) {
+$router->group(['prefix' => 'question'], function ($router) {
     $router->get('/', 'QuestionController@index');
     $router->get('/all', 'QuestionController@all');
     $router->get('/{id}', 'QuestionController@show');
@@ -527,7 +533,7 @@ $router->group(['prefix' => 'question'], function($router) {
 
 
 // question_answer routes
-$router->group(['prefix' => 'question_answer'], function($router) {
+$router->group(['prefix' => 'question_answer'], function ($router) {
     $router->get('/', 'QuestionAnswerController@index');
     $router->get('/all', 'QuestionAnswerController@all');
     $router->get('/{id}', 'QuestionAnswerController@show');
@@ -538,7 +544,7 @@ $router->group(['prefix' => 'question_answer'], function($router) {
 
 
 // question_bank routes
-$router->group(['prefix' => 'question_bank'], function($router) {
+$router->group(['prefix' => 'question_bank'], function ($router) {
     $router->get('/', 'QuestionBankController@index');
     $router->get('/all', 'QuestionBankController@all');
     $router->get('/{id}', 'QuestionBankController@show');
@@ -549,7 +555,7 @@ $router->group(['prefix' => 'question_bank'], function($router) {
 
 
 // role routes
-$router->group(['prefix' => 'role'], function($router) {
+$router->group(['prefix' => 'role'], function ($router) {
     $router->get('/', 'RoleController@index');
     $router->get('/all', 'RoleController@all');
     $router->get('/{id}', 'RoleController@show');
@@ -560,7 +566,7 @@ $router->group(['prefix' => 'role'], function($router) {
 
 
 // school_year routes
-$router->group(['prefix' => 'school_year'], function($router) {
+$router->group(['prefix' => 'school_year'], function ($router) {
     $router->get('/', 'SchoolYearController@index');
     $router->get('/all', 'SchoolYearController@all');
     $router->get('/{id}', 'SchoolYearController@show');
@@ -571,7 +577,7 @@ $router->group(['prefix' => 'school_year'], function($router) {
 
 
 // semester routes
-$router->group(['prefix' => 'semester'], function($router) {
+$router->group(['prefix' => 'semester'], function ($router) {
     $router->get('/', 'SemesterController@index');
     $router->get('/all', 'SemesterController@all');
     $router->get('/{id}', 'SemesterController@show');
@@ -582,7 +588,7 @@ $router->group(['prefix' => 'semester'], function($router) {
 
 
 // staff routes
-$router->group(['prefix' => 'staff'], function($router) {
+$router->group(['prefix' => 'staff'], function ($router) {
     $router->get('/', 'StaffController@index');
     $router->get('/all', 'StaffController@all');
     $router->get('/{id}', 'StaffController@show');
@@ -593,7 +599,7 @@ $router->group(['prefix' => 'staff'], function($router) {
 
 
 // staff_upload routes
-$router->group(['prefix' => 'staff_upload'], function($router) {
+$router->group(['prefix' => 'staff_upload'], function ($router) {
     $router->get('/', 'StaffUploadController@index');
     $router->get('/all', 'StaffUploadController@all');
     $router->get('/{id}', 'StaffUploadController@show');
@@ -604,7 +610,7 @@ $router->group(['prefix' => 'staff_upload'], function($router) {
 
 
 // staff_upload_result routes
-$router->group(['prefix' => 'staff_upload_result'], function($router) {
+$router->group(['prefix' => 'staff_upload_result'], function ($router) {
     $router->get('/', 'StaffUploadResultController@index');
     $router->get('/all', 'StaffUploadResultController@all');
     $router->get('/{id}', 'StaffUploadResultController@show');
@@ -615,7 +621,7 @@ $router->group(['prefix' => 'staff_upload_result'], function($router) {
 
 
 // staff_upload_result_detail routes
-$router->group(['prefix' => 'staff_upload_result_detail'], function($router) {
+$router->group(['prefix' => 'staff_upload_result_detail'], function ($router) {
     $router->get('/', 'StaffUploadResultDetailController@index');
     $router->get('/all', 'StaffUploadResultDetailController@all');
     $router->get('/{id}', 'StaffUploadResultDetailController@show');
@@ -626,7 +632,7 @@ $router->group(['prefix' => 'staff_upload_result_detail'], function($router) {
 
 
 // status_type routes
-$router->group(['prefix' => 'status_type'], function($router) {
+$router->group(['prefix' => 'status_type'], function ($router) {
     $router->get('/', 'StatusTypeController@index');
     $router->get('/all', 'StatusTypeController@all');
     $router->get('/{id}', 'StatusTypeController@show');
@@ -637,7 +643,7 @@ $router->group(['prefix' => 'status_type'], function($router) {
 
 
 // student routes
-$router->group(['prefix' => 'student'], function($router) {
+$router->group(['prefix' => 'student'], function ($router) {
     $router->get('/', 'StudentController@index');
     $router->get('/all', 'StudentController@all');
     $router->get('/{id}', 'StudentController@show');
@@ -648,7 +654,7 @@ $router->group(['prefix' => 'student'], function($router) {
 
 
 // student_class routes
-$router->group(['prefix' => 'student_class'], function($router) {
+$router->group(['prefix' => 'student_class'], function ($router) {
     $router->get('/', 'StudentClaController@index');
     $router->get('/all', 'StudentClaController@all');
     $router->get('/{id}', 'StudentClaController@show');
@@ -659,7 +665,7 @@ $router->group(['prefix' => 'student_class'], function($router) {
 
 
 // student_class_history routes
-$router->group(['prefix' => 'student_class_history'], function($router) {
+$router->group(['prefix' => 'student_class_history'], function ($router) {
     $router->get('/', 'StudentClassHistoryController@index');
     $router->get('/all', 'StudentClassHistoryController@all');
     $router->get('/{id}', 'StudentClassHistoryController@show');
@@ -670,7 +676,7 @@ $router->group(['prefix' => 'student_class_history'], function($router) {
 
 
 // student_upload routes
-$router->group(['prefix' => 'student_upload'], function($router) {
+$router->group(['prefix' => 'student_upload'], function ($router) {
     $router->get('/', 'StudentUploadController@index');
     $router->get('/all', 'StudentUploadController@all');
     $router->get('/{id}', 'StudentUploadController@show');
@@ -681,7 +687,7 @@ $router->group(['prefix' => 'student_upload'], function($router) {
 
 
 // student_upload_result routes
-$router->group(['prefix' => 'student_upload_result'], function($router) {
+$router->group(['prefix' => 'student_upload_result'], function ($router) {
     $router->get('/', 'StudentUploadResultController@index');
     $router->get('/all', 'StudentUploadResultController@all');
     $router->get('/{id}', 'StudentUploadResultController@show');
@@ -692,7 +698,7 @@ $router->group(['prefix' => 'student_upload_result'], function($router) {
 
 
 // student_upload_result_detail routes
-$router->group(['prefix' => 'student_upload_result_detail'], function($router) {
+$router->group(['prefix' => 'student_upload_result_detail'], function ($router) {
     $router->get('/', 'StudentUploadResultDetailController@index');
     $router->get('/all', 'StudentUploadResultDetailController@all');
     $router->get('/{id}', 'StudentUploadResultDetailController@show');
@@ -703,7 +709,7 @@ $router->group(['prefix' => 'student_upload_result_detail'], function($router) {
 
 
 // student_violation routes
-$router->group(['prefix' => 'student_violation'], function($router) {
+$router->group(['prefix' => 'student_violation'], function ($router) {
     $router->get('/', 'StudentViolationController@index');
     $router->get('/all', 'StudentViolationController@all');
     $router->get('/{id}', 'StudentViolationController@show');
@@ -714,7 +720,7 @@ $router->group(['prefix' => 'student_violation'], function($router) {
 
 
 // student_violation_type routes
-$router->group(['prefix' => 'student_violation_type'], function($router) {
+$router->group(['prefix' => 'student_violation_type'], function ($router) {
     $router->get('/', 'StudentViolationTypeController@index');
     $router->get('/all', 'StudentViolationTypeController@all');
     $router->get('/{id}', 'StudentViolationTypeController@show');
@@ -725,7 +731,7 @@ $router->group(['prefix' => 'student_violation_type'], function($router) {
 
 
 // subject routes
-$router->group(['prefix' => 'subject'], function($router) {
+$router->group(['prefix' => 'subject'], function ($router) {
     $router->get('/', 'SubjectController@index');
     $router->get('/all', 'SubjectController@all');
     $router->get('/{id}', 'SubjectController@show');
@@ -736,7 +742,7 @@ $router->group(['prefix' => 'subject'], function($router) {
 
 
 // teacher routes
-$router->group(['prefix' => 'teacher'], function($router) {
+$router->group(['prefix' => 'teacher'], function ($router) {
     $router->get('/', 'TeacherController@index');
     $router->get('/all', 'TeacherController@all');
     $router->get('/{id}', 'TeacherController@show');
@@ -747,7 +753,7 @@ $router->group(['prefix' => 'teacher'], function($router) {
 
 
 // teacher_upload routes
-$router->group(['prefix' => 'teacher_upload'], function($router) {
+$router->group(['prefix' => 'teacher_upload'], function ($router) {
     $router->get('/', 'TeacherUploadController@index');
     $router->get('/all', 'TeacherUploadController@all');
     $router->get('/{id}', 'TeacherUploadController@show');
@@ -758,7 +764,7 @@ $router->group(['prefix' => 'teacher_upload'], function($router) {
 
 
 // teacher_upload_result routes
-$router->group(['prefix' => 'teacher_upload_result'], function($router) {
+$router->group(['prefix' => 'teacher_upload_result'], function ($router) {
     $router->get('/', 'TeacherUploadResultController@index');
     $router->get('/all', 'TeacherUploadResultController@all');
     $router->get('/{id}', 'TeacherUploadResultController@show');
@@ -769,7 +775,7 @@ $router->group(['prefix' => 'teacher_upload_result'], function($router) {
 
 
 // teacher_upload_result_detail routes
-$router->group(['prefix' => 'teacher_upload_result_detail'], function($router) {
+$router->group(['prefix' => 'teacher_upload_result_detail'], function ($router) {
     $router->get('/', 'TeacherUploadResultDetailController@index');
     $router->get('/all', 'TeacherUploadResultDetailController@all');
     $router->get('/{id}', 'TeacherUploadResultDetailController@show');
@@ -780,7 +786,7 @@ $router->group(['prefix' => 'teacher_upload_result_detail'], function($router) {
 
 
 // teaching_schedule routes
-$router->group(['prefix' => 'teaching_schedule'], function($router) {
+$router->group(['prefix' => 'teaching_schedule'], function ($router) {
     $router->get('/', 'TeachingScheduleController@index');
     $router->get('/all', 'TeachingScheduleController@all');
     $router->get('/{id}', 'TeachingScheduleController@show');
@@ -791,7 +797,7 @@ $router->group(['prefix' => 'teaching_schedule'], function($router) {
 
 
 // user_parent_student routes
-$router->group(['prefix' => 'user_parent_student'], function($router) {
+$router->group(['prefix' => 'user_parent_student'], function ($router) {
     $router->get('/', 'UserParentStudentController@index');
     $router->get('/all', 'UserParentStudentController@all');
     $router->get('/{id}', 'UserParentStudentController@show');
@@ -802,7 +808,7 @@ $router->group(['prefix' => 'user_parent_student'], function($router) {
 
 
 // user_read_article routes
-$router->group(['prefix' => 'user_read_article'], function($router) {
+$router->group(['prefix' => 'user_read_article'], function ($router) {
     $router->get('/', 'UserReadArticleController@index');
     $router->get('/all', 'UserReadArticleController@all');
     $router->get('/{id}', 'UserReadArticleController@show');
@@ -813,7 +819,7 @@ $router->group(['prefix' => 'user_read_article'], function($router) {
 
 
 // user_role routes
-$router->group(['prefix' => 'user_role'], function($router) {
+$router->group(['prefix' => 'user_role'], function ($router) {
     $router->get('/', 'UserRoleController@index');
     $router->get('/all', 'UserRoleController@all');
     $router->get('/{id}', 'UserRoleController@show');
@@ -824,7 +830,7 @@ $router->group(['prefix' => 'user_role'], function($router) {
 
 
 // violation_counseling routes
-$router->group(['prefix' => 'violation_counseling'], function($router) {
+$router->group(['prefix' => 'violation_counseling'], function ($router) {
     $router->get('/', 'ViolationCounselingController@index');
     $router->get('/all', 'ViolationCounselingController@all');
     $router->get('/{id}', 'ViolationCounselingController@show');
@@ -835,7 +841,7 @@ $router->group(['prefix' => 'violation_counseling'], function($router) {
 
 
 // questionbanks routes
-$router->group(['prefix' => 'questionbanks'], function($router) {
+$router->group(['prefix' => 'questionbanks'], function ($router) {
     $router->get('/', 'QuestionbankController@index');
     $router->get('/all', 'QuestionbankController@all');
     $router->get('/{id}', 'QuestionbankController@show');

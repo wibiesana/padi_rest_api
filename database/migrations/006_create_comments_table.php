@@ -19,17 +19,23 @@ return new class
                 parent_id INTEGER,
                 content TEXT NOT NULL,
                 status VARCHAR(20) DEFAULT 'approved',
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at INTEGER DEFAULT (strftime('%s', 'now')),
                 updated_at INTEGER DEFAULT (strftime('%s', 'now')),
                 FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_id)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_created_by ON comments(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_updated_by ON comments(updated_by)");
         } elseif ($driver === 'pgsql') {
             $sql = "CREATE TABLE IF NOT EXISTS comments (
                 id SERIAL PRIMARY KEY,
@@ -38,17 +44,23 @@ return new class
                 parent_id INTEGER,
                 content TEXT NOT NULL,
                 status VARCHAR(20) DEFAULT 'approved',
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_id)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_created_by ON comments(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_comments_updated_by ON comments(updated_by)");
 
             $db->exec("
                 DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
@@ -66,14 +78,20 @@ return new class
                 parent_id INT,
                 content TEXT NOT NULL,
                 status VARCHAR(20) DEFAULT 'approved',
+                created_by INT NULL,
+                updated_by INT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_comments_post_id (post_id),
                 INDEX idx_comments_user_id (user_id),
                 INDEX idx_comments_parent_id (parent_id),
+                INDEX idx_comments_created_by (created_by),
+                INDEX idx_comments_updated_by (updated_by),
                 FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+                FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
             $db->exec($sql);

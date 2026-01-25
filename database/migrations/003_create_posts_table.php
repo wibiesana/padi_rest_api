@@ -23,9 +23,13 @@ return new class
                 status VARCHAR(20) DEFAULT 'draft',
                 published_at INTEGER,
                 views INTEGER DEFAULT 0,
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at INTEGER DEFAULT (strftime('%s', 'now')),
                 updated_at INTEGER DEFAULT (strftime('%s', 'now')),
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
@@ -33,6 +37,8 @@ return new class
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_created_by ON posts(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_updated_by ON posts(updated_by)");
         } elseif ($driver === 'pgsql') {
             $sql = "CREATE TABLE IF NOT EXISTS posts (
                 id SERIAL PRIMARY KEY,
@@ -45,9 +51,13 @@ return new class
                 status VARCHAR(20) DEFAULT 'draft',
                 published_at TIMESTAMP,
                 views INTEGER DEFAULT 0,
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
@@ -55,6 +65,8 @@ return new class
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_created_by ON posts(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_updated_by ON posts(updated_by)");
 
             $db->exec("
                 DROP TRIGGER IF EXISTS update_posts_updated_at ON posts;
@@ -76,12 +88,18 @@ return new class
                 status VARCHAR(20) DEFAULT 'draft',
                 published_at TIMESTAMP NULL,
                 views INT DEFAULT 0,
+                created_by INT NULL,
+                updated_by INT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_posts_user_id (user_id),
                 INDEX idx_posts_slug (slug),
                 INDEX idx_posts_status (status),
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                INDEX idx_posts_created_by (created_by),
+                INDEX idx_posts_updated_by (updated_by),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
             $db->exec($sql);

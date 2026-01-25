@@ -16,6 +16,7 @@ These collections are for built-in functionality and should exist before others:
 
 - `auth_api_collection.json` - Authentication endpoints (Login, Register, Password Reset)
 - `user_api_collection.json` - User management endpoints
+- `site_api_collection.json` - Site information and health check endpoints
 
 ## 🚀 Quick Start
 

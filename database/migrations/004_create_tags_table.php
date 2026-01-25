@@ -17,24 +17,36 @@ return new class
                 name VARCHAR(100) NOT NULL UNIQUE,
                 slug VARCHAR(100) NOT NULL UNIQUE,
                 description TEXT,
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at INTEGER DEFAULT (strftime('%s', 'now')),
-                updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+                updated_at INTEGER DEFAULT (strftime('%s', 'now')),
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
             $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_created_by ON tags(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_updated_by ON tags(updated_by)");
         } elseif ($driver === 'pgsql') {
             $sql = "CREATE TABLE IF NOT EXISTS tags (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL UNIQUE,
                 slug VARCHAR(100) NOT NULL UNIQUE,
                 description TEXT,
+                created_by INTEGER,
+                updated_by INTEGER,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
 
             $db->exec($sql);
             $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_created_by ON tags(created_by)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_tags_updated_by ON tags(updated_by)");
 
             $db->exec("
                 DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
@@ -50,9 +62,15 @@ return new class
                 name VARCHAR(100) NOT NULL UNIQUE,
                 slug VARCHAR(100) NOT NULL UNIQUE,
                 description TEXT,
+                created_by INT NULL,
+                updated_by INT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_tags_slug (slug)
+                INDEX idx_tags_slug (slug),
+                INDEX idx_tags_created_by (created_by),
+                INDEX idx_tags_updated_by (updated_by),
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+                FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
             $db->exec($sql);

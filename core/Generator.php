@@ -288,8 +288,11 @@ class Generator
 
             $columnRules = [];
 
-            // Required? (Not nullable and no default)
-            if (($info['Null'] ?? 'YES') === 'NO' && ($info['Default'] ?? null) === null) {
+            // Required? (Not nullable and no default, but allow if it has a default value)
+            $isNullable = ($info['Null'] ?? 'YES') === 'YES';
+            $hasDefault = ($info['Default'] ?? null) !== null;
+
+            if (!$isNullable && !$hasDefault) {
                 $columnRules[] = 'required';
             }
 
@@ -299,6 +302,8 @@ class Generator
                 $columnRules[] = 'integer';
             } elseif (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false || strpos($type, 'double') !== false) {
                 $columnRules[] = 'numeric';
+            } elseif (strpos($type, 'varchar') !== false || strpos($type, 'char') !== false || strpos($type, 'text') !== false) {
+                $columnRules[] = 'string';
             }
 
             // Max length for varchar
@@ -307,7 +312,7 @@ class Generator
             }
 
             // Email check
-            if (strpos($column, 'email') !== false) {
+            if (strpos(strtolower($column), 'email') !== false) {
                 $columnRules[] = 'email';
             }
 
@@ -341,6 +346,20 @@ class Generator
     private function modelNameToTableName(string $modelName): string
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $modelName));
+
+        // Check if singular table exists first, then try plural
+        try {
+            $db = Database::getInstance()->getConnection();
+            $stmt = $db->query("SHOW TABLES LIKE '{$table}'");
+            $result = $stmt->fetch();
+            if ($result) {
+                return $table; // Singular table exists
+            }
+        } catch (\Exception $e) {
+            // Continue to try plural
+        }
+
+        // Try plural version
         if (substr($table, -1) !== 's') {
             $table .= 's';
         }
@@ -352,8 +371,21 @@ class Generator
      */
     private function tableNameToModelName(string $tableName): string
     {
-        // Remove trailing 's' for plural table names
-        $singular = rtrim($tableName, 's');
+        // Handle plural table names more carefully
+        // Only remove 's' if it's actually a plural form, not part of a word like 'class'
+        $singular = $tableName;
+
+        // Common plural patterns to handle
+        if (preg_match('/(.+)ies$/', $tableName, $matches)) {
+            // countries -> country
+            $singular = $matches[1] . 'y';
+        } elseif (preg_match('/(.+)ses$/', $tableName, $matches)) {
+            // classes -> class, addresses -> address
+            $singular = $matches[1] . 's';
+        } elseif (preg_match('/(.+[^s])s$/', $tableName, $matches)) {
+            // users -> user, posts -> post (but not class -> clas)
+            $singular = $matches[1];
+        }
 
         // Convert snake_case to PascalCase
         return str_replace('_', '', ucwords($singular, '_'));
@@ -933,18 +965,21 @@ PHP;
 
             $type = strtolower($info['Type'] ?? '');
             $columnLower = strtolower($column);
+            $isRequired = ($info['Null'] ?? 'YES') === 'NO' && ($info['Default'] ?? null) === null;
 
             // Generate appropriate sample value based on column name and type
             if (strpos($columnLower, 'email') !== false) {
                 $data[$column] = 'user@example.com';
             } elseif (strpos($columnLower, 'password') !== false) {
-                $data[$column] = 'password123';
+                $data[$column] = 'Password123!';
             } elseif (strpos($columnLower, 'phone') !== false) {
                 $data[$column] = '+1234567890';
             } elseif (strpos($columnLower, 'url') !== false || strpos($columnLower, 'website') !== false) {
                 $data[$column] = 'https://example.com';
             } elseif (strpos($columnLower, 'name') !== false) {
                 $data[$column] = 'Sample Name';
+            } elseif (strpos($columnLower, 'username') !== false) {
+                $data[$column] = 'sampleuser';
             } elseif (strpos($columnLower, 'title') !== false) {
                 $data[$column] = 'Sample Title';
             } elseif (strpos($columnLower, 'description') !== false) {
@@ -957,6 +992,8 @@ PHP;
                 $data[$column] = 10;
             } elseif (strpos($columnLower, 'status') !== false) {
                 $data[$column] = 'active';
+            } elseif (strpos($columnLower, 'role') !== false) {
+                $data[$column] = 'user';
             } elseif (strpos($columnLower, 'date') !== false) {
                 $data[$column] = date('Y-m-d');
             } elseif (strpos($columnLower, 'time') !== false) {
@@ -964,17 +1001,22 @@ PHP;
             } elseif (strpos($columnLower, 'is_') !== false || strpos($columnLower, 'has_') !== false) {
                 $data[$column] = true;
             } elseif (strpos($type, 'int') !== false) {
-                $data[$column] = 1;
+                $data[$column] = $isRequired ? 1 : 0;
             } elseif (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false || strpos($type, 'double') !== false) {
-                $data[$column] = 0.0;
+                $data[$column] = $isRequired ? 9.99 : 0.0;
             } elseif (strpos($type, 'bool') !== false || strpos($type, 'tinyint(1)') !== false) {
                 $data[$column] = true;
             } elseif (strpos($type, 'json') !== false) {
                 $data[$column] = [];
             } elseif (strpos($type, 'text') !== false || strpos($type, 'varchar') !== false) {
-                $data[$column] = 'sample text';
+                $data[$column] = $isRequired ? 'Sample Text' : 'sample text';
             } else {
-                $data[$column] = 'value';
+                $data[$column] = $isRequired ? 'Required Value' : 'value';
+            }
+
+            // Don't include optional fields with default values to keep sample clean
+            if (!$isRequired && !in_array($columnLower, ['username', 'email', 'password', 'name', 'title'])) {
+                unset($data[$column]);
             }
         }
 

@@ -28,6 +28,24 @@ class User extends BaseModel
         return true; // Return false to stop saving
     }
 
+    /**
+     * Get validation rules for User model
+     * @return array
+     */
+    protected function getValidationRules(): array
+    {
+        return [
+            'username' => 'string|max:50',
+            'email' => 'required|string|max:255|email',
+            'password' => 'required|string|min:8|max:255',
+            'role' => 'string|max:50',
+            'status' => 'string|max:20|in:active,inactive,banned',
+            'email_verified_at' => 'nullable',
+            'remember_token' => 'string|max:100',
+            'last_login_at' => 'nullable'
+        ];
+    }
+
     protected function afterSave(bool $insert, array $data): void
     {
         if ($insert) {

@@ -23,6 +23,17 @@ abstract class Controller
      */
     protected function validate(array $rules, array $messages = []): array
     {
+        // Prevent empty validation rules
+        if (empty($rules)) {
+            $this->response->json([
+                'success' => false,
+                'message' => 'Validation rules not configured. Please contact administrator.',
+                'message_code' => 'VALIDATION_RULES_MISSING',
+                'errors' => ['system' => ['Validation rules are not properly configured for this endpoint']]
+            ], 500);
+            exit; // Force exit to prevent further execution
+        }
+
         $validator = new Validator($this->request->all(), $rules, $messages);
 
         if (!$validator->validate()) {
@@ -32,6 +43,7 @@ abstract class Controller
                 'message_code' => 'VALIDATION_FAILED',
                 'errors' => $validator->errors()
             ], 422);
+            exit; // Force exit to prevent further execution
         }
 
         return $validator->validated();

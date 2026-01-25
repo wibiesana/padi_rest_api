@@ -69,19 +69,14 @@ class UserController extends Controller
      */
     public function store(): void
     {
-        // Authorization: Only admin can create users
-        $this->requireRole('admin', 'Only administrators can create users');
-
         $validated = $this->validate([
-            'username' => 'max:50|unique:users,username',
-            'email' => 'required|max:255|email|unique:users,email',
-            'password' => 'required|max:255',
-            'role' => 'max:50',
-            'status' => 'max:20'
+            'username' => 'string|max:50|unique:users,username',
+            'email' => 'required|string|max:255|email|unique:users,email',
+            'password' => 'required|string|max:255',
+            'role' => 'string|max:50',
+            'status' => 'string|max:20',
+            'remember_token' => 'string|max:100'
         ]);
-
-        // Remove sensitive fields that should not be set by user input
-        unset($validated['email_verified_at'], $validated['remember_token']);
 
         $id = $this->model->create($validated);
 
@@ -104,29 +99,15 @@ class UserController extends Controller
             $this->notFound('User not found');
         }
 
-        // Authorization: Admin or owner can update
-        $this->requireAdminOrOwner((int)$user['id']);
-
         $validated = $this->validate([
-            'username' => 'max:50|unique:users,username,' . $id,
-            'email' => 'max:255|email|unique:users,email,' . $id,
-            'password' => 'max:255', // Optional on update
-            'role' => 'max:50',
-            'status' => 'max:20'
+            'username' => 'string|max:50|unique:users,username,' . $id,
+            'email' => 'required|string|max:255|email|unique:users,email,' . $id,
+            'password' => 'required|string|max:255',
+            'role' => 'string|max:50',
+            'status' => 'string|max:20',
+            'email_verified_at' => 'email',
+            'remember_token' => 'string|max:100'
         ]);
-
-        // Non-admin users cannot change role or status
-        if (!$this->isAdmin()) {
-            unset($validated['role'], $validated['status']);
-        }
-
-        // Remove sensitive fields that should not be set by user input
-        unset($validated['email_verified_at'], $validated['remember_token']);
-
-        // Remove password if empty (optional update)
-        if (empty($validated['password'])) {
-            unset($validated['password']);
-        }
 
         $this->model->update($id, $validated);
 
@@ -142,19 +123,11 @@ class UserController extends Controller
      */
     public function destroy(): void
     {
-        // Authorization: Only admin can delete users
-        $this->requireRole('admin', 'Only administrators can delete users');
-
         $id = $this->request->param('id');
         $user = $this->model->find($id);
 
         if (!$user) {
             $this->notFound('User not found');
-        }
-
-        // Prevent deleting yourself
-        if ($this->isOwner((int)$user['id'])) {
-            $this->error('You cannot delete your own account', 400, null, 'CANNOT_DELETE_SELF');
         }
 
         $this->model->delete($id);

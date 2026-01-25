@@ -52,6 +52,8 @@ class Validator
             case 'required':
                 if (empty($value) && $value !== '0') {
                     $this->addError($field, $ruleName, 'The {field} field is required');
+                } elseif (is_string($value) && trim($value) === '') {
+                    $this->addError($field, $ruleName, 'The {field} field is required');
                 }
                 break;
 

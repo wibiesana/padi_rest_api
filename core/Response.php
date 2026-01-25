@@ -71,11 +71,16 @@ class Response
                 $debugInfo['queries'] = $sanitizedQueries;
             }
 
-            // Wrap response with debug info
-            $data = [
-                'data' => $data,
-                'debug' => $debugInfo
-            ];
+            // Add debug info directly to the response instead of wrapping
+            if (is_array($data)) {
+                $data['debug'] = $debugInfo;
+            } else {
+                // If data is not an array, wrap it but flatten the structure
+                $data = [
+                    'data' => $data,
+                    'debug' => $debugInfo
+                ];
+            }
         }
 
         // Enable gzip compression for JSON responses

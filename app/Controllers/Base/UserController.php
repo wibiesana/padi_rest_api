@@ -29,12 +29,12 @@ class UserController extends Controller
             // Limit search query length to prevent abuse
             $search = substr($search, 0, 255);
             $data = $this->model->search($search);
-            $this->success(['data' => $data]);
+            $this->collection($data);
             return;
         }
 
         $result = $this->model->paginate($page, $perPage);
-        $this->success($result);
+        $this->collection($result['data'], $result['meta']);
     }
 
     /**
@@ -44,7 +44,7 @@ class UserController extends Controller
     public function all(): void
     {
         $data = $this->model::findQuery()->all();
-        $this->success(['data' => $data]);
+        $this->collection($data);
     }
 
     /**
@@ -60,7 +60,7 @@ class UserController extends Controller
             $this->notFound('User not found');
         }
 
-        $this->success($user);
+        $this->single($user);
     }
 
     /**
@@ -80,10 +80,8 @@ class UserController extends Controller
 
         $id = $this->model->create($validated);
 
-        $this->success([
-            'id' => $id,
-            'user' => $this->model->find($id)
-        ], 'User created successfully', 201);
+        $user = $this->model->find($id);
+        $this->single($user, 'User created successfully', 201);
     }
 
     /**

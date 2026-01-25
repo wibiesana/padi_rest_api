@@ -394,7 +394,7 @@ abstract class ActiveRecord
 
         return [
             'data' => $results,
-            'pagination' => [
+            'meta' => [
                 'total' => (int)$total,
                 'per_page' => $perPage,
                 'current_page' => $page,

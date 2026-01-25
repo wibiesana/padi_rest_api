@@ -69,12 +69,71 @@ abstract class Controller
             default => 'SUCCESS'
         };
 
-        $this->response->json([
+        $response = [
+            'success' => true,
+            'message' => $message,
+            'message_code' => $messageCode
+        ];
+
+        // Only add item field if data is not null
+        if ($data !== null) {
+            $response['item'] = $data;
+        }
+
+        $this->response->json($response, $code);
+    }
+
+    /**
+     * Return collection response for lists (with or without pagination)
+     */
+    protected function collection(array $items, array $meta = [], string $message = 'Success', int $code = 200): void
+    {
+        $messageCode = match ($code) {
+            200 => 'SUCCESS',
+            201 => 'CREATED',
+            204 => 'NO_CONTENT',
+            default => 'SUCCESS'
+        };
+
+        $response = [
             'success' => true,
             'message' => $message,
             'message_code' => $messageCode,
-            'data' => $data
-        ], $code);
+            'item' => $items
+        ];
+
+        // Add pagination meta if provided
+        if (!empty($meta)) {
+            $response['meta'] = $meta;
+        }
+
+        $this->response->json($response, $code);
+    }
+
+    /**
+     * Return single item response
+     */
+    protected function single($data, string $message = 'Success', int $code = 200): void
+    {
+        $messageCode = match ($code) {
+            200 => 'SUCCESS',
+            201 => 'CREATED',
+            204 => 'NO_CONTENT',
+            default => 'SUCCESS'
+        };
+
+        $response = [
+            'success' => true,
+            'message' => $message,
+            'message_code' => $messageCode
+        ];
+
+        // For single items, item should be an object, not an array
+        if ($data !== null) {
+            $response['item'] = $data;
+        }
+
+        $this->response->json($response, $code);
     }
 
     /**

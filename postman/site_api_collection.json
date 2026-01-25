@@ -17,7 +17,7 @@
                     }
                 ],
                 "url": {
-                    "raw": "{{base_url}}/api/",
+                    "raw": "{{base_url}}/",
                     "host": [
                         "{{base_url}}"
                     ],
@@ -40,7 +40,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/",
+                            "raw": "{{base_url}}/",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -74,7 +74,7 @@
                     }
                 ],
                 "url": {
-                    "raw": "{{base_url}}/api/health",
+                    "raw": "{{base_url}}/health",
                     "host": [
                         "{{base_url}}"
                     ],
@@ -97,7 +97,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/health",
+                            "raw": "{{base_url}}/health",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -131,7 +131,7 @@
                     }
                 ],
                 "url": {
-                    "raw": "{{base_url}}/api/site/info",
+                    "raw": "{{base_url}}/site/info",
                     "host": [
                         "{{base_url}}"
                     ],
@@ -155,7 +155,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/site/info",
+                            "raw": "{{base_url}}/site/info",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -190,7 +190,7 @@
                     }
                 ],
                 "url": {
-                    "raw": "{{base_url}}/api/site/endpoints",
+                    "raw": "{{base_url}}/site/endpoints",
                     "host": [
                         "{{base_url}}"
                     ],
@@ -214,7 +214,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/site/endpoints",
+                            "raw": "{{base_url}}/site/endpoints",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -234,7 +234,7 @@
                             "value": "application/json"
                         }
                     ],
-                    "body": "{\n    \"success\": true,\n    \"endpoints\": {\n        \"authentication\": {\n            \"POST /api/auth/register\": \"Register new user\",\n            \"POST /api/auth/login\": \"User login\",\n            \"POST /api/auth/logout\": \"User logout\",\n            \"POST /api/auth/refresh\": \"Refresh token\",\n            \"POST /api/auth/forgot-password\": \"Request password reset\",\n            \"POST /api/auth/reset-password\": \"Reset password\",\n            \"GET /api/auth/me\": \"Get current user info\"\n        },\n        \"users\": {\n            \"GET /api/users\": \"Get users (paginated)\",\n            \"GET /api/users/all\": \"Get all users\",\n            \"GET /api/users/{id}\": \"Get user by ID\",\n            \"POST /api/users\": \"Create user\",\n            \"PUT /api/users/{id}\": \"Update user\",\n            \"DELETE /api/users/{id}\": \"Delete user\"\n        },\n        \"site\": {\n            \"GET /api/\": \"API information\",\n            \"GET /api/health\": \"Health check\",\n            \"GET /api/site/info\": \"Site information\",\n            \"GET /api/site/endpoints\": \"Available endpoints\"\n        }\n    },\n    \"timestamp\": \"2026-01-25 10:30:45\"\n}"
+                    "body": "{\n    \"success\": true,\n    \"endpoints\": {\n        \"authentication\": {\n            \"POST /auth/register\": \"Register new user\",\n            \"POST /auth/login\": \"User login\",\n            \"POST /auth/logout\": \"User logout\",\n            \"POST /auth/refresh\": \"Refresh token\",\n            \"POST /auth/forgot-password\": \"Request password reset\",\n            \"POST /auth/reset-password\": \"Reset password\",\n            \"GET /auth/me\": \"Get current user info\"\n        },\n        \"users\": {\n            \"GET /users\": \"Get users (paginated)\",\n            \"GET /users/all\": \"Get all users\",\n            \"GET /users/{id}\": \"Get user by ID\",\n            \"POST /users\": \"Create user\",\n            \"PUT /users/{id}\": \"Update user\",\n            \"DELETE /users/{id}\": \"Delete user\"\n        },\n        \"site\": {\n            \"GET /\": \"API information\",\n            \"GET /health\": \"Health check\",\n            \"GET /site/info\": \"Site information\",\n            \"GET /site/endpoints\": \"Available endpoints\"\n        }\n    },\n    \"timestamp\": \"2026-01-25 10:30:45\"\n}"
                 }
             ]
         }

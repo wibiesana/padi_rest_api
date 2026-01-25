@@ -128,6 +128,16 @@ Essential knowledge for building with Padi REST API.
 - Response methods
 - Error handling
 
+### Response Structure Guide
+
+**[📄 RESPONSE_STRUCTURE.md](02-core-concepts/RESPONSE_STRUCTURE.md)** ✨ NEW
+
+- Standardized response format
+- `collection()` vs `single()` methods
+- Frontend integration examples
+- Migration from legacy structure
+- Best practices
+
 ### Code Generator
 
 **[📄 CODE_GENERATOR.md](02-core-concepts/CODE_GENERATOR.md)** ✨ NEW

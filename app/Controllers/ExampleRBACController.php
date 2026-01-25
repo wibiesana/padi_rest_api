@@ -39,7 +39,7 @@ class ExampleRBACController extends Controller
             'total_students' => $this->model::findQuery()->where('role = :role', ['role' => 'student'])->count(),
         ];
 
-        $this->success($stats, 'Admin dashboard data');
+        $this->single($stats, 'Admin dashboard data');
     }
 
     /**
@@ -92,7 +92,7 @@ class ExampleRBACController extends Controller
             unset($response['remember_token']);
         }
 
-        $this->success($response, 'Student data retrieved');
+        $this->single($response, 'Student data retrieved');
     }
 
     /**
@@ -249,7 +249,7 @@ class ExampleRBACController extends Controller
             }, $users);
         }
 
-        $this->success(['data' => $users], 'Users retrieved successfully');
+        $this->collection($users, [], 'Users retrieved successfully');
     }
 
     /**

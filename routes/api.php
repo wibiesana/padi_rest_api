@@ -850,4 +850,15 @@ $router->group(['prefix' => 'questionbanks'], function ($router) {
     $router->delete('/{id}', 'QuestionbankController@destroy')->middleware('AuthMiddleware');
 });
 
+
+// jobs routes
+$router->group(['prefix' => 'jobs'], function($router) {
+    $router->get('/', 'JobController@index');
+    $router->get('/all', 'JobController@all');
+    $router->get('/{id}', 'JobController@show');
+    $router->post('/', 'JobController@store')->middleware('AuthMiddleware');
+    $router->put('/{id}', 'JobController@update')->middleware('AuthMiddleware');
+    $router->delete('/{id}', 'JobController@destroy')->middleware('AuthMiddleware');
+});
+
 return $router;

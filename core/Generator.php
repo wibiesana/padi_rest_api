@@ -568,12 +568,12 @@ class {$controllerName} extends Controller
             // Limit search query length to prevent abuse
             \$search = substr(\$search, 0, 255);
             \$data = \$this->model->search(\$search);
-            \$this->success(['data' => \$data]);
+            \$this->collection(\$data);
             return;
         }
         
         \$result = \$this->model->paginate(\$page, \$perPage);
-        \$this->success(\$result);
+        \$this->collection(\$result['data'], \$result['meta']);
     }
     
     /**
@@ -583,7 +583,7 @@ class {$controllerName} extends Controller
     public function all(): void
     {
         \$data = \$this->model::findQuery()->all();
-        \$this->success(['data' => \$data]);
+        \$this->collection(\$data);
     }
     
     /**
@@ -599,7 +599,7 @@ class {$controllerName} extends Controller
             \$this->notFound('{$modelName} not found');
         }
         
-        \$this->success(\${$resourceName});
+        \$this->single(\${$resourceName});
     }
     
     /**
@@ -614,10 +614,8 @@ class {$controllerName} extends Controller
         
         \$id = \$this->model->create(\$validated);
         
-        \$this->success([
-            'id' => \$id,
-            '{$resourceName}' => \$this->model->find(\$id)
-        ], '{$modelName} created successfully', 201);
+        \${$resourceName} = \$this->model->find(\$id);
+        \$this->single(\${$resourceName}, '{$modelName} created successfully', 201);
     }
     
     /**
@@ -639,10 +637,8 @@ class {$controllerName} extends Controller
         
         \$this->model->update(\$id, \$validated);
         
-        \$this->success(
-            \$this->model->find(\$id),
-            '{$modelName} updated successfully'
-        );
+        \$updated{$modelName} = \$this->model->find(\$id);
+        \$this->single(\$updated{$modelName}, '{$modelName} updated successfully');
     }
     
     /**

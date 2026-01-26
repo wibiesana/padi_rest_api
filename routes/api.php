@@ -67,4 +67,5 @@ $router->group(['prefix' => 'users', 'middleware' => ['AuthMiddleware']], functi
     $router->delete('/{id}', 'UserController@destroy'); // Delete user
 });
 
+// ============================================================================
 return $router;

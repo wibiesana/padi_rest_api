@@ -85,10 +85,12 @@ function printHelp()
     echo "  These tables have custom logic and won't be regenerated.\n\n";
     echo "Examples:\n";
     echo "  php generate.php crud categories --write\n";
+    echo "  php generate.php crud post_tags --write       # Generates routes as 'post-tags'\n";
     echo "  php generate.php crud-all --overwrite --write\n";
     echo "  php generate.php model posts --overwrite\n";
     echo "  php generate.php controller Post\n";
     echo "  php generate.php routes posts --write\n";
+    echo "  php generate.php routes password_resets --write  # Generates routes as 'password-resets'\n";
     echo "  php generate.php list\n\n";
     echo Colors::$green . "NEW! 🎉 Postman Collections\n" . Colors::$reset;
     echo "  ✓ Automatically generated for each CRUD\n";

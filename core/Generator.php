@@ -141,7 +141,7 @@ class Generator
     public function generateRoutes(string $resourceName, array $options = []): string
     {
         $controllerName = $this->tableNameToModelName($resourceName) . 'Controller';
-        $prefix = $options['prefix'] ?? strtolower($resourceName);
+        $prefix = $options['prefix'] ?? $this->tableNameToRoutePrefix($resourceName);
         $middleware = $options['middleware'] ?? [];
         $protected = $options['protected'] ?? ['store', 'update', 'destroy'];
 
@@ -389,6 +389,16 @@ class Generator
 
         // Convert snake_case to PascalCase
         return str_replace('_', '', ucwords($singular, '_'));
+    }
+
+    /**
+     * Convert table name to kebab-case route prefix
+     * Follows REST API best practices: post_tags -> post-tags
+     */
+    private function tableNameToRoutePrefix(string $tableName): string
+    {
+        // Convert snake_case to kebab-case for routes
+        return str_replace('_', '-', strtolower($tableName));
     }
 
     /**
@@ -694,33 +704,36 @@ PHP;
      */
     private function getRoutesTemplate(string $prefix, string $controllerName, array $middleware, array $protected): string
     {
+        // Convert prefix to uppercase for display
+        $displayName = strtoupper(str_replace('-', ' ', $prefix));
+
+        // Add AuthMiddleware to middleware array if any routes are protected
+        $hasProtectedRoutes = !empty($protected);
+        if ($hasProtectedRoutes && !in_array('AuthMiddleware', $middleware)) {
+            $middleware[] = 'AuthMiddleware';
+        }
+
         $middlewareStr = empty($middleware) ? '' : ", 'middleware' => ['" . implode("', '", $middleware) . "']";
 
-        $routes = "// {$prefix} routes\n";
-        $routes .= "\$router->group(['prefix' => '{$prefix}'{$middlewareStr}], function(\$router) {\n";
-        $routes .= "    \$router->get('/', '{$controllerName}@index');\n";
-        $routes .= "    \$router->get('/all', '{$controllerName}@all');\n";
-        $routes .= "    \$router->get('/{id}', '{$controllerName}@show');\n";
-
-        if (in_array('store', $protected)) {
-            $routes .= "    \$router->post('/', '{$controllerName}@store')->middleware('AuthMiddleware');\n";
-        } else {
-            $routes .= "    \$router->post('/', '{$controllerName}@store');\n";
+        $routes = "// ============================================================================\n";
+        $routes .= "// {$displayName} MANAGEMENT ROUTES (PROTECTED)\n";
+        $routes .= "// ============================================================================\n";
+        $routes .= "// Standard CRUD operations for {$prefix} - requires authentication\n";
+        $routes .= "\$router->group(['prefix' => '{$prefix}'{$middlewareStr}], function (\$router) {\n";
+        $routes .= "    // List & view operations\n";
+        $routes .= "    \$router->get('/', '{$controllerName}@index');           // List {$prefix} with pagination\n";
+        if (!$hasProtectedRoutes || !in_array('all', $protected)) {
+            $routes .= "    \$router->get('/all', '{$controllerName}@all');         // Get all {$prefix}\n";
         }
+        $routes .= "    \$router->get('/{id}', '{$controllerName}@show');       // Get specific item\n";
+        $routes .= "\n    // Modification operations\n";
 
-        if (in_array('update', $protected)) {
-            $routes .= "    \$router->put('/{id}', '{$controllerName}@update')->middleware('AuthMiddleware');\n";
-        } else {
-            $routes .= "    \$router->put('/{id}', '{$controllerName}@update');\n";
-        }
-
-        if (in_array('destroy', $protected)) {
-            $routes .= "    \$router->delete('/{id}', '{$controllerName}@destroy')->middleware('AuthMiddleware');\n";
-        } else {
-            $routes .= "    \$router->delete('/{id}', '{$controllerName}@destroy');\n";
-        }
+        $routes .= "    \$router->post('/', '{$controllerName}@store');         // Create new item\n";
+        $routes .= "    \$router->put('/{id}', '{$controllerName}@update');     // Update item\n";
+        $routes .= "    \$router->delete('/{id}', '{$controllerName}@destroy'); // Delete item\n";
 
         $routes .= "});\n";
+        $routes .= "\n";
 
         return $routes;
     }

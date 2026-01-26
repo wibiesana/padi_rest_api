@@ -12,7 +12,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                    "raw": "{{base_url}}/users?page=1&per_page=10",
+                    "raw": "{{base_url}}/users?page=1&per-page=10",
                     "host": [
                         "{{base_url}}"
                     ],
@@ -26,7 +26,7 @@
                             "value": "1"
                         },
                         {
-                            "key": "per_page",
+                            "key": "per-page",
                             "value": "10"
                         }
                     ]
@@ -113,7 +113,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"username\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"sample text\",\n    \"status\": \"active\",\n    \"email_verified_at\": \"user@example.com\",\n    \"remember_token\": \"sample text\",\n    \"last_login_at\": \"value\"\n}"
+                    "raw": "{\n    \"username\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123!\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/users",
@@ -145,7 +145,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"username\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"sample text\",\n    \"status\": \"active\",\n    \"email_verified_at\": \"user@example.com\",\n    \"remember_token\": \"sample text\",\n    \"last_login_at\": \"value\"\n}"
+                    "raw": "{\n    \"username\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123!\"\n}"
                 },
                 "url": {
                     "raw": "{{base_url}}/users/1",

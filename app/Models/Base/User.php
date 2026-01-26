@@ -16,17 +16,17 @@ class User extends ActiveRecord
     protected array $hidden = ['password'];
 
     /**
-     * Audit fields detected: created_at, updated_at
+     * Audit fields detected: created_at, updated_at, created_by, updated_by
      * These will be auto-populated by ActiveRecord
      */
     protected bool $useAudit = true;
     
     /**
-     * Timestamp format: 'unix'
+     * Timestamp format: 'datetime'
      * 'datetime' = Y-m-d H:i:s (DATETIME/TIMESTAMP columns)
      * 'unix' = integer timestamp (INT/BIGINT columns)
      */
-    protected string $timestampFormat = 'unix';
+    protected string $timestampFormat = 'datetime';
     
     /**
      * Search users

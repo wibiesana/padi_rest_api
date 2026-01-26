@@ -571,7 +571,7 @@ class {$controllerName} extends Controller
     public function index()
     {
         \$page = max(1, (int)\$this->request->query('page', 1)); // Min page 1
-        \$perPage = min(100, max(1, (int)\$this->request->query('per_page', 10))); // Max 100 per page
+        \$perPage = min(100, max(1, (int)\$this->request->query('per-page', 10))); // Max 100 per page
         \$search = \$this->request->query('search');
         
         if (\$search) {
@@ -805,12 +805,12 @@ PHP;
                         'method' => 'GET',
                         'header' => [],
                         'url' => [
-                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}?page=1&per_page=10",
+                            'raw' => "{{base_url}}{$apiPrefix}/{$prefix}?page=1&per-page=10",
                             'host' => ['{{base_url}}'],
                             'path' => [ltrim($apiPrefix, '/'), $prefix],
                             'query' => [
                                 ['key' => 'page', 'value' => '1'],
-                                ['key' => 'per_page', 'value' => '10']
+                                ['key' => 'per-page', 'value' => '10']
                             ]
                         ]
                     ],
@@ -972,6 +972,11 @@ PHP;
         $data = [];
         $exclude = ['id', 'created_at', 'updated_at', 'deleted_at'];
 
+        // Helper function to convert snake_case to kebab-case
+        $toKebabCase = function ($str) {
+            return str_replace('_', '-', $str);
+        };
+
         foreach ($schema as $column => $info) {
             if (in_array($column, $exclude)) continue;
             if (strpos($info['Extra'] ?? '', 'auto_increment') !== false) continue;
@@ -980,56 +985,59 @@ PHP;
             $columnLower = strtolower($column);
             $isRequired = ($info['Null'] ?? 'YES') === 'NO' && ($info['Default'] ?? null) === null;
 
+            // Convert field name to kebab-case for API consistency
+            $fieldName = $toKebabCase($column);
+
             // Generate appropriate sample value based on column name and type
             if (strpos($columnLower, 'email') !== false) {
-                $data[$column] = 'user@example.com';
+                $data[$fieldName] = 'user@example.com';
             } elseif (strpos($columnLower, 'password') !== false) {
-                $data[$column] = 'Password123!';
+                $data[$fieldName] = 'Password123!';
             } elseif (strpos($columnLower, 'phone') !== false) {
-                $data[$column] = '+1234567890';
+                $data[$fieldName] = '+1234567890';
             } elseif (strpos($columnLower, 'url') !== false || strpos($columnLower, 'website') !== false) {
-                $data[$column] = 'https://example.com';
+                $data[$fieldName] = 'https://example.com';
             } elseif (strpos($columnLower, 'name') !== false) {
-                $data[$column] = 'Sample Name';
+                $data[$fieldName] = 'Sample Name';
             } elseif (strpos($columnLower, 'username') !== false) {
-                $data[$column] = 'sampleuser';
+                $data[$fieldName] = 'sampleuser';
             } elseif (strpos($columnLower, 'title') !== false) {
-                $data[$column] = 'Sample Title';
+                $data[$fieldName] = 'Sample Title';
             } elseif (strpos($columnLower, 'description') !== false) {
-                $data[$column] = 'This is a sample description';
+                $data[$fieldName] = 'This is a sample description';
             } elseif (strpos($columnLower, 'content') !== false || strpos($columnLower, 'body') !== false) {
-                $data[$column] = 'This is sample content';
+                $data[$fieldName] = 'This is sample content';
             } elseif (strpos($columnLower, 'price') !== false || strpos($columnLower, 'amount') !== false) {
-                $data[$column] = 99.99;
+                $data[$fieldName] = 99.99;
             } elseif (strpos($columnLower, 'quantity') !== false || strpos($columnLower, 'stock') !== false) {
-                $data[$column] = 10;
+                $data[$fieldName] = 10;
             } elseif (strpos($columnLower, 'status') !== false) {
-                $data[$column] = 'active';
+                $data[$fieldName] = 'active';
             } elseif (strpos($columnLower, 'role') !== false) {
-                $data[$column] = 'user';
+                $data[$fieldName] = 'user';
             } elseif (strpos($columnLower, 'date') !== false) {
-                $data[$column] = date('Y-m-d');
+                $data[$fieldName] = date('Y-m-d');
             } elseif (strpos($columnLower, 'time') !== false) {
-                $data[$column] = date('H:i:s');
+                $data[$fieldName] = date('H:i:s');
             } elseif (strpos($columnLower, 'is_') !== false || strpos($columnLower, 'has_') !== false) {
-                $data[$column] = true;
+                $data[$fieldName] = true;
             } elseif (strpos($type, 'int') !== false) {
-                $data[$column] = $isRequired ? 1 : 0;
+                $data[$fieldName] = $isRequired ? 1 : 0;
             } elseif (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false || strpos($type, 'double') !== false) {
-                $data[$column] = $isRequired ? 9.99 : 0.0;
+                $data[$fieldName] = $isRequired ? 9.99 : 0.0;
             } elseif (strpos($type, 'bool') !== false || strpos($type, 'tinyint(1)') !== false) {
-                $data[$column] = true;
+                $data[$fieldName] = true;
             } elseif (strpos($type, 'json') !== false) {
-                $data[$column] = [];
+                $data[$fieldName] = [];
             } elseif (strpos($type, 'text') !== false || strpos($type, 'varchar') !== false) {
-                $data[$column] = $isRequired ? 'Sample Text' : 'sample text';
+                $data[$fieldName] = $isRequired ? 'Sample Text' : 'sample text';
             } else {
-                $data[$column] = $isRequired ? 'Required Value' : 'value';
+                $data[$fieldName] = $isRequired ? 'Required Value' : 'value';
             }
 
             // Don't include optional fields with default values to keep sample clean
             if (!$isRequired && !in_array($columnLower, ['username', 'email', 'password', 'name', 'title'])) {
-                unset($data[$column]);
+                unset($data[$fieldName]);
             }
         }
 

@@ -22,7 +22,7 @@ class UserController extends Controller
     public function index()
     {
         $page = max(1, (int)$this->request->query('page', 1)); // Min page 1
-        $perPage = min(100, max(1, (int)$this->request->query('per_page', 10))); // Max 100 per page
+        $perPage = min(100, max(1, (int)$this->request->query('per-page', 10))); // Max 100 per page
         $search = $this->request->query('search');
 
         if ($search) {
@@ -71,7 +71,10 @@ class UserController extends Controller
             'password' => 'required|string|max:255',
             'role' => 'string|max:50',
             'status' => 'string|max:20',
-            'remember_token' => 'string|max:100'
+            'email_verified_at' => 'email',
+            'remember_token' => 'string|max:100',
+            'created_by' => 'integer',
+            'updated_by' => 'integer'
         ]);
 
         try {
@@ -103,7 +106,9 @@ class UserController extends Controller
             'role' => 'string|max:50',
             'status' => 'string|max:20',
             'email_verified_at' => 'email',
-            'remember_token' => 'string|max:100'
+            'remember_token' => 'string|max:100',
+            'created_by' => 'integer',
+            'updated_by' => 'integer'
         ]);
 
         try {

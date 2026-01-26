@@ -167,13 +167,18 @@ class Router
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
                 $request->setParams($params);
 
-                // Execute middlewares
-                foreach ($route['middlewares'] as $middleware) {
-                    $this->executeMiddleware($middleware, $request);
-                }
+                try {
+                    // Execute middlewares
+                    foreach ($route['middlewares'] as $middleware) {
+                        $this->executeMiddleware($middleware, $request);
+                    }
 
-                // Execute handler
-                $this->executeHandler($route['handler'], $request);
+                    // Execute handler
+                    $this->executeHandler($route['handler'], $request);
+                } catch (\Exception $e) {
+                    // Handle middleware or controller exceptions
+                    $this->handleException($e, $request);
+                }
                 return;
             }
         }
@@ -232,6 +237,37 @@ class Router
         if ($result !== null) {
             $this->formatResponse($result, $request);
         }
+    }
+
+    /**
+     * Handle exceptions from controllers
+     */
+    private function handleException(\Exception $e, Request $request): void
+    {
+        $response = new Response();
+        $statusCode = $e->getCode() ?: 500;
+
+        // Ensure status code is valid HTTP status code
+        if ($statusCode < 100 || $statusCode > 599) {
+            $statusCode = 500;
+        }
+
+        $error = [
+            'success' => false,
+            'message' => $e->getMessage() ?: 'An error occurred',
+            'message_code' => $this->getStatusCodeName($statusCode)
+        ];
+
+        // Add debug info if in debug mode
+        if (Env::get('APP_DEBUG', false)) {
+            $error['debug'] = [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ];
+        }
+
+        $response->json($error, $statusCode);
     }
 
     /**

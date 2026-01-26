@@ -310,14 +310,14 @@ if ($user['role'] === 'admin') {
 
    ```php
    if (!$userModel->isEmailVerified($user)) {
-       return $this->error('Please verify your email first', 403);
+       throw new \Exception('Please verify your email first', 403);
    }
    ```
 
 5. **Check status** before critical operations
    ```php
    if (!$userModel->isActive($user)) {
-       return $this->error('Account is inactive', 403);
+       throw new \Exception('Account is inactive', 403);
    }
    ```
 

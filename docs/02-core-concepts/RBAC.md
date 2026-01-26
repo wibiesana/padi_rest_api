@@ -317,7 +317,7 @@ public function updateStudent(): void
     }
 
     $this->model->update($studentId, $validated);
-    $this->success($this->model->find($studentId), 'Student updated successfully');
+    return $this->model->find($studentId);
 }
 ```
 
@@ -378,7 +378,7 @@ public function updateTeacher(): void
     }
 
     $this->model->update($teacherId, $validated);
-    $this->success($this->model->find($teacherId), 'Teacher updated successfully');
+    return $this->model->find($teacherId);
 }
 ```
 
@@ -407,7 +407,7 @@ public function listUsers(): void
         }, $users);
     }
 
-    $this->success(['data' => $users], 'Users retrieved successfully');
+    return ['data' => $users];
 }
 ```
 
@@ -431,10 +431,10 @@ public function createStudent(): void
 
     $id = $this->model->create($validated);
 
-    $this->success([
+    return [
         'id' => $id,
         'student' => $this->model->find($id)
-    ], 'Student created successfully', 201);
+    ];
 }
 ```
 
@@ -579,7 +579,7 @@ if (!$this->isAdmin()) {
     unset($user['email_verified_at']);
 }
 
-$this->success($user);
+return $user;
 ```
 
 ### 7. Document Permissions

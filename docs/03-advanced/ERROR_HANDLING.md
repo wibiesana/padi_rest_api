@@ -504,20 +504,20 @@ $response->json([
 
 ```php
 // ❌ Generic
-$this->error('Error', 400);
+throw new \Exception('Error', 400);
 
 // ✅ Specific
-$this->error('Product out of stock', 400, null, 'OUT_OF_STOCK');
+throw new \Exception('Product out of stock', 400);
 ```
 
 ### 2. Keep Messages User-Friendly
 
 ```php
 // ❌ Technical
-$this->error('Foreign key constraint violation', 400);
+throw new \Exception('Foreign key constraint violation', 400);
 
 // ✅ User-friendly
-$this->error('Cannot delete user with active orders', 400, null, 'HAS_DEPENDENCIES');
+throw new \Exception('Cannot delete user with active orders', 400);
 ```
 
 ### 3. Security-First for Auth Errors
@@ -527,7 +527,7 @@ $this->error('Cannot delete user with active orders', 400, null, 'HAS_DEPENDENCI
 $this->unauthorized('Invalid credentials', 'INVALID_CREDENTIALS');
 
 // ❌ Bad - Reveals user existence
-$this->error('User not found', 404);
+throw new \Exception('User not found', 404);
 ```
 
 ### 4. Document Custom Codes

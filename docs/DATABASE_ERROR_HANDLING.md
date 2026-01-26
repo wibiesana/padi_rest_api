@@ -55,7 +55,7 @@ Ketika `APP_DEBUG=true`, response JSON akan menyertakan:
 ```php
 try {
     $id = $this->model->create($data);
-    $this->success($id, 'Data created successfully');
+    return ['id' => $id, 'message' => 'Data created successfully'];
 } catch (\PDOException $e) {
     $this->databaseError('Failed to create data', $e);
 }

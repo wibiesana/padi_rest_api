@@ -332,7 +332,7 @@ return $product;
 
 ```php
 // Don't use old methods (deprecated)
-$this->success($data);     // ❌ Use return $data
+return $data;        // ✅ Use this instead
 $this->single($item);      // ❌ Use return $item
 $this->collection($items); // ❌ Use return $items
 $this->notFound('Error');  // ❌ Use throw new \Exception('Error', 404)

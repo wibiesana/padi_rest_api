@@ -19,7 +19,7 @@ class AuthController extends Controller
      * Register new user
      * POST /api/auth/register
      */
-    public function register(): void
+    public function register()
     {
         $validated = $this->validate([
             'username' => 'min:3|max:50|unique:users,username',
@@ -30,14 +30,12 @@ class AuthController extends Controller
 
         // Validate password confirmation matches
         if ($validated['password'] !== $validated['password_confirmation']) {
-            $this->error('Password confirmation does not match', 422, [
-                'password_confirmation' => ['Password confirmation must match password']
-            ]);
+            throw new \Exception('Password confirmation does not match', 422);
         }
 
         // Additional password complexity validation
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/', $validated['password'])) {
-            $this->error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)', 422);
+            throw new \Exception('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)', 422);
         }
 
         unset($validated['password_confirmation']);
@@ -55,23 +53,25 @@ class AuthController extends Controller
         // Push Welcome Email Job to Queue
         \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $user['email'],
-            'subject' => 'Welcome to ' . ($_ENV['APP_NAME'] ?? 'Our API'),
+            'subject' => 'Welcome to ' . (\Core\Env::get('APP_NAME', 'Our API')),
             'body' => 'Thank you for registering!'
         ]);
 
-        $this->success([
+        $this->setStatusCode(201);
+        return [
             'id' => $user['id'],
             'user_id' => $user['id'],
             'user' => $user,
-            'token' => $token
-        ], 'Registration successful. Welcome email will be sent shortly.', 201);
+            'token' => $token,
+            'message' => 'Registration successful. Welcome email will be sent shortly.'
+        ];
     }
 
     /**
      * Login user
      * POST /api/auth/login
      */
-    public function login(): void
+    public function login()
     {
         $validated = $this->validate([
             'username' => 'required', // Can be email or username
@@ -85,7 +85,7 @@ class AuthController extends Controller
 
         // Whitelist field name to prevent SQL injection
         if (!in_array($field, ['email', 'username'], true)) {
-            $this->unauthorized('Invalid credentials', 'INVALID_CREDENTIALS');
+            throw new \Exception('Invalid credentials', 401);
         }
 
         // Get user with password in one query
@@ -98,12 +98,12 @@ class AuthController extends Controller
 
         // Use consistent error message to prevent timing attacks
         if (!$user || !password_verify($validated['password'], $user['password'])) {
-            $this->unauthorized('Invalid credentials', 'INVALID_CREDENTIALS');
+            throw new \Exception('Invalid credentials', 401);
         }
 
         // Check user status
         if ($user['status'] !== 'active') {
-            $this->unauthorized('Invalid credentials', 'INVALID_CREDENTIALS');
+            throw new \Exception('Account is not active', 401);
         }
 
         // Update last login
@@ -138,7 +138,8 @@ class AuthController extends Controller
 
         $response = [
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'message' => 'Login successful'
         ];
 
         if ($rememberToken) {
@@ -146,41 +147,43 @@ class AuthController extends Controller
             $response['expires_in'] = 365 * 24 * 60 * 60; // 365 days (1 year) in seconds
         }
 
-        $this->success($response, 'Login successful');
+        return $response;
     }
 
     /**
      * Get authenticated user
      * GET /api/auth/me
      */
-    public function me(): void
+    public function me()
     {
         if (!$this->request->user) {
-            $this->unauthorized('Not authenticated');
+            throw new \Exception('Not authenticated', 401);
         }
 
-        $this->success([
+        return [
             'user' => $this->request->user
-        ]);
+        ];
     }
 
     /**
      * Logout user
      * POST /api/auth/logout
      */
-    public function logout(): void
+    public function logout()
     {
         // In a stateless JWT system, logout is typically handled client-side
         // You can implement token blacklisting here if needed
 
-        $this->success(null, 'Logout successful');
+        return [
+            'message' => 'Logout successful'
+        ];
     }
 
     /**
      * Refresh token using remember token
      * POST /auth/refresh
      */
-    public function refresh(): void
+    public function refresh()
     {
         $validated = $this->validate([
             'remember_token' => 'required'
@@ -191,12 +194,12 @@ class AuthController extends Controller
         $user = $users[0] ?? null;
 
         if (!$user) {
-            $this->unauthorized('Invalid or expired remember token');
+            throw new \Exception('Invalid or expired remember token', 401);
         }
 
         // Check if user is active
         if (!$this->model->isActive($user)) {
-            $this->unauthorized('Your account is inactive. Please contact support.');
+            throw new \Exception('Your account is inactive. Please contact support.', 401);
         }
 
         // Generate new access token (365 days / 1 year for mobile apps)
@@ -215,19 +218,20 @@ class AuthController extends Controller
         // Remove password from response
         unset($user['password']);
 
-        $this->success([
+        return [
             'user' => $user,
             'token' => $token,
             'remember_token' => $validated['remember_token'],
-            'expires_in' => 365 * 24 * 60 * 60 // 365 days (1 year)
-        ], 'Token refreshed successfully');
+            'expires_in' => 365 * 24 * 60 * 60, // 365 days (1 year)
+            'message' => 'Token refreshed successfully'
+        ];
     }
 
     /**
      * Forgot Password - Send reset email
      * POST /auth/forgot-password
      */
-    public function forgotPassword(): void
+    public function forgotPassword()
     {
         $validated = $this->validate([
             'login' => 'required' // Can be email or username
@@ -244,8 +248,9 @@ class AuthController extends Controller
 
         // Always return success to prevent email enumeration
         if (!$user) {
-            $this->success(null, 'If the account exists, a password reset link has been sent.');
-            return;
+            return [
+                'message' => 'If the account exists, a password reset link has been sent.'
+            ];
         }
 
         // Generate reset token
@@ -271,7 +276,7 @@ class AuthController extends Controller
         ]);
 
         // Generate reset URL
-        $resetUrl = ($_ENV['FRONTEND_URL'] ?? 'http://localhost:3000') . '/reset-password?token=' . $token . '&email=' . urlencode($user['email']);
+        $resetUrl = (\Core\Env::get('FRONTEND_URL', 'http://localhost:3000')) . '/reset-password?token=' . $token . '&email=' . urlencode($user['email']);
 
         // Send email
         $emailBody = "
@@ -282,24 +287,26 @@ class AuthController extends Controller
             <p>This link will expire in 1 hour.</p>
             <p>If you didn't request this, please ignore this email.</p>
             <br>
-            <p>Best regards,<br>" . ($_ENV['APP_NAME'] ?? 'Our API') . "</p>
+            <p>Best regards,<br>" . (\Core\Env::get('APP_NAME', 'Our API')) . "</p>
         ";
 
         // Push email job to queue
         \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $user['email'],
-            'subject' => 'Password Reset Request - ' . ($_ENV['APP_NAME'] ?? 'Our API'),
+            'subject' => 'Password Reset Request - ' . (\Core\Env::get('APP_NAME', 'Our API')),
             'body' => $emailBody
         ]);
 
-        $this->success(null, 'If the account exists, a password reset link has been sent.');
+        return [
+            'message' => 'If the account exists, a password reset link has been sent.'
+        ];
     }
 
     /**
      * Reset Password
      * POST /auth/reset-password
      */
-    public function resetPassword(): void
+    public function resetPassword()
     {
         $validated = $this->validate([
             'email' => 'required|email',
@@ -310,12 +317,12 @@ class AuthController extends Controller
 
         // Additional password complexity validation
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/', $validated['password'])) {
-            $this->error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)', 422);
+            throw new \Exception('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#)', 422);
         }
 
         // Check password confirmation
         if ($validated['password'] !== $validated['password_confirmation']) {
-            $this->error('Password confirmation does not match', 422);
+            throw new \Exception('Password confirmation does not match', 422);
         }
 
         // Verify token
@@ -335,13 +342,13 @@ class AuthController extends Controller
         $resetRecord = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$resetRecord) {
-            $this->error('Invalid or expired reset token', 400);
+            throw new \Exception('Invalid or expired reset token', 400);
         }
 
         // Find user
         $user = $this->model->findByEmail($validated['email']);
         if (!$user) {
-            $this->error('User not found', 404);
+            throw new \Exception('User not found', 404);
         }
 
         // Update password
@@ -363,15 +370,17 @@ class AuthController extends Controller
             <p>Your password has been successfully reset.</p>
             <p>If you didn't make this change, please contact us immediately.</p>
             <br>
-            <p>Best regards,<br>" . ($_ENV['APP_NAME'] ?? 'Our API') . "</p>
+            <p>Best regards,<br>" . (\Core\Env::get('APP_NAME', 'Our API')) . "</p>
         ";
 
         \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $validated['email'],
-            'subject' => 'Password Reset Successful - ' . ($_ENV['APP_NAME'] ?? 'Our API'),
+            'subject' => 'Password Reset Successful - ' . (\Core\Env::get('APP_NAME', 'Our API')),
             'body' => $emailBody
         ]);
 
-        $this->success(null, 'Password has been reset successfully. You can now login with your new password.');
+        return [
+            'message' => 'Password has been reset successfully. You can now login with your new password.'
+        ];
     }
 }

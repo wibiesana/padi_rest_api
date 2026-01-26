@@ -65,13 +65,31 @@ set_exception_handler(function ($exception) use ($config) {
         'message_code' => 'INTERNAL_SERVER_ERROR'
     ];
 
+    // Handle PDOException specifically
+    if ($exception instanceof PDOException) {
+        $error['message'] = 'Database error occurred';
+        $error['message_code'] = 'DATABASE_ERROR';
+
+        // Log the database error
+        \Core\DatabaseManager::logError($exception);
+    }
+
     if ($config['app_debug']) {
         $error['debug'] = [
             'message' => $exception->getMessage(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace' => $exception->getTraceAsString()
+            'trace' => $exception->getTraceAsString(),
+            'type' => get_class($exception)
         ];
+
+        // Add database-specific debug info for PDOException
+        if ($exception instanceof PDOException) {
+            $lastDbError = \Core\DatabaseManager::getLastError();
+            if ($lastDbError) {
+                $error['debug']['database_error'] = $lastDbError;
+            }
+        }
     }
 
     $response->json($error, 500);

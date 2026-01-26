@@ -8,6 +8,7 @@ use Core\Env;
  * Supports: MySQL, MariaDB, PostgreSQL, SQLite
  * 
  * You can configure multiple database connections and switch between them
+ * Uses Env::get() for consistent environment variable access with fallback values
  */
 
 return [

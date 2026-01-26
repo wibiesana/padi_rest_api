@@ -1,12 +1,14 @@
 <?php
 
+use Core\Env;
+
 return [
-    'driver' => $_ENV['MAIL_DRIVER'] ?? 'smtp',
-    'host' => $_ENV['MAIL_HOST'] ?? 'smtp.mailtrap.io',
-    'port' => $_ENV['MAIL_PORT'] ?? 2525,
-    'username' => $_ENV['MAIL_USERNAME'] ?? null,
-    'password' => $_ENV['MAIL_PASSWORD'] ?? null,
-    'encryption' => $_ENV['MAIL_ENCRYPTION'] ?? 'tls',
-    'from_address' => $_ENV['MAIL_FROM_ADDRESS'] ?? 'noreply@example.com',
-    'from_name' => $_ENV['MAIL_FROM_NAME'] ?? $_ENV['APP_NAME'] ?? 'Padi REST API',
+    'driver' => Env::get('MAIL_DRIVER', 'smtp'),
+    'host' => Env::get('MAIL_HOST', 'smtp.mailtrap.io'),
+    'port' => Env::get('MAIL_PORT', 2525),
+    'username' => Env::get('MAIL_USERNAME', null),
+    'password' => Env::get('MAIL_PASSWORD', null),
+    'encryption' => Env::get('MAIL_ENCRYPTION', 'tls'),
+    'from_address' => Env::get('MAIL_FROM_ADDRESS', 'noreply@example.com'),
+    'from_name' => Env::get('MAIL_FROM_NAME', Env::get('APP_NAME', 'Padi REST API')),
 ];

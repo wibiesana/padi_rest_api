@@ -39,6 +39,16 @@ class DatabaseManager
     private static ?string $defaultConnection = null;
 
     /**
+     * Store last database error
+     */
+    private static ?array $lastDatabaseError = null;
+
+    /**
+     * Store database error history
+     */
+    private static array $databaseErrors = [];
+
+    /**
      * Get database connection by name
      * 
      * @param string|null $name Connection name from config, null for default
@@ -104,8 +114,24 @@ class DatabaseManager
                     throw new PDOException("Unsupported database driver: {$driver}");
             }
         } catch (PDOException $e) {
+            // Store detailed error information
+            self::$lastDatabaseError = [
+                'type' => 'connection_error',
+                'driver' => $driver,
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'timestamp' => date('Y-m-d H:i:s'),
+                'config' => array_diff_key($config, ['password' => '']) // Remove sensitive data
+            ];
+
+            self::$databaseErrors[] = self::$lastDatabaseError;
+
             throw new PDOException(
-                "Failed to connect to {$driver} database: " . $e->getMessage()
+                "Failed to connect to {$driver} database: " . $e->getMessage(),
+                (int)$e->getCode(),
+                $e
             );
         }
     }
@@ -322,5 +348,72 @@ class DatabaseManager
         }
 
         return self::$config['connections'][$name]['driver'] ?? 'mysql';
+    }
+
+    /**
+     * Get last database error
+     */
+    public static function getLastError(): ?array
+    {
+        return self::$lastDatabaseError;
+    }
+
+    /**
+     * Get all database errors
+     */
+    public static function getAllErrors(): array
+    {
+        return self::$databaseErrors;
+    }
+
+    /**
+     * Clear database errors
+     */
+    public static function clearErrors(): void
+    {
+        self::$lastDatabaseError = null;
+        self::$databaseErrors = [];
+    }
+
+    /**
+     * Log database error
+     */
+    public static function logError(\Exception $e, string $query = '', array $params = []): void
+    {
+        self::$lastDatabaseError = [
+            'type' => 'query_error',
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'query' => $query,
+            'params' => self::sanitizeParams($params),
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        self::$databaseErrors[] = self::$lastDatabaseError;
+    }
+
+    /**
+     * Sanitize parameters to remove sensitive data
+     */
+    private static function sanitizeParams(array $params): array
+    {
+        $sensitiveKeys = ['password', 'token', 'secret', 'api_key', 'auth', 'pass'];
+        $sanitized = [];
+
+        foreach ($params as $key => $value) {
+            $isSensitive = false;
+            foreach ($sensitiveKeys as $sensitiveKey) {
+                if (stripos($key, $sensitiveKey) !== false) {
+                    $isSensitive = true;
+                    break;
+                }
+            }
+
+            $sanitized[$key] = $isSensitive ? '***REDACTED***' : $value;
+        }
+
+        return $sanitized;
     }
 }

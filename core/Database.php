@@ -68,6 +68,14 @@ class Database
     }
 
     /**
+     * Log query error
+     */
+    public static function logQueryError(\Exception $e, string $query = '', array $params = []): void
+    {
+        DatabaseManager::logError($e, $query, $params);
+    }
+
+    /**
      * Get total query count
      */
     public static function getQueryCount(): int

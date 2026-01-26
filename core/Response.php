@@ -66,6 +66,22 @@ class Response
                 'query_count' => Database::getQueryCount(),
             ];
 
+            // Add database error information if available
+            $lastDbError = DatabaseManager::getLastError();
+            if ($lastDbError !== null) {
+                $debugInfo['database_error'] = $lastDbError;
+            }
+
+            $allDbErrors = DatabaseManager::getAllErrors();
+            if (!empty($allDbErrors)) {
+                $debugInfo['database_errors_count'] = count($allDbErrors);
+
+                // Only include all errors if specifically enabled
+                if (Env::get('DEBUG_SHOW_ALL_DB_ERRORS', 'false') === 'true') {
+                    $debugInfo['database_errors'] = $allDbErrors;
+                }
+            }
+
             // Only include full query details if explicitly enabled
             if (Env::get('DEBUG_SHOW_QUERIES', 'false') === 'true') {
                 $debugInfo['queries'] = $sanitizedQueries;

@@ -21,13 +21,26 @@ Padi REST API provides built-in support for role-based access control with:
 - ✅ **RoleMiddleware** for route-level protection
 - ✅ **Controller helper methods** for granular permission checks
 - ✅ **Owner-based access** for resource ownership validation
-- ✅ **Standardized error responses** with proper message codes
+- ✅ **Exception-based error handling** with automatic response formatting
+- ✅ **Flexible return values** - return data directly, throw exceptions for errors
 
 ### Common Use Cases
 
 1. **Admin**: Full access to all resources
 2. **Teacher**: Can view/manage students, cannot manage other teachers
 3. **Student**: Can only view/update own data
+
+### Example Routes
+
+The framework includes simplified RBAC examples at `/rbac/*` endpoints:
+
+```php
+// GET /rbac/stats - Admin only
+// GET /rbac/users - Admin or Teacher
+// POST /rbac/students - Admin or Teacher
+// GET /rbac/my-profile - Self-access (any authenticated user)
+// PUT /rbac/my-profile - Self-access (any authenticated user)
+```
 
 ## RoleMiddleware
 
@@ -74,7 +87,7 @@ Use built-in helper methods for fine-grained authorization within your controlle
 Check if user has specific role:
 
 ```php
-public function someMethod(): void
+public function someMethod()
 {
     if ($this->hasRole('admin')) {
         // Admin-specific logic
@@ -86,7 +99,7 @@ public function someMethod(): void
         $data = $this->getTeacherData();
     }
 
-    $this->success($data);
+    return $data;
 }
 ```
 
@@ -95,7 +108,7 @@ public function someMethod(): void
 Check if user has any of the specified roles:
 
 ```php
-public function someMethod(): void
+public function someMethod()
 {
     if ($this->hasAnyRole(['admin', 'teacher'])) {
         // Logic for admin or teacher
@@ -105,7 +118,7 @@ public function someMethod(): void
         $data = $this->getOwnData();
     }
 
-    $this->success($data);
+    return $data;
 }
 ```
 
@@ -114,25 +127,28 @@ public function someMethod(): void
 Require specific role or throw 403 error:
 
 ```php
-public function adminDashboard(): void
+public function adminDashboard()
 {
     // This will throw 403 if user is not admin
     $this->requireRole('admin');
 
     // Only admins reach here
-    $stats = [
+    return [
         'total_users' => $this->model::findQuery()->count(),
         'active_users' => $this->model::findQuery()->where('status = :status', ['status' => 'active'])->count(),
     ];
-
-    $this->success($stats, 'Admin dashboard data');
 }
 
 // With custom message
-public function deleteUser(): void
+public function deleteUser()
 {
     $this->requireRole('admin', 'Only administrators can delete users');
-    // Delete logic
+
+    // Delete logic here
+    $this->model->delete($userId);
+
+    $this->setStatusCode(204); // No content
+    return null;
 }
 ```
 
@@ -141,13 +157,13 @@ public function deleteUser(): void
 Require any of specified roles:
 
 ```php
-public function viewReports(): void
+public function viewReports()
 {
     $this->requireAnyRole(['admin', 'teacher'], 'Only admin and teachers can view reports');
 
     // Admins and teachers reach here
     $reports = $this->getReports();
-    $this->success($reports);
+    return $reports;
 }
 ```
 
@@ -156,23 +172,23 @@ public function viewReports(): void
 Check if current user owns the resource:
 
 ```php
-public function updateProfile(): void
+public function updateProfile()
 {
     $userId = (int)$this->request->param('id');
     $user = $this->model->find($userId);
 
     if (!$user) {
-        $this->notFound('User not found');
+        throw new \Exception('User not found', 404);
     }
 
     if (!$this->isOwner($userId)) {
-        $this->forbidden('You can only update your own profile');
+        throw new \Exception('You can only update your own profile', 403);
     }
 
     // Update logic
     $validated = $this->validate([...]);
     $this->model->update($userId, $validated);
-    $this->success($this->model->find($userId));
+    return $this->model->find($userId);
 }
 ```
 
@@ -181,21 +197,21 @@ public function updateProfile(): void
 Quick check for admin role:
 
 ```php
-public function getUserList(): void
+public function getUserList()
 {
     $users = $this->model->all();
 
     // Filter sensitive data based on role
     if ($this->isAdmin()) {
         // Show all data including sensitive info
-        $this->success($users);
+        return $users;
     } else {
         // Remove sensitive data for non-admins
         $users = array_map(function ($user) {
             unset($user['password'], $user['remember_token']);
             return $user;
         }, $users);
-        $this->success($users);
+        return $users;
     }
 }
 ```
@@ -205,13 +221,13 @@ public function getUserList(): void
 Require admin role or resource ownership:
 
 ```php
-public function update(): void
+public function update()
 {
     $userId = (int)$this->request->param('id');
     $user = $this->model->find($userId);
 
     if (!$user) {
-        $this->notFound('User not found');
+        throw new \Exception('User not found', 404);
     }
 
     // Only admin or the user themselves can update
@@ -220,7 +236,7 @@ public function update(): void
     // Update logic
     $validated = $this->validate([...]);
     $this->model->update($userId, $validated);
-    $this->success($this->model->find($userId));
+    return $this->model->find($userId);
 }
 ```
 
@@ -229,13 +245,13 @@ public function update(): void
 ### Example 1: Student Can Only View Own Data
 
 ```php
-public function viewStudent(): void
+public function viewStudent()
 {
     $studentId = (int)$this->request->param('id');
     $student = $this->model->find($studentId);
 
     if (!$student || $student['role'] !== 'student') {
-        $this->notFound('Student not found');
+        throw new \Exception('Student not found', 404);
     }
 
     // Permission check
@@ -247,13 +263,13 @@ public function viewStudent(): void
     } elseif ($this->hasRole('student')) {
         // Student can only view their own data
         if (!$this->isOwner($studentId)) {
-            $this->forbidden('Students can only view their own data');
+            throw new \Exception('Students can only view their own data', 403);
         }
     } else {
-        $this->forbidden('You do not have permission to view student data');
+        throw new \Exception('You do not have permission to view student data', 403);
     }
 
-    $this->success($student, 'Student data retrieved');
+    return $student;
 }
 ```
 

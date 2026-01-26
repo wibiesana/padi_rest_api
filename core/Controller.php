@@ -58,137 +58,39 @@ abstract class Controller
     }
 
     /**
-     * Return success response
+     * Return database error response with detailed debug info
      */
-    protected function success($data = null, string $message = 'Success', int $code = 200): void
+    protected function databaseError(string $message = 'Database error occurred', \Exception $exception = null): void
     {
-        $messageCode = match ($code) {
-            200 => 'SUCCESS',
-            201 => 'CREATED',
-            204 => 'NO_CONTENT',
-            default => 'SUCCESS'
-        };
-
-        $response = [
-            'success' => true,
-            'message' => $message,
-            'message_code' => $messageCode
-        ];
-
-        // Only add item field if data is not null
-        if ($data !== null) {
-            $response['item'] = $data;
-        }
-
-        $this->response->json($response, $code);
-    }
-
-    /**
-     * Return collection response for lists (with or without pagination)
-     */
-    protected function collection(array $items, array $meta = [], string $message = 'Success', int $code = 200): void
-    {
-        $messageCode = match ($code) {
-            200 => 'SUCCESS',
-            201 => 'CREATED',
-            204 => 'NO_CONTENT',
-            default => 'SUCCESS'
-        };
-
-        $response = [
-            'success' => true,
-            'message' => $message,
-            'message_code' => $messageCode,
-            'item' => $items
-        ];
-
-        // Add pagination meta if provided
-        if (!empty($meta)) {
-            $response['meta'] = $meta;
-        }
-
-        $this->response->json($response, $code);
-    }
-
-    /**
-     * Return single item response
-     */
-    protected function single($data, string $message = 'Success', int $code = 200): void
-    {
-        $messageCode = match ($code) {
-            200 => 'SUCCESS',
-            201 => 'CREATED',
-            204 => 'NO_CONTENT',
-            default => 'SUCCESS'
-        };
-
-        $response = [
-            'success' => true,
-            'message' => $message,
-            'message_code' => $messageCode
-        ];
-
-        // For single items, item should be an object, not an array
-        if ($data !== null) {
-            $response['item'] = $data;
-        }
-
-        $this->response->json($response, $code);
-    }
-
-    /**
-     * Return error response
-     */
-    protected function error(string $message = 'Error', int $code = 400, mixed $errors = null, ?string $messageCode = null): void
-    {
-        if ($messageCode === null) {
-            $messageCode = match ($code) {
-                400 => 'BAD_REQUEST',
-                401 => 'UNAUTHORIZED',
-                403 => 'FORBIDDEN',
-                404 => 'NOT_FOUND',
-                422 => 'VALIDATION_FAILED',
-                429 => 'RATE_LIMIT_EXCEEDED',
-                500 => 'INTERNAL_SERVER_ERROR',
-                default => 'ERROR'
-            };
+        // Log the database error if exception is provided
+        if ($exception) {
+            Database::logQueryError($exception);
         }
 
         $response = [
             'success' => false,
             'message' => $message,
-            'message_code' => $messageCode
+            'message_code' => 'DATABASE_ERROR'
         ];
 
-        if ($errors !== null) {
-            $response['errors'] = $errors;
+        // Add database error details in debug mode
+        if (Env::get('APP_DEBUG', false) === 'true') {
+            $lastError = DatabaseManager::getLastError();
+            if ($lastError) {
+                $response['database_error'] = $lastError;
+            }
+
+            if ($exception) {
+                $response['exception'] = [
+                    'message' => $exception->getMessage(),
+                    'code' => $exception->getCode(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine()
+                ];
+            }
         }
 
-        $this->response->json($response, $code);
-    }
-
-    /**
-     * Return not found response
-     */
-    protected function notFound(string $message = 'Resource not found'): void
-    {
-        $this->error($message, 404);
-    }
-
-    /**
-     * Return unauthorized response
-     */
-    protected function unauthorized(string $message = 'Unauthorized', ?string $messageCode = null): void
-    {
-        $this->error($message, 401, null, $messageCode);
-    }
-
-    /**
-     * Return forbidden response
-     */
-    protected function forbidden(string $message = 'Forbidden'): void
-    {
-        $this->error($message, 403);
+        $this->response->json($response, 500);
     }
 
     /**
@@ -213,7 +115,7 @@ abstract class Controller
     protected function requireRole(string $role, ?string $message = null): void
     {
         if (!$this->hasRole($role)) {
-            $this->forbidden($message ?? "Only {$role}s can access this resource");
+            throw new \Exception($message ?? "Only {$role}s can access this resource", 403);
         }
     }
 
@@ -224,7 +126,7 @@ abstract class Controller
     {
         if (!$this->hasAnyRole($roles)) {
             $roleList = implode(', ', $roles);
-            $this->forbidden($message ?? "Only {$roleList} can access this resource");
+            throw new \Exception($message ?? "Only {$roleList} can access this resource", 403);
         }
     }
 
@@ -250,7 +152,74 @@ abstract class Controller
     protected function requireAdminOrOwner(int $resourceUserId, ?string $message = null): void
     {
         if (!$this->isAdmin() && !$this->isOwner($resourceUserId)) {
-            $this->forbidden($message ?? 'You can only access your own resources');
+            throw new \Exception($message ?? 'You can only access your own resources', 403);
         }
+    }
+
+    /**
+     * Set response status code for auto-formatting
+     */
+    protected function setStatusCode(int $code): void
+    {
+        $this->request->setResponseStatusCode($code);
+    }
+
+    /**
+     * Return raw response (alias for direct return)
+     */
+    protected function raw($data, int $code = 200)
+    {
+        $this->setStatusCode($code);
+        return $data;
+    }
+
+    /**
+     * Return simple response format
+     */
+    protected function simple($data, string $status = 'success', string $code = null, int $statusCode = 200)
+    {
+        $this->setStatusCode($statusCode);
+        return [
+            'status' => $status,
+            'code' => $code ?? $this->getStatusCodeName($statusCode),
+            'item' => $data
+        ];
+    }
+
+    /**
+     * Return created response for auto-formatting
+     */
+    protected function created($data = null)
+    {
+        $this->setStatusCode(201);
+        return $data;
+    }
+
+    /**
+     * Return no content response
+     */
+    protected function noContent()
+    {
+        $this->setStatusCode(204);
+        return null;
+    }
+
+    /**
+     * Get status code name
+     */
+    private function getStatusCodeName(int $code): string
+    {
+        return match ($code) {
+            200 => 'SUCCESS',
+            201 => 'CREATED',
+            204 => 'NO_CONTENT',
+            400 => 'BAD_REQUEST',
+            401 => 'UNAUTHORIZED',
+            403 => 'FORBIDDEN',
+            404 => 'NOT_FOUND',
+            422 => 'VALIDATION_FAILED',
+            500 => 'INTERNAL_SERVER_ERROR',
+            default => 'SUCCESS'
+        };
     }
 }

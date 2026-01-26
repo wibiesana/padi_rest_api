@@ -14,6 +14,7 @@ class Request
     private string $method;
     private string $uri;
     public ?object $user = null;
+    private ?int $responseStatusCode = null;
 
     public function __construct()
     {
@@ -257,5 +258,21 @@ class Request
         }
 
         return '0.0.0.0';
+    }
+
+    /**
+     * Set response status code
+     */
+    public function setResponseStatusCode(int $code): void
+    {
+        $this->responseStatusCode = $code;
+    }
+
+    /**
+     * Get response status code
+     */
+    public function getResponseStatusCode(): ?int
+    {
+        return $this->responseStatusCode;
     }
 }

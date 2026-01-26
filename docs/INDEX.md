@@ -100,13 +100,21 @@ Essential knowledge for building with Padi REST API.
 
 ### Role-Based Access Control (RBAC)
 
-**[📄 RBAC.md](02-core-concepts/RBAC.md)** ✨ NEW
+**[📄 RBAC.md](02-core-concepts/RBAC.md)** ✨ UPDATED
 
 - RoleMiddleware usage
 - Controller helper methods
 - Real-world examples (student, teacher, admin)
 - Best practices
 - Testing authorization
+
+**[📄 RBAC_IMPLEMENTATION_GUIDE.md](02-core-concepts/RBAC_IMPLEMENTATION_GUIDE.md)** ✨ NEW
+
+- Quick start with ready-to-use endpoints (`/rbac/*`)
+- Live examples with different permission patterns
+- Admin-only, multi-role, and self-access patterns
+- Postman testing guide
+- Error response documentation
 
 ### Models Guide
 

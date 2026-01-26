@@ -558,7 +558,7 @@ class {$controllerName} extends Controller
      * Get all {$resourceName}s with pagination
      * GET /{$resourceName}s
      */
-    public function index(): void
+    public function index()
     {
         \$page = max(1, (int)\$this->request->query('page', 1)); // Min page 1
         \$perPage = min(100, max(1, (int)\$this->request->query('per_page', 10))); // Max 100 per page
@@ -567,96 +567,100 @@ class {$controllerName} extends Controller
         if (\$search) {
             // Limit search query length to prevent abuse
             \$search = substr(\$search, 0, 255);
-            \$data = \$this->model->search(\$search);
-            \$this->collection(\$data);
-            return;
+            return \$this->model->search(\$search);
         }
         
-        \$result = \$this->model->paginate(\$page, \$perPage);
-        \$this->collection(\$result['data'], \$result['meta']);
+        return \$this->model->paginate(\$page, \$perPage);
     }
     
     /**
      * Get all {$resourceName}s without pagination
      * GET /{$resourceName}s/all
      */
-    public function all(): void
+    public function all()
     {
-        \$data = \$this->model::findQuery()->all();
-        \$this->collection(\$data);
+        return \$this->model::findQuery()->all();
     }
     
     /**
      * Get single {$resourceName}
      * GET /{$resourceName}s/{id}
      */
-    public function show(): void
+    public function show()
     {
         \$id = \$this->request->param('id');
         \${$resourceName} = \$this->model->find(\$id);
         
         if (!\${$resourceName}) {
-            \$this->notFound('{$modelName} not found');
+            throw new \\Exception('{$modelName} not found', 404);
         }
         
-        \$this->single(\${$resourceName});
+        return \${$resourceName};
     }
     
     /**
      * Create new {$resourceName}
      * POST /{$resourceName}s
      */
-    public function store(): void
+    public function store()
     {
         \$validated = \$this->validate([
 {$storeRules}
         ]);
         
-        \$id = \$this->model->create(\$validated);
-        
-        \${$resourceName} = \$this->model->find(\$id);
-        \$this->single(\${$resourceName}, '{$modelName} created successfully', 201);
+        try {
+            \$id = \$this->model->create(\$validated);
+            \${$resourceName} = \$this->model->find(\$id);
+            return \$this->created(\${$resourceName});
+        } catch (\\PDOException \$e) {
+            \$this->databaseError('Failed to create {$resourceName}', \$e);
+        }
     }
     
     /**
      * Update {$resourceName}
      * PUT /{$resourceName}s/{id}
      */
-    public function update(): void
+    public function update()
     {
         \$id = \$this->request->param('id');
         \${$resourceName} = \$this->model->find(\$id);
         
         if (!\${$resourceName}) {
-            \$this->notFound('{$modelName} not found');
+            throw new \\Exception('{$modelName} not found', 404);
         }
         
         \$validated = \$this->validate([
 {$updateRules}
         ]);
         
-        \$this->model->update(\$id, \$validated);
-        
-        \$updated{$modelName} = \$this->model->find(\$id);
-        \$this->single(\$updated{$modelName}, '{$modelName} updated successfully');
+        try {
+            \$this->model->update(\$id, \$validated);
+            return \$this->model->find(\$id);
+        } catch (\\PDOException \$e) {
+            \$this->databaseError('Failed to update {$resourceName}', \$e);
+        }
     }
     
     /**
      * Delete {$resourceName}
      * DELETE /{$resourceName}s/{id}
      */
-    public function destroy(): void
+    public function destroy()
     {
         \$id = \$this->request->param('id');
         \${$resourceName} = \$this->model->find(\$id);
         
         if (!\${$resourceName}) {
-            \$this->notFound('{$modelName} not found');
+            throw new \\Exception('{$modelName} not found', 404);
         }
         
-        \$this->model->delete(\$id);
-        
-        \$this->success(null, '{$modelName} deleted successfully');
+        try {
+            \$this->model->delete(\$id);
+            return \$this->noContent();
+        } catch (\\PDOException \$e) {
+            \$this->databaseError('Failed to delete {$resourceName}', \$e);
+        }
     }
 }
 

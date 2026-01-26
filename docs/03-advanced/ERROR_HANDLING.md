@@ -76,10 +76,11 @@ All API responses include a standardized `message_code` field to help frontend a
 
 ```php
 // GET /api/users/1
-$this->success($user, 'User retrieved successfully'); // 200, SUCCESS
+return $user; // Auto-formatted based on RESPONSE_FORMAT
 
 // POST /api/users
-$this->success($user, 'User created successfully', 201); // 201, CREATED
+$this->setStatusCode(201);
+return $user; // Status 201, auto-formatted
 ```
 
 ## Error Codes
@@ -426,33 +427,34 @@ use Core\Controller;
 
 class ProductController extends Controller
 {
-    public function show(int $id): void
+    public function show(int $id)
     {
         $product = $this->model->find($id);
 
         if (!$product) {
-            // Custom message code for specific scenario
-            $this->error('Product not found', 404, null, 'PRODUCT_NOT_FOUND');
+            // Custom exception with specific message for scenario
+            throw new \Exception('Product not found', 404);
         }
 
-        $this->success($product);
+        return $product;
     }
 
-    public function purchase(int $id): void
+    public function purchase(int $id)
     {
         $product = $this->model->find($id);
 
         if (!$product) {
-            $this->notFound('Product not found');
+            throw new \Exception('Product not found', 404);
         }
 
         if ($product['stock'] < 1) {
             // Custom error for out of stock
-            $this->error('Product is out of stock', 400, null, 'OUT_OF_STOCK');
+            throw new \Exception('Product is out of stock', 400);
         }
 
         // Process purchase...
-        $this->success($order, 'Purchase successful', 201);
+        $this->setStatusCode(201);
+        return $order;
     }
 }
 ```
@@ -460,22 +462,21 @@ class ProductController extends Controller
 ### Available Controller Methods
 
 ```php
-// Success responses
-$this->success($data, 'Message', 200);           // message_code: SUCCESS
-$this->success($data, 'Created', 201);           // message_code: CREATED
+// Return data directly (auto-formatted)
+return $data;                                     // Auto status 200, auto message_code
+$this->setStatusCode(201); return $data;         // Custom status with data
 
-// Error responses (automatic message_code)
-$this->error('Message', 400);                    // message_code: BAD_REQUEST
-$this->unauthorized('Message');                  // message_code: UNAUTHORIZED
-$this->forbidden('Message');                     // message_code: FORBIDDEN
-$this->notFound('Message');                      // message_code: NOT_FOUND
+// Exception handling (automatic error responses)
+throw new \Exception('Error message', 400);      // Auto message_code based on status
+throw new \Exception('Not found', 404);          // Auto message_code: NOT_FOUND
+throw new \Exception('Forbidden', 403);          // Auto message_code: FORBIDDEN
+throw new \Exception('Not found', 404);          // Auto message_code: NOT_FOUND
 
-// Error with custom message_code
-$this->error('Message', 400, null, 'CUSTOM_CODE');
-$this->unauthorized('Message', 'CUSTOM_AUTH_CODE');
+// Helper methods (for special cases)
+return $this->databaseError('Database connection failed');  // Database error handler
 
 // Validation (automatic)
-$this->validate([...]);                          // message_code: VALIDATION_FAILED
+$this->validate([...]);                          // Auto message_code: VALIDATION_FAILED on error
 ```
 
 ### Direct Response Usage

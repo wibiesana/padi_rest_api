@@ -19,7 +19,7 @@ class UserController extends Controller
      * Get all users with pagination
      * GET /users
      */
-    public function index(): void
+    public function index()
     {
         $page = max(1, (int)$this->request->query('page', 1)); // Min page 1
         $perPage = min(100, max(1, (int)$this->request->query('per_page', 10))); // Max 100 per page
@@ -28,46 +28,42 @@ class UserController extends Controller
         if ($search) {
             // Limit search query length to prevent abuse
             $search = substr($search, 0, 255);
-            $data = $this->model->search($search);
-            $this->collection($data);
-            return;
+            return $this->model->search($search);
         }
 
-        $result = $this->model->paginate($page, $perPage);
-        $this->collection($result['data'], $result['meta']);
+        return $this->model->paginate($page, $perPage);
     }
 
     /**
      * Get all users without pagination
      * GET /users/all
      */
-    public function all(): void
+    public function all()
     {
-        $data = $this->model::findQuery()->all();
-        $this->collection($data);
+        return $this->model::findQuery()->all();
     }
 
     /**
      * Get single user
      * GET /users/{id}
      */
-    public function show(): void
+    public function show()
     {
         $id = $this->request->param('id');
         $user = $this->model->find($id);
 
         if (!$user) {
-            $this->notFound('User not found');
+            throw new \Exception('User not found', 404);
         }
 
-        $this->single($user);
+        return $user;
     }
 
     /**
      * Create new user
      * POST /users
      */
-    public function store(): void
+    public function store()
     {
         $validated = $this->validate([
             'username' => 'string|max:50|unique:users,username',
@@ -78,23 +74,26 @@ class UserController extends Controller
             'remember_token' => 'string|max:100'
         ]);
 
-        $id = $this->model->create($validated);
-
-        $user = $this->model->find($id);
-        $this->single($user, 'User created successfully', 201);
+        try {
+            $id = $this->model->create($validated);
+            $user = $this->model->find($id);
+            return $this->created($user);
+        } catch (\PDOException $e) {
+            $this->databaseError('Failed to create user', $e);
+        }
     }
 
     /**
      * Update user
      * PUT /users/{id}
      */
-    public function update(): void
+    public function update()
     {
         $id = $this->request->param('id');
         $user = $this->model->find($id);
 
         if (!$user) {
-            $this->notFound('User not found');
+            throw new \Exception('User not found', 404);
         }
 
         $validated = $this->validate([
@@ -107,29 +106,32 @@ class UserController extends Controller
             'remember_token' => 'string|max:100'
         ]);
 
-        $this->model->update($id, $validated);
-
-        $this->success(
-            $this->model->find($id),
-            'User updated successfully'
-        );
+        try {
+            $this->model->update($id, $validated);
+            return $this->model->find($id);
+        } catch (\PDOException $e) {
+            $this->databaseError('Failed to update user', $e);
+        }
     }
 
     /**
      * Delete user
      * DELETE /users/{id}
      */
-    public function destroy(): void
+    public function destroy()
     {
         $id = $this->request->param('id');
         $user = $this->model->find($id);
 
         if (!$user) {
-            $this->notFound('User not found');
+            throw new \Exception('User not found', 404);
         }
 
-        $this->model->delete($id);
-
-        $this->success(null, 'User deleted successfully');
+        try {
+            $this->model->delete($id);
+            return $this->noContent();
+        } catch (\PDOException $e) {
+            $this->databaseError('Failed to delete user', $e);
+        }
     }
 }

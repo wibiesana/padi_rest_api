@@ -1,80 +1,67 @@
-# Response Structure Guide
+# Flexible Response Format Guide
 
-This document explains the standardized response structure used throughout the Padi REST API Framework.
+This document explains the new flexible response system in Padi REST API Framework that allows controllers to return data directly without worrying about response formatting.
 
 ## Overview
 
-All API responses follow a consistent structure to ensure predictable frontend integration and easy error handling. The framework provides semantic methods to return different types of responses.
+The framework automatically formats controller return values into consistent API responses. Controllers can return data directly, and the framework handles response formatting based on the configured format.
 
-## Response Methods
+## How It Works
 
-### 🔹 `collection()` - Multiple Items
+### 1. Return Data Directly
 
-Use for returning arrays of items (with or without pagination):
-
-```php
-// Without pagination
-$this->collection($items);
-
-// With pagination
-$this->collection($items, $meta);
-
-// With custom message
-$this->collection($items, [], 'Items retrieved successfully');
-```
-
-**Use Cases:**
-
-- `index()` methods with pagination
-- `all()` methods without pagination
-- Search results
-- List endpoints
-
-### 🔹 `single()` - Single Item
-
-Use for returning individual objects:
+Controllers simply return the data they want to send:
 
 ```php
-// Basic usage
-$this->single($item);
+public function show()
+{
+    $user = $this->model->find($id);
 
-// With custom message
-$this->single($item, 'Item created successfully');
+    if (!$user) {
+        throw new \Exception('User not found', 404);
+    }
 
-// With status code
-$this->single($item, 'Item created successfully', 201);
+    return $user; // Framework handles the rest
+}
 ```
 
-**Use Cases:**
+### 2. Auto-Formatting
 
-- `show()` methods
-- `store()` methods (after creation)
-- `update()` methods (after update)
+The Router captures controller return values and automatically formats them based on the `RESPONSE_FORMAT` environment variable:
 
-### 🔹 `success()` - Generic Success
+- **`full`** (default): Standard framework response with `success`, `message`, `data`
+- **`simple`**: Minimal response with `status`, `message`, `data`
+- **`raw`**: Direct data return without wrapper
 
-Use for responses without specific data:
+### 3. Exception Handling
+
+Throw exceptions for errors - they're automatically converted to proper error responses:
 
 ```php
-// Basic usage
-$this->success();
+public function update()
+{
+    $user = $this->model->find($id);
 
-// With message only
-$this->success(null, 'Operation completed successfully');
+    if (!$user) {
+        throw new \Exception('User not found', 404);
+    }
 
-// Legacy usage (still supported)
-$this->success($data, 'Custom message');
+    if (!$this->canEdit($user)) {
+        throw new \Exception('Permission denied', 403);
+    }
+
+    $this->model->update($id, $data);
+    return $this->model->find($id);
+}
 ```
 
-**Use Cases:**
+## Response Formats
 
-- `destroy()` methods
-- Operations without return data
-- Legacy compatibility
+### Full Format (Default)
 
-## Response Structure
+When `RESPONSE_FORMAT=full` in `.env`:
 
-### Collection Response (With Pagination)
+**Collection:**
 
 ```json
 {
@@ -82,51 +69,18 @@ $this->success($data, 'Custom message');
   "message": "Success",
   "message_code": "SUCCESS",
   "item": [
-    {
-      "id": 1,
-      "title": "Sample Title",
-      "content": "Sample content..."
-    },
-    {
-      "id": 2,
-      "title": "Another Title",
-      "content": "More content..."
-    }
+    { "id": 1, "name": "Item 1" },
+    { "id": 2, "name": "Item 2" }
   ],
   "meta": {
     "total": 25,
     "per_page": 10,
-    "current_page": 1,
-    "last_page": 3,
-    "from": 1,
-    "to": 10
+    "current_page": 1
   }
 }
 ```
 
-### Collection Response (Without Pagination)
-
-```json
-{
-  "success": true,
-  "message": "Success",
-  "message_code": "SUCCESS",
-  "item": [
-    {
-      "id": 1,
-      "title": "Sample Title",
-      "content": "Sample content..."
-    },
-    {
-      "id": 2,
-      "title": "Another Title",
-      "content": "More content..."
-    }
-  ]
-}
-```
-
-### Single Item Response
+**Single Item:**
 
 ```json
 {
@@ -135,55 +89,222 @@ $this->success($data, 'Custom message');
   "message_code": "SUCCESS",
   "item": {
     "id": 1,
-    "title": "Sample Title",
-    "content": "Sample content...",
-    "created_at": "2026-01-25 10:30:00"
+    "name": "Item 1",
+    "created_at": "2026-01-26"
   }
 }
 ```
 
-### Success Response (No Data)
+### Simple Format
+
+When `RESPONSE_FORMAT=simple` in `.env`:
 
 ```json
 {
-  "success": true,
-  "message": "Item deleted successfully",
-  "message_code": "SUCCESS"
+  "status": "success",
+  "message": "Success",
+  "data": {
+    "id": 1,
+    "name": "Item 1"
+  }
 }
 ```
 
-## Migration from Legacy Structure
+### Raw Format
 
-### Before (Legacy)
+When `RESPONSE_FORMAT=raw` in `.env`:
 
-```php
-// Old nested structure
-$this->success([
-    'data' => $items
-]);
-
-// Response:
+```json
 {
-    "data": {
-        "success": true,
-        "data": [...]
-    },
-    "debug": {...}
+  "id": 1,
+  "name": "Item 1",
+  "created_at": "2026-01-26"
 }
 ```
 
-### After (Current)
+## Controller Helper Methods
+
+While the main approach is returning data directly, some helper methods are available for specific cases:
+
+### Status Code Control
 
 ```php
-// New flat structure
-$this->collection($items);
-
-// Response:
+public function store()
 {
-    "success": true,
-    "message_code": "SUCCESS",
-    "item": [...],
-    "debug": {...}
+    $id = $this->model->create($data);
+    $item = $this->model->find($id);
+
+    $this->setStatusCode(201); // Set status before return
+    return $item;
+}
+
+// Or use helper
+public function store()
+{
+    $id = $this->model->create($data);
+    return $this->created($this->model->find($id)); // Auto 201 status
+}
+```
+
+### Empty Responses
+
+```php
+public function destroy()
+{
+    $this->model->delete($id);
+
+    $this->setStatusCode(204); // No content
+    return null; // or return nothing
+}
+
+// Or use helper
+public function destroy()
+{
+    $this->model->delete($id);
+    return $this->noContent(); // Auto 204 status
+}
+```
+
+### Format-Specific Responses
+
+```php
+public function getFormatted()
+{
+    $data = $this->model->find($id);
+
+    // Force simple format regardless of env setting
+    return $this->simple($data, 'success', 'USER_FOUND');
+
+    // Force raw format
+    return $this->raw($data);
+}
+```
+
+## Complete Controller Examples
+
+### Basic CRUD Controller
+
+```php
+class ProductController extends Controller
+{
+    // GET /products
+    public function index()
+    {
+        $page = (int)$this->request->query('page', 1);
+        $perPage = (int)$this->request->query('per_page', 10);
+
+        return $this->model->paginate($page, $perPage);
+    }
+
+    // GET /products/all
+    public function all()
+    {
+        return $this->model->all();
+    }
+
+    // GET /products/{id}
+    public function show()
+    {
+        $product = $this->model->find($this->request->param('id'));
+
+        if (!$product) {
+            throw new \Exception('Product not found', 404);
+        }
+
+        return $product;
+    }
+
+    // POST /products
+    public function store()
+    {
+        $validated = $this->validate([
+            'name' => 'required|max:100',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer'
+        ]);
+
+        $id = $this->model->create($validated);
+
+        $this->setStatusCode(201);
+        return $this->model->find($id);
+    }
+
+    // PUT /products/{id}
+    public function update()
+    {
+        $id = $this->request->param('id');
+        $product = $this->model->find($id);
+
+        if (!$product) {
+            throw new \Exception('Product not found', 404);
+        }
+
+        $validated = $this->validate([
+            'name' => 'max:100',
+            'price' => 'numeric',
+            'stock' => 'integer'
+        ]);
+
+        $this->model->update($id, $validated);
+        return $this->model->find($id);
+    }
+
+    // DELETE /products/{id}
+    public function destroy()
+    {
+        $product = $this->model->find($this->request->param('id'));
+
+        if (!$product) {
+            throw new \Exception('Product not found', 404);
+        }
+
+        $this->model->delete($product['id']);
+
+        $this->setStatusCode(204);
+        return null;
+    }
+}
+```
+
+## Error Handling
+
+All exceptions are automatically converted to proper error responses:
+
+### Exception Response Format
+
+**404 Not Found:**
+
+```json
+{
+  "success": false,
+  "message": "Product not found",
+  "data": null,
+  "status_code": 404
+}
+```
+
+**403 Forbidden:**
+
+```json
+{
+  "success": false,
+  "message": "Permission denied",
+  "data": null,
+  "status_code": 403
+}
+```
+
+**422 Validation Error:**
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "name": ["The name field is required"],
+    "price": ["The price must be numeric"]
+  },
+  "status_code": 422
 }
 ```
 
@@ -192,330 +313,83 @@ $this->collection($items);
 ### ✅ DO
 
 ```php
-// Use semantic methods
-$this->collection($posts);           // For lists
-$this->single($post);               // For single items
-$this->success(null, 'Deleted');   // For operations without data
+// Return data directly
+return $products;
 
-// Handle pagination properly
-$result = $this->model->paginate($page, $perPage);
-$this->collection($result['data'], $result['meta'] ?? []);
+// Throw exceptions for errors
+throw new \Exception('Not found', 404);
 
-// Use appropriate status codes
-$this->single($post, 'Post created', 201);
+// Use helpers for specific status codes
+return $this->created($newProduct);
+return $this->noContent();
+
+// Set status when needed
+$this->setStatusCode(201);
+return $product;
 ```
 
 ### ❌ DON'T
 
 ```php
-// Don't use generic success for everything
-$this->success(['data' => $posts]);  // ❌ Use collection() instead
-$this->success($post);               // ❌ Use single() instead
+// Don't use old methods (deprecated)
+$this->success($data);     // ❌ Use return $data
+$this->single($item);      // ❌ Use return $item
+$this->collection($items); // ❌ Use return $items
+$this->notFound('Error');  // ❌ Use throw new \Exception('Error', 404)
+$this->forbidden();        // ❌ Use throw new \Exception('Error', 403)
 
-// Don't wrap data unnecessarily
-$this->collection(['data' => $items]); // ❌ Pass items directly
-
-// Don't ignore status codes
-$this->single($post);  // ❌ Should be 201 for creation
-$this->single($post, 'Created', 201); // ✅ Correct
+// Don't return wrapped data unnecessarily
+return ['data' => $products]; // ❌ Use return $products
 ```
 
-## Controller Examples
+## Environment Configuration
 
-### Complete CRUD Controller
+Control response format via environment variables:
+
+```env
+# .env
+RESPONSE_FORMAT=full    # Default: full framework response
+RESPONSE_FORMAT=simple  # Minimal response format
+RESPONSE_FORMAT=raw     # Direct data output
+```
+
+## Migration from Old Format
+
+If you have existing controllers using old methods, update them:
 
 ```php
-class PostController extends Controller
+// OLD (deprecated)
+public function index(): void
 {
-    // GET /posts (with pagination)
-    public function index(): void
-    {
-        $page = (int)$this->request->query('page', 1);
-        $perPage = (int)$this->request->query('per_page', 10);
-
-        $result = $this->model->paginate($page, $perPage);
-        $this->collection($result['data'], $result['meta'] ?? []);
-    }
-
-    // GET /posts/all (without pagination)
-    public function all(): void
-    {
-        $data = $this->model::findQuery()->all();
-        $this->collection($data);
-    }
-
-    // GET /posts/{id}
-    public function show(): void
-    {
-        $post = $this->model->find($this->request->param('id'));
-
-        if (!$post) {
-            $this->notFound('Post not found');
-        }
-
-        $this->single($post);
-    }
-
-    // POST /posts
-    public function store(): void
-    {
-        $validated = $this->validate([...]);
-        $id = $this->model->create($validated);
-
-        $post = $this->model->find($id);
-        $this->single($post, 'Post created successfully', 201);
-    }
-
-    // PUT /posts/{id}
-    public function update(): void
-    {
-        $id = $this->request->param('id');
-        $post = $this->model->find($id);
-
-        if (!$post) {
-            $this->notFound('Post not found');
-        }
-
-        $validated = $this->validate([...]);
-        $this->model->update($id, $validated);
-
-        $updatedPost = $this->model->find($id);
-        $this->single($updatedPost, 'Post updated successfully');
-    }
-
-    // DELETE /posts/{id}
-    public function destroy(): void
-    {
-        $post = $this->model->find($this->request->param('id'));
-
-        if (!$post) {
-            $this->notFound('Post not found');
-        }
-
-        $this->model->delete($post['id']);
-        $this->success(null, 'Post deleted successfully');
-    }
-}
-```
-
-## Frontend Integration
-
-### JavaScript/TypeScript Pagination
-
-```typescript
-interface PaginationMeta {
-  total: number;
-  per_page: number;
-  current_page: number;
-  last_page: number;
-  from: number;
-  to: number;
+    $products = $this->model->all();
+    $this->collection($products);
 }
 
-interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  message_code: string;
-  item?: T;
-  meta?: PaginationMeta;
-}
-
-// Fetch posts with pagination
-async function fetchPosts(page: number = 1, perPage: number = 10) {
-  const response: ApiResponse<Post[]> = await api.get(
-    `/posts?page=${page}&per_page=${perPage}`,
-  );
-
-  if (response.success) {
-    const posts = response.item || [];
-    const pagination = response.meta;
-
-    if (pagination) {
-      console.log(
-        `Showing ${pagination.from}-${pagination.to} of ${pagination.total} items`,
-      );
-      console.log(`Page ${pagination.current_page} of ${pagination.last_page}`);
-    }
-
-    return { posts, pagination };
-  }
-
-  throw new Error(response.message);
-}
-
-// Usage example
-const { posts, pagination } = await fetchPosts(1, 20);
-```
-
-### Vue 3 Pagination Component
-
-```vue
-<template>
-  <div>
-    <!-- Posts list -->
-    <div v-for="post in posts" :key="post.id" class="post-item">
-      <h3>{{ post.title }}</h3>
-      <p>{{ post.content }}</p>
-    </div>
-
-    <!-- Pagination controls -->
-    <div v-if="pagination" class="pagination">
-      <button
-        @click="fetchPage(pagination.current_page - 1)"
-        :disabled="pagination.current_page === 1"
-      >
-        Previous
-      </button>
-
-      <span class="pagination-info">
-        Page {{ pagination.current_page }} of {{ pagination.last_page }} ({{
-          pagination.from
-        }}-{{ pagination.to }} of {{ pagination.total }})
-      </span>
-
-      <button
-        @click="fetchPage(pagination.current_page + 1)"
-        :disabled="pagination.current_page === pagination.last_page"
-      >
-        Next
-      </button>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-
-const posts = ref([]);
-const pagination = ref(null);
-const loading = ref(false);
-
-async function fetchPage(page = 1, perPage = 10) {
-  loading.value = true;
-  try {
-    const response = await $api.get(`/posts?page=${page}&per_page=${perPage}`);
-    if (response.success) {
-      posts.value = response.item || [];
-      pagination.value = response.meta || null;
-    }
-  } catch (error) {
-    console.error("Failed to fetch posts:", error);
-  } finally {
-    loading.value = false;
-  }
-}
-
-onMounted(() => {
-  fetchPage(1, 20); // Load first page with 20 items
-});
-</script>
-```
-
-### React Pagination Hook
-
-```typescript
-import { useState, useEffect } from 'react';
-
-interface UsePaginationOptions {
-  initialPage?: number;
-  perPage?: number;
-  endpoint: string;
-}
-
-function usePagination<T>({ initialPage = 1, perPage = 10, endpoint }: UsePaginationOptions) {
-  const [data, setData] = useState<T[]>([]);
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPage = async (page: number) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response: ApiResponse<T[]> = await api.get(`${endpoint}?page=${page}&per_page=${perPage}`);
-
-      if (response.success) {
-        setData(response.item || []);
-        setPagination(response.meta || null);
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError('Failed to fetch data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPage(initialPage);
-  }, []);
-
-  return {
-    data,
-    pagination,
-    loading,
-    error,
-    fetchPage,
-    nextPage: () => pagination && fetchPage(pagination.current_page + 1),
-    prevPage: () => pagination && fetchPage(pagination.current_page - 1),
-    canGoNext: pagination ? pagination.current_page < pagination.last_page : false,
-    canGoPrev: pagination ? pagination.current_page > 1 : false
-  };
-}
-
-// Usage in component
-function PostsList() {
-  const {
-    data: posts,
-    pagination,
-    loading,
-    nextPage,
-    prevPage,
-    canGoNext,
-    canGoPrev
-  } = usePagination<Post>({ endpoint: '/posts', perPage: 20 });
-
-  return (
-    <div>
-      {posts.map(post => <PostItem key={post.id} post={post} />)}
-
-      {pagination && (
-        <div className="pagination">
-          <button onClick={prevPage} disabled={!canGoPrev}>Previous</button>
-          <span>Page {pagination.current_page} of {pagination.last_page}</span>
-          <button onClick={nextPage} disabled={!canGoNext}>Next</button>
-        </div>
-      )}
-    </div>
-  );
-}
-```
-
-## Debug Information
-
-In development mode (`APP_DEBUG=true`), responses include debug information:
-
-```json
+// NEW (recommended)
+public function index()
 {
-    "success": true,
-    "message": "Success",
-    "message_code": "SUCCESS",
-    "item": [...],
-    "debug": {
-        "execution_time": "45.23ms",
-        "memory_usage": "2.1MB",
-        "query_count": 3,
-        "queries": [...]
+    return $this->model->all();
+}
+
+// OLD (deprecated)
+public function show(): void
+{
+    $product = $this->model->find($id);
+    if (!$product) {
+        $this->notFound('Product not found');
     }
+    $this->single($product);
+}
+
+// NEW (recommended)
+public function show()
+{
+    $product = $this->model->find($id);
+    if (!$product) {
+        throw new \Exception('Product not found', 404);
+    }
+    return $product;
 }
 ```
 
-The debug information is automatically added and does not affect the main response structure.
-
-## See Also
-
-- [Error Handling Guide](ERROR_HANDLING.md)
-- [Pagination Guide](../02-core-concepts/PAGINATION.md)
-- [Controller Guide](../02-core-concepts/CONTROLLERS.md)
+The new approach is simpler, more intuitive, and provides better flexibility for different response formats!

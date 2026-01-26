@@ -288,20 +288,26 @@ abstract class ActiveRecord
         $placeholders = ':' . implode(', :', array_keys($data));
 
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($data);
-        Database::logQuery($sql, $data);
 
-        $id = $this->db->lastInsertId();
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($data);
+            Database::logQuery($sql, $data);
 
-        // Add ID to data for afterSave
-        $data[$this->primaryKey] = $id;
-        $this->afterSave(true, $data);
+            $id = $this->db->lastInsertId();
 
-        // Invalidate cache
-        Cache::delete("table_count:{$this->table}");
+            // Add ID to data for afterSave
+            $data[$this->primaryKey] = $id;
+            $this->afterSave(true, $data);
 
-        return $id;
+            // Invalidate cache
+            Cache::delete("table_count:{$this->table}");
+
+            return $id;
+        } catch (\PDOException $e) {
+            Database::logQueryError($e, $sql, $data);
+            throw $e;
+        }
     }
 
     /**
@@ -325,15 +331,21 @@ abstract class ActiveRecord
         $params['id'] = $id;
 
         $sql = "UPDATE {$this->table} SET {$setClause} WHERE {$this->primaryKey} = :id";
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute($params);
-        Database::logQuery($sql, $params);
 
-        if ($result) {
-            $this->afterSave(false, array_merge(['id' => $id], $data));
+        try {
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($params);
+            Database::logQuery($sql, $params);
+
+            if ($result) {
+                $this->afterSave(false, array_merge(['id' => $id], $data));
+            }
+
+            return $result;
+        } catch (\PDOException $e) {
+            Database::logQueryError($e, $sql, $params);
+            throw $e;
         }
-
-        return $result;
     }
 
     /**
@@ -347,18 +359,24 @@ abstract class ActiveRecord
 
         $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id";
         $params = ['id' => $id];
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute($params);
-        Database::logQuery($sql, $params);
 
-        if ($result) {
-            $this->afterDelete($id);
+        try {
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($params);
+            Database::logQuery($sql, $params);
+
+            if ($result) {
+                $this->afterDelete($id);
+            }
+
+            // Invalidate cache
+            Cache::delete("table_count:{$this->table}");
+
+            return $result;
+        } catch (\PDOException $e) {
+            Database::logQueryError($e, $sql, $params);
+            throw $e;
         }
-
-        // Invalidate cache
-        Cache::delete("table_count:{$this->table}");
-
-        return $result;
     }
 
     /**

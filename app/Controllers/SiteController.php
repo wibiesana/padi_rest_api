@@ -41,28 +41,24 @@ class SiteController extends Controller
     /**
      * Site information endpoint
      */
-    public function info(): void
+    public function info()
     {
-        $response = new Response();
-        $response->json([
-            'success' => true,
+        return [
             'site_name' => Env::get('APP_NAME', 'Padi REST API'),
             'description' => 'A RESTful API built with PHP',
             'version' => Env::get('APP_VERSION', '2.0.0'),
             'author' => 'Padi Team',
             'environment' => Env::get('APP_ENV', 'production'),
             'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        ];
     }
 
     /**
      * API endpoints documentation
      */
-    public function endpoints(): void
+    public function endpoints()
     {
-        $response = new Response();
-        $response->json([
-            'success' => true,
+        return [
             'endpoints' => [
                 'authentication' => [
                     'POST /api/auth/register' => 'Register new user',
@@ -86,9 +82,16 @@ class SiteController extends Controller
                     'GET /api/health' => 'Health check',
                     'GET /api/site/info' => 'Site information',
                     'GET /api/site/endpoints' => 'Available endpoints'
+                ],
+                'rbac' => [
+                    'GET /rbac/stats' => 'Admin statistics (admin only)',
+                    'GET /rbac/users' => 'List users (admin/teacher)',
+                    'POST /rbac/students' => 'Create student (admin/teacher)',
+                    'GET /rbac/my-profile' => 'View own profile (self-access)',
+                    'PUT /rbac/my-profile' => 'Update own profile (self-access)'
                 ]
             ],
             'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        ];
     }
 }

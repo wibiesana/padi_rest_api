@@ -208,8 +208,10 @@ class Router
      */
     private function executeHandler($handler, Request $request): void
     {
+        $result = null;
+
         if (is_callable($handler)) {
-            $handler($request);
+            $result = $handler($request);
         } elseif (is_string($handler)) {
             [$controller, $method] = explode('@', $handler);
             $controllerClass = "App\\Controllers\\{$controller}";
@@ -217,7 +219,7 @@ class Router
             if (class_exists($controllerClass)) {
                 $instance = new $controllerClass($request);
                 if (method_exists($instance, $method)) {
-                    $instance->$method();
+                    $result = $instance->$method();
                 } else {
                     throw new \Exception("Method {$method} not found in {$controllerClass}");
                 }
@@ -225,5 +227,151 @@ class Router
                 throw new \Exception("Controller {$controllerClass} not found");
             }
         }
+
+        // Auto-format response if result is returned
+        if ($result !== null) {
+            $this->formatResponse($result, $request);
+        }
+    }
+
+    /**
+     * Auto-format response based on return type
+     */
+    private function formatResponse($data, Request $request): void
+    {
+        $response = new Response();
+
+        // Get custom status code if set
+        $statusCode = $request->getResponseStatusCode() ?? 200;
+
+        // Handle different response formats based on environment variable or request header
+        $format = $this->getResponseFormat($request);
+
+        switch ($format) {
+            case 'raw':
+                // Return data as-is without wrapping
+                $response->json($data, $statusCode);
+                break;
+
+            case 'simple':
+                // Simple success wrapper
+                if (is_array($data) && isset($data['status'])) {
+                    // Data already has status structure
+                    $response->json($data, $statusCode);
+                } else {
+                    $response->json([
+                        'status' => 'success',
+                        'code' => $this->getStatusCodeName($statusCode),
+                        'item' => $data
+                    ], $statusCode);
+                }
+                break;
+
+            case 'full':
+            default:
+                // Full framework response format
+                if (is_array($data) && isset($data['success'])) {
+                    // Data already has framework format
+                    $response->json($data, $statusCode);
+                } else {
+                    // Auto-detect if it's a collection or single item
+                    $this->autoFormatResponse($data, $response, $statusCode);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Auto-format response as collection or single item
+     */
+    private function autoFormatResponse($data, Response $response, int $statusCode): void
+    {
+        $messageCode = match ($statusCode) {
+            200 => 'SUCCESS',
+            201 => 'CREATED',
+            204 => 'NO_CONTENT',
+            default => 'SUCCESS'
+        };
+
+        if (is_array($data) && $this->isCollection($data)) {
+            // Collection response
+            $response->json([
+                'success' => true,
+                'message' => 'Success',
+                'message_code' => $messageCode,
+                'item' => $data
+            ], $statusCode);
+        } else {
+            // Single item response
+            $responseData = [
+                'success' => true,
+                'message' => 'Success',
+                'message_code' => $messageCode
+            ];
+
+            if ($data !== null) {
+                $responseData['item'] = $data;
+            }
+
+            $response->json($responseData, $statusCode);
+        }
+    }
+
+    /**
+     * Check if data is a collection
+     */
+    private function isCollection($data): bool
+    {
+        if (!is_array($data)) {
+            return false;
+        }
+
+        // Empty array is considered a collection
+        if (empty($data)) {
+            return true;
+        }
+
+        // If it has pagination meta, it's likely a collection
+        if (isset($data['meta']) && isset($data['data'])) {
+            return true;
+        }
+
+        // If it's a sequential array or has multiple items with similar structure
+        return array_keys($data) === range(0, count($data) - 1);
+    }
+
+    /**
+     * Get response format preference
+     */
+    private function getResponseFormat(Request $request): string
+    {
+        // Check request header first
+        $formatHeader = $request->header('X-Response-Format');
+        if ($formatHeader) {
+            return strtolower($formatHeader);
+        }
+
+        // Check environment variable
+        $envFormat = Env::get('RESPONSE_FORMAT', 'full');
+        return strtolower($envFormat);
+    }
+
+    /**
+     * Get status code name
+     */
+    private function getStatusCodeName(int $code): string
+    {
+        return match ($code) {
+            200 => 'SUCCESS',
+            201 => 'CREATED',
+            204 => 'NO_CONTENT',
+            400 => 'BAD_REQUEST',
+            401 => 'UNAUTHORIZED',
+            403 => 'FORBIDDEN',
+            404 => 'NOT_FOUND',
+            422 => 'VALIDATION_FAILED',
+            500 => 'INTERNAL_SERVER_ERROR',
+            default => 'SUCCESS'
+        };
     }
 }

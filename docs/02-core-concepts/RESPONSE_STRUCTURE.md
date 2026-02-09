@@ -268,9 +268,27 @@ class ProductController extends Controller
 
 ## Error Handling
 
-All exceptions are automatically converted to proper error responses:
+All exceptions are automatically converted to proper error responses.
 
-### Exception Response Format
+### ⚠️ ValidationException
+
+The framework uses `Core\ValidationException` to handle validation errors. This allows the framework to be compatible with **FrankenPHP Worker Mode** by avoiding `exit()` calls and using proper exception flow.
+
+**422 Validation Error Response:**
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "message_code": "VALIDATION_FAILED",
+  "errors": {
+    "name": ["The name field is required"],
+    "price": ["The price must be numeric"]
+  }
+}
+```
+
+### Standard Exception Format
 
 **404 Not Found:**
 
@@ -278,34 +296,32 @@ All exceptions are automatically converted to proper error responses:
 {
   "success": false,
   "message": "Product not found",
-  "data": null,
-  "status_code": 404
+  "message_code": "NOT_FOUND"
 }
 ```
 
-**403 Forbidden:**
+---
 
-```json
-{
-  "success": false,
-  "message": "Permission denied",
-  "data": null,
-  "status_code": 403
-}
-```
+## 🏎️ FrankenPHP Worker Mode
 
-**422 Validation Error:**
+Padi REST API Framework is fully optimized for **FrankenPHP Worker Mode**.
 
-```json
-{
-  "success": false,
-  "message": "Validation failed",
-  "errors": {
-    "name": ["The name field is required"],
-    "price": ["The price must be numeric"]
-  },
-  "status_code": 422
-}
+### What is Worker Mode?
+
+In worker mode, PHP starts once and handles multiple requests in a loop, instead of starting and stopping for every single request. This provides significant performance gains (up to 3x-5x faster).
+
+### Compatibility Measures
+
+1.  **No `exit()`/`die()`**: We've removed hard `exit` calls in core classes like `Controller` and `Validator`.
+2.  **Explicit Request Handling**: `public/index.php` contains a worker loop that resets the `Request` object for every call.
+3.  **Global State Cleanup**: Ensure your custom code doesn't rely on static variables that persist across requests.
+
+### Configuration
+
+To use worker mode, start FrankenPHP with the worker flag:
+
+```bash
+frankenphp run --config Caddyfile --worker public/index.php
 ```
 
 ## Best Practices

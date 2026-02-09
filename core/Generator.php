@@ -533,7 +533,7 @@ PHP;
         }
 
         // Priority list of display columns
-        $candidates = ['username', 'name', 'nama', 'title', 'judul', 'email', 'full_name', 'description', 'code', 'id'];
+        $candidates = ['username', 'name', 'nama', 'title', 'judul', 'email', 'full_name', 'code', 'id'];
 
         foreach ($candidates as $candidate) {
             if (in_array($candidate, $columns)) {
@@ -1293,11 +1293,6 @@ PHP;
         $data = [];
         $exclude = ['id', 'created_at', 'updated_at', 'deleted_at'];
 
-        // Helper function to convert snake_case to kebab-case
-        $toKebabCase = function ($str) {
-            return str_replace('_', '-', $str);
-        };
-
         foreach ($schema as $column => $info) {
             if (in_array($column, $exclude)) continue;
             if (strpos($info['Extra'] ?? '', 'auto_increment') !== false) continue;
@@ -1306,8 +1301,8 @@ PHP;
             $columnLower = strtolower($column);
             $isRequired = ($info['Null'] ?? 'YES') === 'NO' && ($info['Default'] ?? null) === null;
 
-            // Convert field name to kebab-case for API consistency
-            $fieldName = $toKebabCase($column);
+            // Use actual column names for API consistency (matching ActiveRecord $fillable)
+            $fieldName = $column;
 
             // Generate appropriate sample value based on column name and type
             if (strpos($columnLower, 'email') !== false) {

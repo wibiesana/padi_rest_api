@@ -253,6 +253,11 @@ class Router
             'message_code' => $this->getStatusCodeName($statusCode)
         ];
 
+        // Include validation errors if it's a ValidationException
+        if ($e instanceof ValidationException) {
+            $error['errors'] = $e->getErrors();
+        }
+
         // Add debug info if in debug mode
         if (Env::get('APP_DEBUG', false)) {
             $error['debug'] = [

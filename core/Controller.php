@@ -25,35 +25,13 @@ abstract class Controller
     {
         // Prevent empty validation rules
         if (empty($rules)) {
-            $this->response->json([
-                'success' => false,
-                'message' => 'Validation rules not configured. Please contact administrator.',
-                'message_code' => 'VALIDATION_RULES_MISSING',
-                'errors' => ['system' => ['Validation rules are not properly configured for this endpoint']]
-            ], 500);
-            exit; // Force exit to prevent further execution
+            throw new \Exception('Validation rules not configured. Please contact administrator.', 500);
         }
 
         $validator = new Validator($this->request->all(), $rules, $messages);
 
         if (!$validator->validate()) {
-            $response = [
-                'success' => false,
-                'message' => 'Validation failed',
-                'message_code' => 'VALIDATION_FAILED',
-                'errors' => $validator->errors()
-            ];
-
-            if (Env::get('APP_DEBUG', false) === 'true') {
-                $response['debug'] = [
-                    'input' => $this->request->all(),
-                    'content_type' => $this->request->header('Content-Type'),
-                    'raw_input' => file_get_contents('php://input')
-                ];
-            }
-
-            $this->response->json($response, 422);
-            exit; // Force exit to prevent further execution
+            throw new ValidationException($validator->errors());
         }
 
         return $validator->validated();

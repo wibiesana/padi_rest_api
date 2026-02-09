@@ -1,6 +1,6 @@
 {
     "name": "wibiesana/padi-rest-api-main",
-    "description": "A lightweight PHP REST API framework with MVC pattern",
+    "description": "Padi REST API Framework: Grow Silent, Feed Many. Lightweight & Scalable.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://github.com/wibiesana/padi_rest_api-main",

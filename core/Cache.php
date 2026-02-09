@@ -111,7 +111,7 @@ class Cache
     /**
      * Set value in cache
      */
-    public static function set(string $key, mixed $value, int $ttl = null): bool
+    public static function set(string $key, mixed $value, ?int $ttl = null): bool
     {
         self::init();
 

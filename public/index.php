@@ -98,6 +98,10 @@ $handler = function () use ($router, $config) {
         $response->json($error, 500);
     });
 
+    // Reset state between requests (Essential for FrankenPHP worker mode)
+    \Core\Database::resetQueryLog();
+    \Core\DatabaseManager::clearErrors();
+
     // Create request instance & Dispatch
     $request = new \Core\Request();
     $router->dispatch($request);

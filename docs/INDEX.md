@@ -4,6 +4,17 @@
 
 Welcome to the official documentation for **Padi REST API Framework** - a high-performance, lightweight PHP framework designed for building professional REST APIs with maximum speed and minimal overhead.
 
+> **"PADI: The Staple Layer for Modern Apps."**
+
+> _"Stateless enough for workers, but connected enough for performance."_
+
+## ✨ P.A.D.I. Philosophy
+
+- **P**erformant: Fast and efficient.
+- **A**daptable: Easy to adapt to various databases and frontends.
+- **D**istributed: Built for distributed systems and microservices architecture.
+- **I**nterface: A standard, reliable data connector for modern applications.
+
 ---
 
 ## 📖 Quick Navigation

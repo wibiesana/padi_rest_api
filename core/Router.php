@@ -151,6 +151,9 @@ class Router
         $method = $request->method();
         $uri = rtrim($request->uri(), '/') ?: '/';
 
+        // Set request for Auth class (Optimization for PHP 8.4/Worker mode)
+        Auth::setRequest($request);
+
 
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {

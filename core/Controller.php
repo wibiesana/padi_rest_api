@@ -48,7 +48,7 @@ abstract class Controller
     /**
      * Return database error response with detailed debug info
      */
-    protected function databaseError(string $message = 'Database error occurred', \Exception $exception = null): void
+    protected function databaseError(string $message = 'Database error occurred', ?\Exception $exception = null): void
     {
         // Log the database error if exception is provided
         if ($exception) {

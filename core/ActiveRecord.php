@@ -333,7 +333,7 @@ abstract class ActiveRecord
     /**
      * Find all records
      */
-    public function all(array $columns = ['*'], string $orderBy = null): array
+    public function all(array $columns = ['*'], ?string $orderBy = null): array
     {
         // Validate column names to prevent SQL injection
         $sanitizedCols = array_map(function ($col) {
@@ -740,7 +740,7 @@ abstract class ActiveRecord
     /**
      * Paginate results with optional conditions
      */
-    public function paginate(int $page = 1, int $perPage = 10, array $conditions = [], string $orderBy = null): array
+    public function paginate(int $page = 1, int $perPage = 10, array $conditions = [], ?string $orderBy = null): array
     {
         $offset = ($page - 1) * $perPage;
 

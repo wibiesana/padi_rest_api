@@ -67,9 +67,16 @@ class DatabaseManager
             $name = self::$defaultConnection;
         }
 
-        // Return existing connection if already created
+        // Return existing connection if already created and still active
         if (isset(self::$connections[$name])) {
-            return self::$connections[$name];
+            try {
+                // Quick ping to verify connection is still alive (essential for Worker mode)
+                self::$connections[$name]->query('SELECT 1');
+                return self::$connections[$name];
+            } catch (PDOException $e) {
+                // Connection lost, remove it to force reconnect
+                unset(self::$connections[$name]);
+            }
         }
 
         // Validate connection exists in config

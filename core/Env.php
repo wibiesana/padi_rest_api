@@ -54,7 +54,7 @@ class Env
     /**
      * Get environment variable
      */
-    public static function get(string $key, $default = null)
+    public static function get(string $key, mixed $default = null)
     {
         return $_ENV[$key] ?? getenv($key) ?: $default;
     }

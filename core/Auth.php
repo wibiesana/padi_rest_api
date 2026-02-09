@@ -8,8 +8,14 @@ use Exception;
 
 class Auth
 {
+    private static ?Request $request = null;
     private static ?string $secret = null;
     private static ?string $algorithm = null;
+
+    public static function setRequest(Request $request): void
+    {
+        self::$request = $request;
+    }
 
     private static function init(): void
     {
@@ -80,7 +86,8 @@ class Auth
      */
     public static function userId(): ?int
     {
-        $token = (new Request())->bearerToken();
+        $request = self::$request ?? new Request();
+        $token = $request->bearerToken();
         if (!$token) return null;
 
         $decoded = self::verifyToken($token);
@@ -92,7 +99,8 @@ class Auth
      */
     public static function user(): ?object
     {
-        $token = (new Request())->bearerToken();
+        $request = self::$request ?? new Request();
+        $token = $request->bearerToken();
         if (!$token) return null;
 
         return self::verifyToken($token);

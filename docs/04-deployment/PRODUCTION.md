@@ -1,6 +1,6 @@
 # 🚀 Production Deployment Guide
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 A comprehensive guide and checklist for deploying Padi REST API Framework to production safely, securely, and with maximum performance.
 

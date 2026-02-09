@@ -216,4 +216,4 @@ Check the `tests/RBACTest.php` for examples of automated authorization testing.
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

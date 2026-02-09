@@ -1,6 +1,6 @@
 # 🛡️ Middleware Guide
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 Middleware provides a convenient mechanism for inspecting and filtering HTTP requests entering your application.
 
@@ -131,4 +131,4 @@ In **Worker Mode**, `exit;` is avoided to keep the process alive. Therefore, whe
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

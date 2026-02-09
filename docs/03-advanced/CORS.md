@@ -1,6 +1,6 @@
 # 🌐 Cross-Origin Resource Sharing (CORS)
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 CORS is a security feature implemented by browsers to restrict how resources on a web page can be requested from another domain.
 
@@ -78,4 +78,4 @@ Unlike traditional PHP scripts that use `exit;` to handle preflight (`OPTIONS`) 
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

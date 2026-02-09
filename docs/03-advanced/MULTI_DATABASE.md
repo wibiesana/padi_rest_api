@@ -463,4 +463,4 @@ sudo apt-get install php-sqlite3
 ---
 
 **Last Updated:** 2026-01-22  
-**Version:** 2.0
+**Version:** 1.0.0

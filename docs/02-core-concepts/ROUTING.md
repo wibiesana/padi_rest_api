@@ -1,6 +1,6 @@
 # 🛣️ Routing Guide
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 The Router is the entry point for all API requests. it maps URLs to specific Controller actions and manages Middleware execution.
 
@@ -135,4 +135,4 @@ $router->options('/custom-endpoint', 'CorsController@handle');
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

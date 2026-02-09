@@ -1,6 +1,6 @@
 # ⚡ Caching System
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 The Caching system provides a unified API for various caching backends, allowing you to speed up your application by storing expensive data in a fast storage.
 
@@ -133,4 +133,4 @@ php scripts/cache-clear.php
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

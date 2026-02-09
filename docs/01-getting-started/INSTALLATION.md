@@ -1,6 +1,6 @@
 # 📦 Installation Guide
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 ---
 

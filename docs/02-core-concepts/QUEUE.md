@@ -1,6 +1,6 @@
 # 🚀 Background Jobs & Queue
 
-**Padi REST API Framework v2.0**
+**Padi REST API Framework v1.0.0**
 
 The Queue system allows you to offload time-consuming tasks (like sending emails, generating reports, or calling slow third-party APIs) to the background.
 
@@ -116,4 +116,4 @@ QUEUE_NAME=default
 ---
 
 **Last Updated:** 2026-02-09  
-**Version:** 2.0.0
+**Version:** 1.0.0

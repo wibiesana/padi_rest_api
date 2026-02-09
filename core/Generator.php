@@ -622,7 +622,7 @@ PHP;
             // Add related name to search scope using Alias
             $paramCounter++;
             $searchConfig[] = [
-                'clause' => "{$alias}.{$displayCol} LIKE :k{$paramCounter}",
+                'clause' => "{$alias}.{$displayCol} LIKE_OP :k{$paramCounter}",
                 'param' => ":k{$paramCounter}"
             ];
         }
@@ -635,7 +635,7 @@ PHP;
                 if (stripos($column, $keyword) !== false) {
                     $paramCounter++;
                     $searchConfig[] = [
-                        'clause' => "{$tableName}.{$column} LIKE :k{$paramCounter}",
+                        'clause' => "{$tableName}.{$column} LIKE_OP :k{$paramCounter}",
                         'param' => ":k{$paramCounter}"
                     ];
                     break;
@@ -647,7 +647,7 @@ PHP;
         if (empty($searchConfig) && !empty($fillable)) {
             $paramCounter++;
             $searchConfig[] = [
-                'clause' => "{$tableName}.id LIKE :k{$paramCounter}",
+                'clause' => "{$tableName}.id LIKE_OP :k{$paramCounter}",
                 'param' => ":k{$paramCounter}"
             ];
         }
@@ -655,6 +655,11 @@ PHP;
         // Build SQL parts - Align glue with indentation (21 spaces approx)
         $whereClauses = array_column($searchConfig, 'clause');
         $whereClause = implode(" OR ", $whereClauses);
+
+        // Use placeholder for LIKE operator to support ILIKE on Postgres
+        // This will be replaced at runtime in the generated code
+        $whereClause = str_replace('LIKE_OP', '{$like}', $whereClause);
+
         $joinClause = implode("\n                     ", $joins);
 
         // Build binding code for searchPaginate (PDO execution array)
@@ -684,6 +689,7 @@ PHP;
      */
     public function searchPaginate(string \$keyword, int \$page = 1, int \$perPage = 10): array
     {
+        \$like = \$this->getLikeOperator();
         \$searchTerm = "%\$keyword%";
         \$offset = (\$page - 1) * \$perPage;
 
@@ -762,6 +768,7 @@ class {$modelName} extends ActiveRecord
      */
     public function search(string \$keyword): array
     {
+        \$like = \$this->getLikeOperator();
         \$searchTerm = "%\$keyword%";
         
         \$sql = "SELECT {\$this->table}.* FROM {\$this->table} 

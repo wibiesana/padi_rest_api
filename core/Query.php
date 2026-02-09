@@ -26,9 +26,11 @@ class Query
     protected ?int $limit = null;
     protected ?int $offset = null;
     protected bool $distinct = false;
+    protected ?string $connectionName = null;
 
     public function __construct(?string $connection = null)
     {
+        $this->connectionName = $connection;
         $this->db = Database::connection($connection);
     }
 
@@ -426,7 +428,17 @@ class Query
             }
 
             $this->params[$paramName] = $value;
-            return "$column $operator $paramName";
+
+            // Auto-detect driver to use ILIKE for PostgreSQL Case-Insensitive search
+            $op = $operator;
+            if ($operator === 'LIKE') {
+                $driver = DatabaseManager::getDriver($this->connectionName);
+                if (in_array($driver, ['pgsql', 'postgres', 'postgresql'])) {
+                    $op = 'ILIKE';
+                }
+            }
+
+            return "$column $op $paramName";
         }
 
         if ($operator === 'AND' || $operator === 'OR') {

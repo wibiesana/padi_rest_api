@@ -148,15 +148,15 @@ Essential knowledge for building with Padi REST API.
 - Built-in middleware
 - FrankenPHP compatibility
 
-### Response Structure Guide
+### Response Structure & Flexible Formats
 
-**[📄 RESPONSE_STRUCTURE.md](02-core-concepts/RESPONSE_STRUCTURE.md)** ✨ NEW
+**[📄 RESPONSE_STRUCTURE.md](02-core-concepts/RESPONSE_STRUCTURE.md)** ✨ UPDATED
 
-- Standardized response format
-- `collection()` vs `single()` methods
-- Frontend integration examples
-- Migration from legacy structure
-- Best practices
+- Flexible response formats (Full, Simple, Raw)
+- Header-based format switching
+- Automatic data transformation
+- Direct Return pattern (No more `success()` calls)
+- FrankenPHP Worker mode compatibility
 
 - Workflow examples
 
@@ -259,13 +259,13 @@ Take your API to the next level with advanced features.
 
 ### Error Handling & Message Codes
 
-**[📄 ERROR_HANDLING.md](03-advanced/ERROR_HANDLING.md)** ✨ NEW
+**[📄 ERROR_HANDLING.md](03-advanced/ERROR_HANDLING.md)** ✨ UPDATED
 
 - Complete message code reference
-- Error response structure
-- Frontend error handling
-- Custom error codes
-- Best practices
+- Standardized error response structure
+- **Database Error Handling & Debugging**
+- Frontend integration examples (Vue/React)
+- Custom error codes & best practices
 
 ### Security Best Practices
 
@@ -572,6 +572,7 @@ docs/
 │   ├── QUERY_BUILDER.md              # Query builder
 │   ├── DATABASE_TRANSACTIONS.md      # Transactions
 │   ├── ACTIVE_RECORD.md              # ✨ ActiveRecord guide
+│   ├── RESPONSE_STRUCTURE.md         # ✨ Response structure & formats
 │   └── USER_MODEL.md                 # User model guide
 │
 ├── 03-advanced/                      # Advanced Topics
@@ -579,7 +580,7 @@ docs/
 │   ├── MULTI_DATABASE.md             # Multi-database support
 │   ├── FRONTEND_INTEGRATION.md       # Frontend integration
 │   ├── CORS.md                       # ✨ CORS guide
-│   ├── ERROR_HANDLING.md             # ✨ Error message codes
+│   ├── ERROR_HANDLING.md             # ✨ Error handling & DB debugging
 │   ├── API_TESTING.md                # API testing
 │   └── POSTMAN_GUIDE.md              # Postman guide
 │

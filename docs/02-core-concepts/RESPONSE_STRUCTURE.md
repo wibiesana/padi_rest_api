@@ -1,19 +1,25 @@
-# Flexible Response Format Guide
+# API Response Structure & Flexible Formats
 
-This document explains the new flexible response system in Padi REST API Framework that allows controllers to return data directly without worrying about response formatting.
+The Padi REST API Framework provides a powerful and flexible response system that allows developers to return data directly from controllers while maintaining a consistent API structure.
 
-## Overview
+## 🌟 Key Features
 
-The framework automatically formats controller return values into consistent API responses. Controllers can return data directly, and the framework handles response formatting based on the configured format.
+- **Direct Return**: Simply return an array, object, or model from your controller.
+- **Multiple Formats**: Support for `full`, `simple`, and `raw` response formats.
+- **Dynamic Selection**: Switch formats via Environment Variables or HTTP Headers.
+- **Auto-Detection**: Automatic status code and resource type detection.
+- **FrankenPHP Ready**: Optimized for high-performance worker modes.
 
-## How It Works
+---
+
+## 🚀 How It Works
 
 ### 1. Return Data Directly
 
-Controllers simply return the data they want to send:
+In Padi, you don't need to call `$this->success()` for every response. The framework's router automatically captures your return value and formats it correctly.
 
 ```php
-public function show()
+public function show($id)
 {
     $user = $this->model->find($id);
 
@@ -21,260 +27,164 @@ public function show()
         throw new \Exception('User not found', 404);
     }
 
-    return $user; // Framework handles the rest
+    return $user; // The framework handles the JSON wrapping
 }
 ```
 
-### 2. Auto-Formatting
+### 2. Supported Response Formats
 
-The Router captures controller return values and automatically formats them based on the `RESPONSE_FORMAT` environment variable:
+#### **Full Format** (Default)
 
-- **`full`** (default): Standard framework response with `success`, `message`, `data`
-- **`simple`**: Minimal response with `status`, `message`, `data`
-- **`raw`**: Direct data return without wrapper
-
-### 3. Exception Handling
-
-Throw exceptions for errors - they're automatically converted to proper error responses:
-
-```php
-public function update()
-{
-    $user = $this->model->find($id);
-
-    if (!$user) {
-        throw new \Exception('User not found', 404);
-    }
-
-    if (!$this->canEdit($user)) {
-        throw new \Exception('Permission denied', 403);
-    }
-
-    $this->model->update($id, $data);
-    return $this->model->find($id);
-}
-```
-
-## Response Formats
-
-### Full Format (Default)
-
-When `RESPONSE_FORMAT=full` in `.env`:
-
-**Collection:**
+Standard framework structure with meta information.
 
 ```json
 {
   "success": true,
   "message": "Success",
   "message_code": "SUCCESS",
-  "item": [
-    { "id": 1, "name": "Item 1" },
-    { "id": 2, "name": "Item 2" }
-  ],
-  "meta": {
-    "total": 25,
-    "per_page": 10,
-    "current_page": 1
-  }
+  "item": { "id": 1, "name": "John Doe" }
 }
 ```
 
-**Single Item:**
+#### **Simple Format**
 
-```json
-{
-  "success": true,
-  "message": "Success",
-  "message_code": "SUCCESS",
-  "item": {
-    "id": 1,
-    "name": "Item 1",
-    "created_at": "2026-01-26"
-  }
-}
-```
-
-### Simple Format
-
-When `RESPONSE_FORMAT=simple` in `.env`:
+A lightweight structure often used by modern frontend apps.
 
 ```json
 {
   "status": "success",
-  "message": "Success",
-  "data": {
-    "id": 1,
-    "name": "Item 1"
-  }
+  "code": "SUCCESS",
+  "data": { "id": 1, "name": "John Doe" }
 }
 ```
 
-### Raw Format
+#### **Raw Format**
 
-When `RESPONSE_FORMAT=raw` in `.env`:
+Direct data output without any wrapper.
 
 ```json
 {
   "id": 1,
-  "name": "Item 1",
-  "created_at": "2026-01-26"
+  "name": "John Doe"
 }
 ```
 
-## Controller Helper Methods
+---
 
-While the main approach is returning data directly, some helper methods are available for specific cases:
+## ⚙️ Configuration
 
-### Status Code Control
+### 1. Global Configuration (`.env`)
+
+Set the default format for your entire application:
+
+```env
+RESPONSE_FORMAT=full    # options: full, simple, raw
+```
+
+### 2. Request-Based Switching (HTTP Header)
+
+Client applications can request a specific format using the `X-Response-Format` header. This overrides the `.env` setting.
+
+```http
+X-Response-Format: simple
+```
+
+**Priority:** Header > Environment Variable > Default (full).
+
+### 3. Per-Request Override (Controller)
+
+You can force a specific format for a specific endpoint:
 
 ```php
-public function store()
+public function export()
 {
-    $id = $this->model->create($data);
-    $item = $this->model->find($id);
-
-    $this->setStatusCode(201); // Set status before return
-    return $item;
-}
-
-// Or use helper
-public function store()
-{
-    $id = $this->model->create($data);
-    return $this->created($this->model->find($id)); // Auto 201 status
+    $data = $this->model->all();
+    return $this->raw($data); // Always returns raw data
 }
 ```
 
-### Empty Responses
+---
 
-```php
-public function destroy()
-{
-    $this->model->delete($id);
+## 🛠️ Controller Helper Methods
 
-    $this->setStatusCode(204); // No content
-    return null; // or return nothing
-}
+While returning data directly is recommended, these helpers provide extra control:
 
-// Or use helper
-public function destroy()
-{
-    $this->model->delete($id);
-    return $this->noContent(); // Auto 204 status
-}
-```
+| Method               | Description                   | Example                         |
+| :------------------- | :---------------------------- | :------------------------------ |
+| `setStatusCode(int)` | Manually set HTTP status code | `$this->setStatusCode(201);`    |
+| `created(any)`       | Return data with 201 status   | `return $this->created($item);` |
+| `noContent()`        | Return empty 204 response     | `return $this->noContent();`    |
+| `simple(data, ...)`  | Force simple format           | `return $this->simple($data);`  |
+| `raw(data)`          | Force raw format              | `return $this->raw($data);`     |
 
-### Format-Specific Responses
+---
 
-```php
-public function getFormatted()
-{
-    $data = $this->model->find($id);
+## 🔍 Auto-Detection Features
 
-    // Force simple format regardless of env setting
-    return $this->simple($data, 'success', 'USER_FOUND');
+The framework is smart enough to handle common scenarios automatically:
 
-    // Force raw format
-    return $this->raw($data);
-}
-```
+### 1. Status Code Detection
 
-## Complete Controller Examples
+- If you return `null` or an empty result from a single-item query → Auto **404**.
+- If you use `$this->created()` → Auto **201**.
+- If you use `$this->noContent()` → Auto **204**.
+- Unhandled exceptions → Auto **500** (or custom code from `Exception`).
 
-### Basic CRUD Controller
+### 2. Resource Type Detection
+
+- **Collection**: If you return a numerical array or a paginated result, it's wrapped as a collection.
+- **Single Item**: If you return an associative array or model, it's treated as a single object.
+
+---
+
+## 📝 Complete CRUD Example
 
 ```php
 class ProductController extends Controller
 {
-    // GET /products
+    // GET /products - List with pagination
     public function index()
     {
-        $page = (int)$this->request->query('page', 1);
-        $perPage = (int)$this->request->query('per_page', 10);
-
-        return $this->model->paginate($page, $perPage);
+        return $this->model->paginate(
+            $this->request->query('page', 1),
+            $this->request->query('per_page', 10)
+        );
     }
 
-    // GET /products/all
-    public function all()
-    {
-        return $this->model->all();
-    }
-
-    // GET /products/{id}
-    public function show()
-    {
-        $product = $this->model->find($this->request->param('id'));
-
-        if (!$product) {
-            throw new \Exception('Product not found', 404);
-        }
-
-        return $product;
-    }
-
-    // POST /products
+    // POST /products - Create
     public function store()
     {
         $validated = $this->validate([
-            'name' => 'required|max:100',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer'
+            'name' => 'required|string',
+            'price' => 'required|numeric'
         ]);
 
         $id = $this->model->create($validated);
-
-        $this->setStatusCode(201);
-        return $this->model->find($id);
+        return $this->created($this->model->find($id));
     }
 
-    // PUT /products/{id}
-    public function update()
+    // GET /products/{id} - View
+    public function show($id)
     {
-        $id = $this->request->param('id');
-        $product = $this->model->find($id);
-
-        if (!$product) {
-            throw new \Exception('Product not found', 404);
-        }
-
-        $validated = $this->validate([
-            'name' => 'max:100',
-            'price' => 'numeric',
-            'stock' => 'integer'
-        ]);
-
-        $this->model->update($id, $validated);
-        return $this->model->find($id);
+        return $this->model->find($id); // Auto 404 if not found
     }
 
-    // DELETE /products/{id}
-    public function destroy()
+    // DELETE /products/{id} - Delete
+    public function destroy($id)
     {
-        $product = $this->model->find($this->request->param('id'));
-
-        if (!$product) {
-            throw new \Exception('Product not found', 404);
-        }
-
-        $this->model->delete($product['id']);
-
-        $this->setStatusCode(204);
-        return null;
+        $this->model->delete($id);
+        return $this->noContent();
     }
 }
 ```
 
-## Error Handling
+---
 
-All exceptions are automatically converted to proper error responses.
+## 🛑 Error Handling
 
-### ⚠️ ValidationException
+Exceptions are automatically converted into standardized error responses:
 
-The framework uses `Core\ValidationException` to handle validation errors. This allows the framework to be compatible with **FrankenPHP Worker Mode** by avoiding `exit()` calls and using proper exception flow.
-
-**422 Validation Error Response:**
+#### **Validation Error (422)**
 
 ```json
 {
@@ -282,20 +192,17 @@ The framework uses `Core\ValidationException` to handle validation errors. This 
   "message": "Validation failed",
   "message_code": "VALIDATION_FAILED",
   "errors": {
-    "name": ["The name field is required"],
-    "price": ["The price must be numeric"]
+    "email": ["The email field is required"]
   }
 }
 ```
 
-### Standard Exception Format
-
-**404 Not Found:**
+#### **Standard Error (400, 404, 500)**
 
 ```json
 {
   "success": false,
-  "message": "Product not found",
+  "message": "Resource not found",
   "message_code": "NOT_FOUND"
 }
 ```
@@ -304,112 +211,33 @@ The framework uses `Core\ValidationException` to handle validation errors. This 
 
 ## 🏎️ FrankenPHP Worker Mode
 
-Padi REST API Framework is fully optimized for **FrankenPHP Worker Mode**.
+This response system is fully architectural-compatible with **FrankenPHP Worker Mode**.
 
-### What is Worker Mode?
-
-In worker mode, PHP starts once and handles multiple requests in a loop, instead of starting and stopping for every single request. This provides significant performance gains (up to 3x-5x faster).
-
-### Compatibility Measures
-
-1.  **No `exit()`/`die()`**: We've removed hard `exit` calls in core classes like `Controller` and `Validator`.
-2.  **Explicit Request Handling**: `public/index.php` contains a worker loop that resets the `Request` object for every call.
-3.  **Global State Cleanup**: Ensure your custom code doesn't rely on static variables that persist across requests.
-
-### Configuration
-
-To use worker mode, start FrankenPHP with the worker flag:
-
-```bash
-frankenphp run --config Caddyfile --worker public/index.php
-```
-
-## Best Practices
-
-### ✅ DO
-
-```php
-// Return data directly
-return $products;
-
-// Throw exceptions for errors
-throw new \Exception('Not found', 404);
-
-// Use helpers for specific status codes
-return $this->created($newProduct);
-return $this->noContent();
-
-// Set status when needed
-$this->setStatusCode(201);
-return $product;
-```
-
-### ❌ DON'T
-
-```php
-// Don't use old methods (deprecated)
-return $data;        // ✅ Use this instead
-$this->single($item);      // ❌ Use return $item
-$this->collection($items); // ❌ Use return $items
-$this->notFound('Error');  // ❌ Use throw new \Exception('Error', 404)
-$this->forbidden();        // ❌ Use throw new \Exception('Error', 403)
-
-// Don't return wrapped data unnecessarily
-return ['data' => $products]; // ❌ Use return $products
-```
-
-## Environment Configuration
-
-Control response format via environment variables:
-
-```env
-# .env
-RESPONSE_FORMAT=full    # Default: full framework response
-RESPONSE_FORMAT=simple  # Minimal response format
-RESPONSE_FORMAT=raw     # Direct data output
-```
-
-## Migration from Old Format
-
-If you have existing controllers using old methods, update them:
-
-```php
-// OLD (deprecated)
-public function index(): void
-{
-    $products = $this->model->all();
-    $this->collection($products);
-}
-
-// NEW (recommended)
-public function index()
-{
-    return $this->model->all();
-}
-
-// OLD (deprecated)
-public function show(): void
-{
-    $product = $this->model->find($id);
-    if (!$product) {
-        $this->notFound('Product not found');
-    }
-    $this->single($product);
-}
-
-// NEW (recommended)
-public function show()
-{
-    $product = $this->model->find($id);
-    if (!$product) {
-        throw new \Exception('Product not found', 404);
-    }
-    return $product;
-}
-```
-
-The new approach is simpler, more intuitive, and provides better flexibility for different response formats!
+1. **No `exit()` calls**: The framework uses exceptions and returns instead of terminating the script.
+2. **State Isolation**: Each response is handled by a fresh `Response` object even when the PHP process lives across multiple requests.
+3. **Performance**: This non-blocking approach allows for 3-10x performance gains.
 
 ---
 
-**Previous:** [← Controllers Guide](CONTROLLERS.md) | **Next:** [API Resources →](RESOURCES.md)
+## 🔄 Migration Guide
+
+If you are upgrading from an older version of Padi:
+
+### Method Migration
+
+| Old Way (Deprecated) ❌       | New Way ✅                          |
+| :---------------------------- | :---------------------------------- |
+| `$this->jsonResponse($data);` | `return $data;`                     |
+| `$this->single($item);`       | `return $item;`                     |
+| `$this->collection($items);`  | `return $items;`                    |
+| `$this->notFound();`          | `throw new \Exception('...', 404);` |
+
+---
+
+## 🤖 Code Generator
+
+The `php scripts/generate.php` tool has been updated to use this flexible format by default. Generated controllers will now use the "Direct Return" pattern and include try-catch blocks for robust error handling.
+
+---
+
+**Next:** [API Resources Guide →](RESOURCES.md)

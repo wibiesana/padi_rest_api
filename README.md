@@ -144,7 +144,7 @@ curl -X POST http://localhost:8085/auth/login \
 | **[docs/MULTI_DATABASE.md](docs/MULTI_DATABASE.md)**                                           | Multi-database usage examples                                 |
 | **[docs/USER_MODEL.md](docs/USER_MODEL.md)**                                                   | Enhanced User model documentation                             |
 | **[docs/02-core-concepts/RBAC.md](docs/02-core-concepts/RBAC.md)**                             | Role-based access control (authorization)                     |
-| **[docs/03-advanced/ERROR_HANDLING.md](docs/03-advanced/ERROR_HANDLING.md)**                   | Error handling & message codes guide                          |
+| **[docs/03-advanced/ERROR_HANDLING.md](docs/03-advanced/ERROR_HANDLING.md)**                   | Error Handling & Database Debugging guide                     |
 | **[docs/API_TESTING.md](docs/API_TESTING.md)**                                                 | API testing examples                                          |
 | **[.env.example](.env.example)**                                                               | Environment configuration example                             |
 
@@ -421,7 +421,8 @@ fetch("/api/auth/login", {
 - **Multi-Database Guide:** [docs/MULTI_DATABASE.md](docs/MULTI_DATABASE.md)
 - **User Model Guide:** [docs/USER_MODEL.md](docs/USER_MODEL.md)
 - **RBAC Guide:** [docs/02-core-concepts/RBAC.md](docs/02-core-concepts/RBAC.md)
-- **Error Handling Guide:** [docs/03-advanced/ERROR_HANDLING.md](docs/03-advanced/ERROR_HANDLING.md)
+- **Error Handling & DB Debugging:** [docs/03-advanced/ERROR_HANDLING.md](docs/03-advanced/ERROR_HANDLING.md)
+- **Response Formats:** [docs/02-core-concepts/RESPONSE_STRUCTURE.md](docs/02-core-concepts/RESPONSE_STRUCTURE.md)
 - **Frontend Integration:** [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md)
 - **Frontend Examples:** [docs/frontend-examples.js](docs/frontend-examples.js)
 - **API Testing:** [docs/API_TESTING.md](docs/API_TESTING.md)

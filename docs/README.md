@@ -50,21 +50,22 @@ curl http://localhost:8085/
 
 ### 📖 Core Concepts
 
-| Topic                                                    | Description                       |
-| -------------------------------------------------------- | --------------------------------- |
-| **[Authentication](02-core-concepts/AUTHENTICATION.md)** | JWT authentication & security     |
-| **[Models](02-core-concepts/MODELS.md)**                 | Database models & CRUD operations |
-| **[Controllers](02-core-concepts/CONTROLLERS.md)**       | Request handling & responses      |
-| **[Routing](02-core-concepts/ROUTING.md)**               | Route mapping & groups            |
-| **[Middleware](02-core-concepts/MIDDLEWARE.md)**         | Authentication & filtering        |
-| **[Code Generator](02-core-concepts/CODE_GENERATOR.md)** | Auto-generate CRUD code           |
-| **[Query Builder](02-core-concepts/QUERY_BUILDER.md)**   | Advanced database queries         |
-| **[API Resources](02-core-concepts/RESOURCES.md)**       | Transformation layer & formatting |
-| **[Email](02-core-concepts/EMAIL.md)**                   | SMTP & Queued emails              |
-| **[Queue System](02-core-concepts/QUEUE.md)**            | Background jobs & workers         |
-| **[Cache](02-core-concepts/CACHE.md)**                   | File & Redis caching              |
-| **[File Upload](02-core-concepts/FILE_UPLOAD.md)**       | Safe uploads & validation         |
-| **[RBAC](02-core-concepts/RBAC.md)**                     | Role-based authorization guide    |
+| Topic                                                          | Description                           |
+| -------------------------------------------------------------- | ------------------------------------- |
+| **[Authentication](02-core-concepts/AUTHENTICATION.md)**       | JWT authentication & security         |
+| **[Models](02-core-concepts/MODELS.md)**                       | Database models & CRUD operations     |
+| **[Controllers](02-core-concepts/CONTROLLERS.md)**             | Request handling & responses          |
+| **[Routing](02-core-concepts/ROUTING.md)**                     | Route mapping & groups                |
+| **[Middleware](02-core-concepts/MIDDLEWARE.md)**               | Authentication & filtering            |
+| **[Code Generator](02-core-concepts/CODE_GENERATOR.md)**       | Auto-generate CRUD code               |
+| **[Query Builder](02-core-concepts/QUERY_BUILDER.md)**         | Advanced database queries             |
+| **[API Resources](02-core-concepts/RESOURCES.md)**             | Transformation layer & formatting     |
+| **[Email](02-core-concepts/EMAIL.md)**                         | SMTP & Queued emails                  |
+| **[Queue System](02-core-concepts/QUEUE.md)**                  | Background jobs & workers             |
+| **[Cache](02-core-concepts/CACHE.md)**                         | File & Redis caching                  |
+| **[File Upload](02-core-concepts/FILE_UPLOAD.md)**             | Safe uploads & validation             |
+| **[RBAC](02-core-concepts/RBAC.md)**                           | Role-based authorization guide        |
+| **[Response Formats](02-core-concepts/RESPONSE_STRUCTURE.md)** | Flexible response formats & structure |
 
 ### 🎯 Advanced Topics
 
@@ -75,6 +76,7 @@ curl http://localhost:8085/
 | **[Cross-Origin (CORS)](03-advanced/CORS.md)**                  | Whitelisting & security         |
 | **[API Testing](03-advanced/API_TESTING.md)**                   | Testing your API                |
 | **[Security](03-advanced/SECURITY.md)**                         | Security best practices         |
+| **[Error Handling](03-advanced/ERROR_HANDLING.md)**             | Complete error & DB error guide |
 
 ### 🚀 Deployment
 

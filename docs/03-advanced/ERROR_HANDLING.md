@@ -9,8 +9,11 @@ Complete guide to error handling and response codes in Padi REST API Framework.
 - [Message Codes Reference](#message-codes-reference)
 - [Success Codes](#success-codes)
 - [Error Codes](#error-codes)
+- [Database Error Handling](#database-error-handling)
 - [Frontend Integration](#frontend-integration)
 - [Custom Error Handling](#custom-error-handling)
+- [Best Practices](#best-practices)
+- [Debugging](#debugging)
 
 ## Overview
 
@@ -22,6 +25,8 @@ All API responses include a standardized `message_code` field to help frontend a
 - ✅ **Internationalization ready** - Display custom messages per locale
 - ✅ **Type-safe handling** - Use constants/enums in frontend
 - ✅ **Consistent API** - Same structure across all endpoints
+
+---
 
 ## Response Structure
 
@@ -62,6 +67,8 @@ All API responses include a standardized `message_code` field to help frontend a
 }
 ```
 
+---
+
 ## Message Codes Reference
 
 ### Success Codes
@@ -72,16 +79,7 @@ All API responses include a standardized `message_code` field to help frontend a
 | `CREATED`    | 201         | Resource created successfully            | POST - new resource created    |
 | `NO_CONTENT` | 204         | Request successful, no content to return | DELETE - resource deleted      |
 
-**Examples:**
-
-```php
-// GET /api/users/1
-return $user; // Auto-formatted based on RESPONSE_FORMAT
-
-// POST /api/users
-$this->setStatusCode(201);
-return $user; // Status 201, auto-formatted
-```
+---
 
 ## Error Codes
 
@@ -95,58 +93,12 @@ return $user; // Status 201, auto-formatted
 | `INVALID_TOKEN`       | 401         | Invalid or expired token                        | Protected route accessed with invalid/expired token   |
 | `FORBIDDEN`           | 403         | Access denied                                   | User doesn't have permission for the requested action |
 
-**Security Note:** `INVALID_CREDENTIALS` uses a generic message "Invalid credentials" to prevent username enumeration attacks, but the `message_code` allows frontend to display specific user-friendly messages.
-
-**Examples:**
-
-```json
-// Login with wrong password
-POST /api/auth/login
-{
-  "success": false,
-  "message": "Invalid credentials",
-  "message_code": "INVALID_CREDENTIALS"
-}
-
-// Access protected route without token
-GET /api/users
-{
-  "success": false,
-  "message": "Unauthorized - No token provided",
-  "message_code": "NO_TOKEN_PROVIDED"
-}
-
-// Access with expired token
-GET /api/users
-{
-  "success": false,
-  "message": "Unauthorized - Invalid or expired token",
-  "message_code": "INVALID_TOKEN"
-}
-```
-
 ### Validation & Client Errors (400, 422)
 
 | Code                | HTTP Status | Description               | When It Occurs                     |
 | ------------------- | ----------- | ------------------------- | ---------------------------------- |
 | `BAD_REQUEST`       | 400         | Invalid request           | Malformed request, missing headers |
 | `VALIDATION_FAILED` | 422         | Request validation failed | Input validation errors            |
-
-**Examples:**
-
-```json
-// Validation error
-POST /api/auth/register
-{
-  "success": false,
-  "message": "Validation failed",
-  "message_code": "VALIDATION_FAILED",
-  "errors": {
-    "email": ["Email is required"],
-    "password": ["Password must be at least 8 characters"]
-  }
-}
-```
 
 ### Resource Errors (404)
 
@@ -155,41 +107,17 @@ POST /api/auth/register
 | `NOT_FOUND`       | 404         | Resource not found     | Requested resource doesn't exist |
 | `ROUTE_NOT_FOUND` | 404         | API endpoint not found | Invalid API endpoint             |
 
-**Examples:**
-
-```json
-// Resource not found
-GET /api/users/99999
-{
-  "success": false,
-  "message": "User not found",
-  "message_code": "NOT_FOUND"
-}
-
-// Invalid endpoint
-GET /api/invalid-endpoint
-{
-  "success": false,
-  "message": "Route not found",
-  "message_code": "ROUTE_NOT_FOUND"
-}
-```
-
 ### Rate Limiting (429)
 
 | Code                  | HTTP Status | Description       | When It Occurs      |
 | --------------------- | ----------- | ----------------- | ------------------- |
 | `RATE_LIMIT_EXCEEDED` | 429         | Too many requests | Rate limit exceeded |
 
-**Example:**
+### Database Errors (500)
 
-```json
-{
-  "success": false,
-  "message": "Too many requests. Please try again later.",
-  "message_code": "RATE_LIMIT_EXCEEDED"
-}
-```
+| Code             | HTTP Status | Description            | When It Occurs          |
+| ---------------- | ----------- | ---------------------- | ----------------------- |
+| `DATABASE_ERROR` | 500         | Database related error | Query failure, SQL sync |
 
 ### Server Errors (500)
 
@@ -197,83 +125,62 @@ GET /api/invalid-endpoint
 | ----------------------- | ----------- | ------------ | ----------------------------- |
 | `INTERNAL_SERVER_ERROR` | 500         | Server error | Unhandled exceptions, crashes |
 
-**Example:**
+---
+
+## Database Error Handling
+
+The framework provides detailed database error handling for easier debugging while maintaining security in production.
+
+### Key Features
+
+1.  **Automatic Logging**: All database errors are logged with full details (SQL, parameters, stack trace).
+2.  **Sensitive Data Redaction**: Automatically redacts sensitive fields (passwords, tokens) from debug logs.
+3.  **ActiveRecord Integration**: CRUD operations automatically catch and log database exceptions.
+4.  **Enhanced Debug Info**: Detailed error reports when `APP_DEBUG=true`.
+
+### Usage in Controllers
+
+```php
+try {
+    $id = $this->model->create($data);
+    return $this->created(['id' => $id]);
+} catch (\PDOException $e) {
+    // Standardized database error response
+    return $this->databaseError('Failed to save data', $e);
+}
+```
+
+### Response in Debug Mode (`APP_DEBUG=true`)
 
 ```json
 {
   "success": false,
-  "message": "Internal Server Error",
-  "message_code": "INTERNAL_SERVER_ERROR"
+  "message": "Failed to create user",
+  "message_code": "DATABASE_ERROR",
+  "database_error": {
+    "type": "query_error",
+    "message": "Duplicate entry 'john@example.com' for key 'users_email_unique'",
+    "code": 1062,
+    "file": "/app/core/ActiveRecord.php",
+    "line": 295,
+    "query": "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
+    "params": {
+      "username": "john",
+      "email": "john@example.com",
+      "password": "***REDACTED***"
+    }
+  }
 }
 ```
 
-### Generic Error
+### New Environment Variables
 
-| Code    | HTTP Status | Description   | When It Occurs             |
-| ------- | ----------- | ------------- | -------------------------- |
-| `ERROR` | Various     | Generic error | Custom error with any code |
+- `DEBUG_SHOW_ALL_DB_ERRORS=true` - Display all database errors in the response.
+- `DEBUG_SHOW_QUERIES=true` - Show raw SQL queries in the debug metadata.
+
+---
 
 ## Frontend Integration
-
-### React Example
-
-```javascript
-// API service
-const handleApiError = (data) => {
-  switch (data.message_code) {
-    case "INVALID_CREDENTIALS":
-      return "Wrong username or password. Please try again.";
-
-    case "INVALID_TOKEN":
-    case "NO_TOKEN_PROVIDED":
-      // Redirect to login
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      return "Session expired. Please login again.";
-
-    case "VALIDATION_FAILED":
-      // Handle validation errors
-      return Object.values(data.errors).flat().join(", ");
-
-    case "RATE_LIMIT_EXCEEDED":
-      return "Too many attempts. Please wait a moment.";
-
-    case "NOT_FOUND":
-      return "Resource not found.";
-
-    case "FORBIDDEN":
-      return "You do not have permission to perform this action.";
-
-    default:
-      return data.message || "An error occurred";
-  }
-};
-
-// Usage in component
-const login = async (credentials) => {
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      // Handle success
-      localStorage.setItem("token", data.data.token);
-      navigate("/dashboard");
-    } else {
-      // Handle error with message_code
-      const errorMessage = handleApiError(data);
-      setError(errorMessage);
-    }
-  } catch (error) {
-    setError("Network error. Please try again.");
-  }
-};
-```
 
 ### Vue 3 Example
 
@@ -282,13 +189,13 @@ const login = async (credentials) => {
 export const useApi = () => {
   const handleError = (data) => {
     const messages = {
-      INVALID_CREDENTIALS: 'Username atau password salah',
-      INVALID_TOKEN: 'Sesi Anda telah berakhir',
-      NO_TOKEN_PROVIDED: 'Silakan login terlebih dahulu',
-      VALIDATION_FAILED: 'Data yang Anda masukkan tidak valid',
-      RATE_LIMIT_EXCEEDED: 'Terlalu banyak percobaan, tunggu sebentar',
-      NOT_FOUND: 'Data tidak ditemukan',
-      FORBIDDEN: 'Anda tidak memiliki akses',
+      INVALID_CREDENTIALS: "Username atau password salah",
+      INVALID_TOKEN: "Sesi Anda telah berakhir",
+      NO_TOKEN_PROVIDED: "Silakan login terlebih dahulu",
+      VALIDATION_FAILED: "Data yang Anda masukkan tidak valid",
+      DATABASE_ERROR: "Gangguan pada server data",
+      NOT_FOUND: "Data tidak ditemukan",
+      FORBIDDEN: "Anda tidak memiliki akses",
     };
 
     return messages[data.message_code] || data.message;
@@ -296,287 +203,55 @@ export const useApi = () => {
 
   return { handleError };
 };
-
-// Usage in component
-<script setup>
-import { ref } from 'vue';
-import { useApi } from '@/composables/useApi';
-
-const { handleError } = useApi();
-const error = ref('');
-
-const login = async (credentials) => {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials)
-  });
-
-  const data = await response.json();
-
-  if (!data.success) {
-    error.value = handleError(data);
-  }
-};
-</script>
 ```
 
-### Angular Example
-
-```typescript
-// error-handler.service.ts
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class ErrorHandlerService {
-  handleApiError(data: any): string {
-    const errorMessages: { [key: string]: string } = {
-      INVALID_CREDENTIALS: 'Invalid username or password',
-      INVALID_TOKEN: 'Your session has expired',
-      NO_TOKEN_PROVIDED: 'Please login to continue',
-      VALIDATION_FAILED: 'Please check your input',
-      RATE_LIMIT_EXCEEDED: 'Too many requests. Please wait.',
-      NOT_FOUND: 'Resource not found',
-      FORBIDDEN: 'Access denied'
-    };
-
-    return errorMessages[data.message_code] || data.message;
-  }
-}
-
-// auth.service.ts
-login(credentials: any) {
-  return this.http.post('/api/auth/login', credentials).pipe(
-    map((data: any) => {
-      if (!data.success) {
-        throw new Error(this.errorHandler.handleApiError(data));
-      }
-      return data;
-    })
-  );
-}
-```
-
-### TypeScript Constants
-
-```typescript
-// constants/message-codes.ts
-export enum MessageCode {
-  // Success
-  SUCCESS = "SUCCESS",
-  CREATED = "CREATED",
-  NO_CONTENT = "NO_CONTENT",
-
-  // Auth errors
-  UNAUTHORIZED = "UNAUTHORIZED",
-  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
-  NO_TOKEN_PROVIDED = "NO_TOKEN_PROVIDED",
-  INVALID_TOKEN = "INVALID_TOKEN",
-  FORBIDDEN = "FORBIDDEN",
-
-  // Client errors
-  BAD_REQUEST = "BAD_REQUEST",
-  VALIDATION_FAILED = "VALIDATION_FAILED",
-  NOT_FOUND = "NOT_FOUND",
-  ROUTE_NOT_FOUND = "ROUTE_NOT_FOUND",
-
-  // Rate limit
-  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
-
-  // Server error
-  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
-  ERROR = "ERROR",
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  message_code: MessageCode;
-  data?: T;
-  errors?: Record<string, string[]>;
-}
-
-// Usage
-const handleResponse = (response: ApiResponse) => {
-  switch (response.message_code) {
-    case MessageCode.INVALID_CREDENTIALS:
-      // Handle invalid credentials
-      break;
-    case MessageCode.INVALID_TOKEN:
-      // Redirect to login
-      break;
-    // ... etc
-  }
-};
-```
+---
 
 ## Custom Error Handling
 
-### In Controllers
-
-You can pass custom `message_code` to error methods:
+### Custom Exception with Code
 
 ```php
-<?php
-
-namespace App\Controllers;
-
-use Core\Controller;
-
-class ProductController extends Controller
+public function purchase(int $id)
 {
-    public function show(int $id)
-    {
-        $product = $this->model->find($id);
+    $product = $this->model->find($id);
 
-        if (!$product) {
-            // Custom exception with specific message for scenario
-            throw new \Exception('Product not found', 404);
-        }
-
-        return $product;
+    if ($product['stock'] < 1) {
+        throw new \Exception('Product is out of stock', 400);
     }
 
-    public function purchase(int $id)
-    {
-        $product = $this->model->find($id);
-
-        if (!$product) {
-            throw new \Exception('Product not found', 404);
-        }
-
-        if ($product['stock'] < 1) {
-            // Custom error for out of stock
-            throw new \Exception('Product is out of stock', 400);
-        }
-
-        // Process purchase...
-        $this->setStatusCode(201);
-        return $order;
-    }
+    // Process purchase...
 }
 ```
 
-### Available Controller Methods
-
-```php
-// Return data directly (auto-formatted)
-return $data;                                     // Auto status 200, auto message_code
-$this->setStatusCode(201); return $data;         // Custom status with data
-
-// Exception handling (automatic error responses)
-throw new \Exception('Error message', 400);      // Auto message_code based on status
-throw new \Exception('Not found', 404);          // Auto message_code: NOT_FOUND
-throw new \Exception('Forbidden', 403);          // Auto message_code: FORBIDDEN
-throw new \Exception('Not found', 404);          // Auto message_code: NOT_FOUND
-
-// Helper methods (for special cases)
-return $this->databaseError('Database connection failed');  // Database error handler
-
-// Validation (automatic)
-$this->validate([...]);                          // Auto message_code: VALIDATION_FAILED on error
-```
-
-### Direct Response Usage
-
-```php
-use Core\Response;
-
-$response = new Response();
-
-// Custom error with specific code
-$response->json([
-    'success' => false,
-    'message' => 'Payment processing failed',
-    'message_code' => 'PAYMENT_FAILED',
-    'data' => [
-        'transaction_id' => '12345',
-        'reason' => 'Insufficient funds'
-    ]
-], 402);
-```
+---
 
 ## Best Practices
 
-### 1. Use Specific Codes When Appropriate
+1.  **Use Specific Status Codes**: Return 404 for missing items, 401 for auth issues, 422 for validation.
+2.  **Keep Messages User-Friendly**: Avoid showing raw SQL errors to users; use `message_code` for mapping.
+3.  **Security-First**: Never reveal user existence in auth endpoints (e.g., use "Invalid credentials" instead of "User not found").
+4.  **Log Everything**: Let the framework log the details; return only what the client needs.
 
-```php
-// ❌ Generic
-throw new \Exception('Error', 400);
-
-// ✅ Specific
-throw new \Exception('Product out of stock', 400);
-```
-
-### 2. Keep Messages User-Friendly
-
-```php
-// ❌ Technical
-throw new \Exception('Foreign key constraint violation', 400);
-
-// ✅ User-friendly
-throw new \Exception('Cannot delete user with active orders', 400);
-```
-
-### 3. Security-First for Auth Errors
-
-```php
-// ✅ Good - Generic message, specific code
-$this->unauthorized('Invalid credentials', 'INVALID_CREDENTIALS');
-
-// ❌ Bad - Reveals user existence
-throw new \Exception('User not found', 404);
-```
-
-### 4. Document Custom Codes
-
-If you add custom `message_code` values, document them in your API documentation.
-
-```php
-/**
- * Purchase product
- *
- * @throws 400 OUT_OF_STOCK - Product is out of stock
- * @throws 402 PAYMENT_FAILED - Payment processing failed
- * @throws 404 PRODUCT_NOT_FOUND - Product not found
- */
-public function purchase(int $id): void { }
-```
+---
 
 ## Debugging
 
-In development mode (`APP_DEBUG=true`), responses include debug information:
+In development mode (`APP_DEBUG=true`), all responses include a `debug` section:
 
 ```json
 {
-  "data": {
-    "success": false,
-    "message": "Internal Server Error",
-    "message_code": "INTERNAL_SERVER_ERROR"
-  },
+  "data": { ... },
   "debug": {
     "execution_time": "45.23ms",
     "memory_usage": "12.45MB",
     "query_count": 3,
-    "queries": [
-      // SQL queries if DEBUG_SHOW_QUERIES=true
-    ]
+    "queries": [ ... ]
   }
 }
 ```
 
-## Related Documentation
-
-- [Role-Based Access Control (RBAC)](../02-core-concepts/RBAC.md) - Authorization and permissions
-- [Authentication Guide](../02-core-concepts/AUTHENTICATION.md) - JWT authentication
-- [API Testing Guide](API_TESTING.md)
-- [Frontend Integration](FRONTEND_INTEGRATION.md)
-- [Security Best Practices](SECURITY.md)
-- [Postman Collections](POSTMAN_GUIDE.md)
-
 ---
 
-**Last Updated:** 2026-01-24  
-**Version:** 1.0.0
+**Last Updated:** 2026-02-09  
+**Version:** 2.0.0

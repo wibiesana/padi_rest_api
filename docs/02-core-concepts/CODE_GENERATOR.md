@@ -609,4 +609,4 @@ curl http://localhost:8085/products
 
 ---
 
-**Previous:** [← Controllers Guide](CONTROLLERS.md) | **Next:** [Query Builder →](QUERY_BUILDER.md)
+**Previous:** [← API Resources](RESOURCES.md) | **Next:** [Query Builder →](QUERY_BUILDER.md)

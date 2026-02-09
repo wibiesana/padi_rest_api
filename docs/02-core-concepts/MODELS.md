@@ -494,7 +494,7 @@ class Product extends BaseProduct
 }
 ```
 
-See [ACTIVE_RECORD_LIFECYCLE.md](ACTIVE_RECORD_LIFECYCLE.md) for details.
+See [ACTIVE_RECORD.md](ACTIVE_RECORD.md) for details.
 
 ---
 
@@ -747,7 +747,7 @@ $results = $product->search('laptop');
 1. **Controllers** - [CONTROLLERS.md](CONTROLLERS.md)
 2. **Query Builder** - [QUERY_BUILDER.md](QUERY_BUILDER.md)
 3. **Database Transactions** - [DATABASE_TRANSACTIONS.md](DATABASE_TRANSACTIONS.md)
-4. **Active Record Lifecycle** - [ACTIVE_RECORD_LIFECYCLE.md](ACTIVE_RECORD_LIFECYCLE.md)
+4. **Active Record** - [ACTIVE_RECORD.md](ACTIVE_RECORD.md)
 
 ---
 

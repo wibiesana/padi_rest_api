@@ -393,3 +393,7 @@ public function show()
 ```
 
 The new approach is simpler, more intuitive, and provides better flexibility for different response formats!
+
+---
+
+**Previous:** [← Controllers Guide](CONTROLLERS.md) | **Next:** [API Resources →](RESOURCES.md)

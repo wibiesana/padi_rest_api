@@ -57,6 +57,8 @@ curl http://localhost:8085/
 | **[Controllers](02-core-concepts/CONTROLLERS.md)**       | Request handling & responses      |
 | **[Code Generator](02-core-concepts/CODE_GENERATOR.md)** | Auto-generate CRUD code           |
 | **[Query Builder](02-core-concepts/QUERY_BUILDER.md)**   | Advanced database queries         |
+| **[API Resources](02-core-concepts/RESOURCES.md)**       | Transformation layer & formatting |
+| **[RBAC](02-core-concepts/RBAC.md)**                     | Role-based authorization guide    |
 
 ### 🎯 Advanced Topics
 
@@ -117,7 +119,9 @@ curl http://localhost:8085/
 2. [Configuration](01-getting-started/CONFIGURATION.md) - 10 min
 3. [Code Generator](02-core-concepts/CODE_GENERATOR.md) - 15 min
 4. [Controllers](02-core-concepts/CONTROLLERS.md) - 20 min
-5. [Frontend Integration](03-advanced/FRONTEND_INTEGRATION.md) - 30 min
+5. [API Resources](02-core-concepts/RESOURCES.md) - 15 min
+6. [RBAC](02-core-concepts/RBAC.md) - 20 min
+7. [Frontend Integration](03-advanced/FRONTEND_INTEGRATION.md) - 30 min
 
 **Total time:** ~1.5 hours
 

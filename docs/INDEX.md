@@ -8,13 +8,13 @@ Welcome to the official documentation for **Padi REST API Framework** - a high-p
 
 ## 📖 Quick Navigation
 
-| Section                                    | Description                            | Best For          |
-| ------------------------------------------ | -------------------------------------- | ----------------- |
-| [🚀 Getting Started](#-getting-started)    | Installation, setup, and first steps   | New users         |
-| [📚 Core Concepts](#-core-concepts)        | Database, models, and query building   | All developers    |
-| [🎯 Advanced Topics](#-advanced-topics)    | Multi-database, frontend integration   | Experienced users |
-| [🚀 Deployment](#-deployment--performance) | Production deployment and optimization | DevOps teams      |
-| [💡 Examples](#-code-examples)             | Ready-to-use code samples              | Quick reference   |
+| Section                                    | Description                                        | Best For          |
+| ------------------------------------------ | -------------------------------------------------- | ----------------- |
+| [🚀 Getting Started](#-getting-started)    | Installation, setup, and first steps               | New users         |
+| [📚 Core Concepts](#-core-concepts)        | Models, controllers, resources, and query building | All developers    |
+| [🎯 Advanced Topics](#-advanced-topics)    | Multi-database, frontend integration               | Experienced users |
+| [🚀 Deployment](#-deployment--performance) | Production deployment and optimization             | DevOps teams      |
+| [💡 Examples](#-code-examples)             | Ready-to-use code samples                          | Quick reference   |
 
 ---
 
@@ -108,14 +108,6 @@ Essential knowledge for building with Padi REST API.
 - Best practices
 - Testing authorization
 
-**[📄 RBAC_IMPLEMENTATION_GUIDE.md](02-core-concepts/RBAC_IMPLEMENTATION_GUIDE.md)** ✨ NEW
-
-- Quick start with ready-to-use endpoints (`/rbac/*`)
-- Live examples with different permission patterns
-- Admin-only, multi-role, and self-access patterns
-- Postman testing guide
-- Error response documentation
-
 ### Models Guide
 
 **[📄 MODELS.md](02-core-concepts/MODELS.md)** ✨ NEW
@@ -146,14 +138,16 @@ Essential knowledge for building with Padi REST API.
 - Migration from legacy structure
 - Best practices
 
-### Code Generator
-
-**[📄 CODE_GENERATOR.md](02-core-concepts/CODE_GENERATOR.md)** ✨ NEW
-
-- Generator commands
-- Generate CRUD
-- Customization
 - Workflow examples
+
+### API Resources Guide
+
+**[📄 RESOURCES.md](02-core-concepts/RESOURCES.md)** ✨ NEW
+
+- Transformation layer
+- Formatting API responses
+- Conditional relationships
+- Collection handling
 
 ### Database Setup
 
@@ -182,14 +176,15 @@ Essential knowledge for building with Padi REST API.
 - Rollback strategies
 - Error handling
 
-### Active Record Lifecycle
+### Active Record
 
-**[📄 ACTIVE_RECORD_LIFECYCLE.md](02-core-concepts/ACTIVE_RECORD_LIFECYCLE.md)**
+**[📄 ACTIVE_RECORD.md](02-core-concepts/ACTIVE_RECORD.md)** ✨ UPDATED
 
-- Model lifecycle hooks
-- `beforeSave`, `afterSave`
-- `beforeDelete`, `afterDelete`
-- Custom validation
+- CRUD operations
+- Eager loading (`with`)
+- Audit fields
+- Composite keys
+- Lifecycle hooks (`beforeSave`, `afterLoad`)
 
 ### User Model Guide
 
@@ -436,7 +431,9 @@ Concise overview with links to:
 2. [CONFIGURATION.md](01-getting-started/CONFIGURATION.md) - 10 min
 3. [CODE_GENERATOR.md](02-core-concepts/CODE_GENERATOR.md) - 15 min
 4. [CONTROLLERS.md](02-core-concepts/CONTROLLERS.md) - 20 min
-5. [FRONTEND_INTEGRATION.md](03-advanced/FRONTEND_INTEGRATION.md) - 30 min
+5. [RESOURCES.md](02-core-concepts/RESOURCES.md) - 15 min
+6. [RBAC.md](02-core-concepts/RBAC.md) - 20 min
+7. [FRONTEND_INTEGRATION.md](03-advanced/FRONTEND_INTEGRATION.md) - 30 min
 
 **Total: ~1.5 hours**
 
@@ -496,6 +493,7 @@ docs/
 │   ├── MODELS.md                     # ✨ Database models guide
 │   ├── CONTROLLERS.md                # ✨ Controllers guide
 │   ├── CODE_GENERATOR.md             # ✨ Auto CRUD generator
+│   ├── RESOURCES.md                  # ✨ API resources guide
 │   ├── DATABASE_SETUP.md             # Database configuration
 │   ├── QUERY_BUILDER.md              # Query builder
 │   ├── DATABASE_TRANSACTIONS.md      # Transactions

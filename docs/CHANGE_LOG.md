@@ -1,5 +1,27 @@
 # CHANGE LOG
 
+## v1.0.3 (2026-02-17)
+
+### Performance & Serving
+
+- **FrankenPHP Worker Mode**:
+  - Added native support for FrankenPHP worker mode in `index.php` for massive performance gains.
+  - Implemented automatic state resetting (`Database` & `DatabaseManager`) between requests in persistent worker loops.
+- **Request Lifecycle Optimizations**:
+  - Integrated CORS and Preflight (`OPTIONS`) handling directly into the entry point.
+  - Enhanced global exception handling to provide structured JSON responses for all uncaught errors and PDO exceptions.
+
+### Environment & Configuration
+
+- **Debug Enforcement**:
+  - Strictly enforced `app_debug` logic based on `APP_ENV`: forced `off` in production and `on` (by default) in development.
+  - Fixed `.env` parsing issue where boolean strings were not correctly evaluated.
+- **PHP 8.4 Support**:
+  - Updated minimum PHP requirement to `v8.4` in `composer.json`.
+- **Debugging Enhancements**:
+  - Added `debug_log` global helper for streamlined error logging.
+  - Integrated server environment dumping for improved development diagnostics.
+
 ## v1.0.2 (2026-02-17)
 
 ### Package & Dependency Management

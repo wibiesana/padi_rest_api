@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3041416555a8778d7af0e272ced60ad6",
+    "content-hash": "fe3004972057d1ceebb1424a1e906c55",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -422,7 +422,7 @@
         },
         {
             "name": "wibiesana/padi-core",
-            "version": "dev-main",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wibiesana/padi_core.git",
@@ -441,13 +441,13 @@
                 "phpmailer/phpmailer": "^7.0",
                 "predis/predis": "^3.3"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Core\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -459,8 +459,8 @@
             ],
             "description": "Core engine for Padi REST API Framework",
             "support": {
-                "source": "https://github.com/wibiesana/padi_core/tree/main",
-                "issues": "https://github.com/wibiesana/padi_core/issues"
+                "issues": "https://github.com/wibiesana/padi_core/issues",
+                "source": "https://github.com/wibiesana/padi_core/tree/1.0.2"
             },
             "time": "2026-02-17T05:24:43+00:00"
         }
@@ -2156,9 +2156,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "wibiesana/padi-core": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

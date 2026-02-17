@@ -10,7 +10,20 @@
 
 ## Automated Setup
 
-Run this script for automated setup:
+Run this command to create a new project:
+
+```bash
+composer create-project wibiesana/padi-rest-api my-app
+cd my-app
+```
+
+Then run the setup script:
+
+```bash
+php scripts/init.php
+```
+
+Or on Windows:
 
 ```bash
 init_app.bat

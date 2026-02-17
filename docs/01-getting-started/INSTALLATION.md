@@ -33,27 +33,25 @@
 
 ## Installation Steps
 
-### Step 1: Clone or Download
+### Step 1: Install via Composer
+
+You can create a new project using our Composer template:
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/mvc_rest_api.git
-cd mvc_rest_api
-
-# Or extract from ZIP
-# Extract to D:\work\mycode\mvc_rest_api
+composer create-project wibiesana/padi-rest-api my-app
+cd my-app
 ```
 
-### Step 2: Install Dependencies
+This command will:
+
+1. Download the latest version of the framework.
+2. Automatically install all dependencies (including core framework).
+3. Set up the directory structure.
+
+### Step 2: Environment Setup
 
 ```bash
-composer install
-```
-
-### Step 3: Environment Setup
-
-```bash
-# Copy environment file
+# Copy environment file (if not already created by composer)
 cp .env.example .env
 
 # On Windows

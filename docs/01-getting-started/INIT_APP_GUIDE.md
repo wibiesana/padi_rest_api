@@ -13,7 +13,14 @@ Ensure your server meets the following requirements before starting the installa
 
 ## Quick Start
 
-Run the automated setup script:
+Run this command to create a new project:
+
+```bash
+composer create-project wibiesana/padi-rest-api my-app
+cd my-app
+```
+
+Then run the automated setup script:
 
 ```bash
 init_app.bat

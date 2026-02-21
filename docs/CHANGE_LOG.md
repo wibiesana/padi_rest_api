@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## v1.0.5 (2026-02-21)
+
+### Core & Server Optimizations
+
+- **Database Connection Reliability**:
+  - Implemented automatic "Keep-Alive" health checks in `index.php`.
+  - The framework now detects dead connections (e.g., "MySQL server has gone away") and automatically reconnects, which is essential for **FrankenPHP Worker Mode** and long-running processes.
+- **Improved Routing & Hosting**:
+  - Enhanced URI normalization in `public/index.php` to better support shared hosting environments and sub-directory deployments.
+  - Better handling of `REQUEST_URI` when the script path is included in the URL.
+
+### Generator Improvements
+
+- **Query Builder Integration**:
+  - Refactored `padi_core/Generator.php` to utilize the `Core\Query` builder for all generated search methods.
+  - Replaced raw SQL concatenation with the fluent API for improved security and database engine abstraction.
+
+---
+
 ## v1.0.4 (2026-02-20)
 
 ### Query Builder Enhancements

@@ -116,6 +116,16 @@ $handler = function () use ($router, $config) {
     \Core\Database::resetQueryLog();
     \Core\DatabaseManager::clearErrors();
 
+    // Ensure database connections are alive (Fix: MySQL server has gone away)
+    foreach (\Core\DatabaseManager::getConnections() as $connName) {
+        try {
+            \Core\DatabaseManager::connection($connName)->query('SELECT 1');
+        } catch (\PDOException $e) {
+            // Connection is dead, remove it so it's recreated on next use
+            \Core\DatabaseManager::disconnect($connName);
+        }
+    }
+
     /**
      * Fix for shared hosting where REQUEST_URI might contain script path
      */

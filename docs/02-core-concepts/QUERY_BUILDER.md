@@ -98,6 +98,30 @@ $query->where(['status' => 'active'])
       ->orWhere(['is_featured' => 1]);
 ```
 
+### Quick Where Helpers
+
+For common conditions, you can use these helper methods:
+
+```php
+// WHERE id IN (1, 2, 3)
+$query->whereIn('id', [1, 2, 3]);
+
+// WHERE id NOT IN (4, 5)
+$query->whereNotIn('id', [4, 5]);
+
+// WHERE created_at BETWEEN '2023-01-01' AND '2023-12-31'
+$query->whereBetween('created_at', '2023-01-01', '2023-12-31');
+
+// WHERE amount NOT BETWEEN 10 AND 50
+$query->whereNotBetween('amount', 10, 50);
+
+// WHERE deleted_at IS NULL
+$query->whereNull('deleted_at');
+
+// WHERE updated_at IS NOT NULL
+$query->whereNotNull('updated_at');
+```
+
 ### `join($type, $table, $on)`
 
 Adds a JOIN. Shortcuts available: `innerJoin()`, `leftJoin()`, `rightJoin()`.
@@ -114,6 +138,14 @@ Specifies the sorting order.
 $query->orderBy('created_at DESC');
 // or as an array
 $query->orderBy(['created_at' => SORT_DESC, 'title' => SORT_ASC]);
+```
+
+### `addOrderBy($columns)`
+
+Adds columns to an existing order by statement.
+
+```php
+$query->orderBy('created_at DESC')->addOrderBy('title ASC');
 ```
 
 ### `groupBy($columns)` & `having($condition)`
@@ -138,6 +170,31 @@ $query->autoIlike(false)
       ->where(['like', 'name', 'Laptop']);
 ```
 
+### `paginate($perPage, $page)`
+
+Easily paginate results. Returns an array with metadata.
+
+```php
+$result = $query->paginate(20, 1);
+// Returns:
+// [
+//    'data' => [...],
+//    'total' => 150,
+//    'per_page' => 20,
+//    'current_page' => 1,
+//    'last_page' => 8
+// ]
+```
+
+### `rawSql()`
+
+Returns the generated SQL with parameters interpolated. Useful for debugging.
+
+```php
+echo $query->where(['id' => 1])->rawSql();
+// SELECT * FROM users WHERE id = '1'
+```
+
 ---
 
 ## 🏃 Query Execution
@@ -151,6 +208,10 @@ After building the query, use the following methods to retrieve the results:
 | `scalar()`        | Retrieves the first column value from the first row (suitable for COUNT). |
 | `column()`        | Retrieves all values from the first column as a one-dimensional array.    |
 | `count($q = '*')` | Counts the number of rows.                                                |
+| `sum($column)`    | Calculates the sum of a column.                                           |
+| `avg($column)`    | Calculates the average of a column.                                       |
+| `min($column)`    | Finds the minimum value of a column.                                      |
+| `max($column)`    | Finds the maximum value of a column.                                      |
 | `exists()`        | Checks if any record matches the criteria (returns boolean).              |
 
 ---

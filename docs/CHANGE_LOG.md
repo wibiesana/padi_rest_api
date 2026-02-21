@@ -1,5 +1,23 @@
 # CHANGE LOG
 
+## v1.0.4 (2026-02-20)
+
+### Query Builder Enhancements
+
+- **PostgreSQL Case-Insensitivity**:
+  - Implemented automatic `ILIKE` conversion for PostgreSQL.
+  - Added `autoIlike(bool)` method to toggle this behavior.
+- **Aggregate Methods**:
+  - Added dedicated methods for common aggregations: `sum()`, `avg()`, `min()`, and `max()`.
+- **Ordering Improvements**:
+  - Added `addOrderBy()` for building complex sort criteria incrementally.
+- **New Helper Methods**:
+  - Added specific WHERE helpers: `whereIn`, `whereNotIn`, `whereBetween`, `whereNotBetween`, `whereNull`, `whereNotNull`.
+  - Added `paginate($perPage, $page)` for easy pagination.
+  - Added `rawSql()` for debugging generated SQL.
+
+---
+
 ## v1.0.3 (2026-02-17)
 
 ### Performance & Serving

@@ -6,21 +6,24 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Define project root path
 define('PADI_ROOT', dirname(__DIR__));
 
-// Debug REQUEST
-file_put_contents(__DIR__ . '/../server_dump.txt', print_r($_SERVER, true));
-
 /**
- * Global helper for debugging
+ * Global helper for debugging (Internal/Server-side)
  */
 function debug_log(string $message, string $level = 'info'): void
 {
-    // Debug class not implemented yet
-    // Log to PHP error log
-    error_log("[$level] $message");
+    // Log to PHP error log only if not in production or for critical errors
+    if (Core\Env::get('APP_ENV') === 'development' || $level === 'error') {
+        error_log("[$level] $message");
+    }
 }
 
 // Load environment variables from .env file
 Core\Env::load(__DIR__ . '/../.env');
+
+// Debug REQUEST (Development ONLY)
+if (Core\Env::get('APP_ENV') === 'development' && Core\Env::get('APP_DEBUG') === 'true') {
+    file_put_contents(__DIR__ . '/../server_dump.txt', print_r($_SERVER, true));
+}
 
 // Load config
 $config = require __DIR__ . '/../Config/app.php';

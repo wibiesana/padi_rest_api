@@ -16,12 +16,19 @@ Models in Padi REST API extend `Wibiesana\Padi\Core\ActiveRecord`. The framework
 
 ```
 app/Models/
-├── User.php           # User model
-├── Product.php        # Product model
-└── Category.php       # Category model
+├── Base/              # Auto-generated base classes (do not edit)
+│   ├── User.php
+│   ├── Product.php
+│   └── Category.php
+├── User.php           # Concrete class (custom logic goes here)
+├── Product.php        # Concrete class
+└── Category.php       # Concrete class
 ```
 
-Previously, the framework used a "Base/Concrete" pattern, but this has been simplified in v1.0.6 to a single-file approach for better maintainability and clarity.
+The framework uses a **Base/Concrete** pattern:
+
+1. **Base Models**: Generated in `app/Models/Base/`. These files are overwritten whenever you regenerate the model. They contain all the auto-detected fields, relationships, and search logic.
+2. **Concrete Models**: Created in `app/Models/`. These files are only created if they don't exist. This is where you should add your custom logic, validation hooks, and extra methods.
 
 ---
 
@@ -69,7 +76,8 @@ $deleted = $product->delete($id);
 php scripts/generate.php model products --write
 
 # This creates:
-# - app/Models/Product.php
+# - app/Models/Base/Product.php (Always overwritten)
+# - app/Models/Product.php      (Created only if missing)
 ```
 
 The generator will check if the file already exists. Use the `--force` flag if you want to overwrite an existing model:

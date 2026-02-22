@@ -9,14 +9,6 @@
   - Updated all internal references, scripts, and templates to reflect the new namespace structure.
   - This change improves package organization and prevents naming collisions.
 
-### Generator Simplification
-
-- **Streamlined Code Generation**:
-  - Removed the mandatory "Base/Concrete" pattern for Models and Controllers.
-  - The generator now produces single, comprehensive files, reducing clutter in the project structure.
-  - Added a `--force` flag to explicitly allow overwriting existing files when necessary.
-  - Implemented smart checks to prevent accidental overwrites of modified files.
-
 ### Authentication & Security
 
 - **Secure Password Reset**:

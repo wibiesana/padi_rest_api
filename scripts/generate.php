@@ -95,10 +95,10 @@ function printHelp()
     echo "  php generate.php routes posts --write\n";
     echo "  php generate.php routes password_resets --write  # Generates routes as 'password-resets'\n";
     echo "  php generate.php list\n\n";
-    echo Colors::$green . "NEW! 🎉 Postman Collections\n" . Colors::$reset;
+    echo Colors::$green . "NEW! 🎉 API Collections\n" . Colors::$reset;
     echo "  ✓ Automatically generated for each CRUD\n";
-    echo "  ✓ Saved to postman/ folder\n";
-    echo "  ✓ Import to Postman for instant API testing\n";
+    echo "  ✓ Saved to api_collection/ folder\n";
+    echo "  ✓ Import to Postman/Insomnia for instant API testing\n";
     echo "  ✓ See docs/03-advanced/POSTMAN_GUIDE.md for usage guide\n\n";
 }
 

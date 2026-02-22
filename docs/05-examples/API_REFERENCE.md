@@ -322,4 +322,4 @@ curl -X POST http://localhost:8085/auth/register \
 **Next Steps:**
 
 - [Frontend Integration](../03-advanced/FRONTEND_INTEGRATION.md)
-- [Postman Guide](../03-advanced/POSTMAN_GUIDE.md)
+- [API Collection Guide](../03-advanced/API_COLLECTION_GUIDE.md)

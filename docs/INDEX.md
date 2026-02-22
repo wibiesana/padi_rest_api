@@ -325,11 +325,11 @@ Take your API to the next level with advanced features.
 - Automated testing
 - Best practices
 
-### Postman Guide
+### API Collection Guide
 
-**[📄 POSTMAN_GUIDE.md](03-advanced/POSTMAN_GUIDE.md)**
+**[📄 API_COLLECTION_GUIDE.md](03-advanced/API_COLLECTION_GUIDE.md)**
 
-- Postman collection setup
+- API collection setup
 - Environment variables
 - Testing workflows
 - Import/export
@@ -437,7 +437,7 @@ Ready-to-use code samples and collections.
 - CRUD operations
 - Error handling
 
-### Postman Collection
+### API Collection
 
 **[📄 postman_collection.json](05-examples/postman_collection.json)**
 
@@ -567,7 +567,7 @@ docs/
 │   ├── CORS.md                       # ✨ CORS guide
 │   ├── ERROR_HANDLING.md             # ✨ Error handling & DB debugging
 │   ├── API_TESTING.md                # API testing
-│   └── POSTMAN_GUIDE.md              # Postman guide
+│   └── API_COLLECTION_GUIDE.md       # API collection guide
 │
 ├── 04-deployment/                    # Production & Performance
 │   ├── PRODUCTION.md                 # ✨ Production deployment
@@ -578,7 +578,7 @@ docs/
 └── 05-examples/                      # Code Samples
     ├── API_REFERENCE.md              # ✨ Complete API reference
     ├── frontend-examples.js          # Frontend examples
-    └── postman_collection.json       # Postman collection
+    └── postman_collection.json       # API collection
 ```
 
 **✨ NEW** = Newly created in reorganization

@@ -18,7 +18,7 @@ The Email component provides a simple wrapper around [PHPMailer](https://github.
 
 ## ⚙️ Configuration
 
-Email settings are managed in your `.env` file and configured in `app/Config/mail.php`.
+Email settings are managed in your `.env` file and configured in `config/mail.php`.
 
 ### .env Settings
 

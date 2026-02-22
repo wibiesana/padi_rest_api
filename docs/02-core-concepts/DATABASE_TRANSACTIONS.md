@@ -71,7 +71,7 @@ try {
 
 ## 🏗️ Transactions with Multiple Databases
 
-If you use the multi-database feature, you can specify the target connection by passing its name (as configured in `app/Config/database.php`).
+If you use the multi-database feature, you can specify the target connection by passing its name (as configured in `config/database.php`).
 
 ```php
 // Transaction on 'mysql' database (default)

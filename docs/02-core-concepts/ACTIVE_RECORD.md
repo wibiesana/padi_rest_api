@@ -304,7 +304,7 @@ Support for multi-database architectures.
 
 ```php
 class ExternalModel extends ActiveRecord {
-    // Uses the 'pgsql' connection defined in app/Config/db.php
+    // Uses the 'pgsql' connection defined in config/database.php
     protected ?string $connection = 'pgsql';
 }
 ```

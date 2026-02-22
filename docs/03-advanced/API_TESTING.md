@@ -92,7 +92,7 @@ curl -X DELETE http://localhost:8085/api/products/1 \
 
 ## Using Postman
 
-1. Import the `postman_collection.json` file into Postman.
+1. Import collection file (e.g., `api_collection/auth_api_collection.json`) into Postman.
 2. Set the `base_url` variable to `http://localhost:8085`.
 3. Login to retrieve the token.
 4. Copy the token into the `token` variable.

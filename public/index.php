@@ -26,7 +26,7 @@ if (Core\Env::get('APP_ENV') === 'development' && Core\Env::get('APP_DEBUG') ===
 }
 
 // Load config
-$config = require __DIR__ . '/../Config/app.php';
+$config = require __DIR__ . '/../config/app.php';
 
 // Prepare router (Caching routes)
 $router = require __DIR__ . '/../routes/api.php';

@@ -6,14 +6,14 @@ Multi-database system has been successfully implemented! 🎉
 
 ### Core Framework
 
-1. **`core/DatabaseManager.php`** - Manager for handling multiple database connections.
-2. **`core/Database.php`** - Updated to support multi-database (backward compatible).
-3. **`core/ActiveRecord.php`** - Updated with `$connection` property to specify database.
-4. **`core/Controller.php`** - Added `json()` method for easier response handling.
+1. **`Core\DatabaseManager`** - Manager for handling multiple database connections (padi-core).
+2. **`Core\Database`** - Updated to support multi-database (padi-core).
+3. **`Core\ActiveRecord`** - Updated with `$connection` property to specify database (padi-core).
+4. **`Core\Controller`** - Added `json()` method for easier response handling (padi-core).
 
 ### Configuration
 
-5. **`app/Config/database.php`** - Config for MySQL, MariaDB, PostgreSQL, SQLite.
+5. **`config/database.php`** - Config for MySQL, MariaDB, PostgreSQL, SQLite.
 6. **`.env.example`** - Updated with environment variables for all databases.
 
 ### Models (Examples)

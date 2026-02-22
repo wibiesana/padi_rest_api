@@ -29,7 +29,7 @@ Output akan menampilkan:
 ✓ Routes for 'products' automatically appended to routes/api.php
 
 4. Generating Postman Collection...
-✓ Postman Collection created at /path/to/postman/product_api_collection.json
+✓ Postman Collection created at /path/to/api_collection/product_api_collection.json
   Import this file to Postman to test the API endpoints
 ```
 
@@ -37,7 +37,7 @@ Output akan menampilkan:
 
 1. Buka aplikasi Postman
 2. Klik **Import** di pojok kiri atas
-3. Pilih file `.json` dari folder `postman/`:
+3. Pilih file `.json` dari folder `api_collection/`:
    - **`auth_api_collection.json`** - Authentication endpoints (Login, Register, Get Me, Forgot/Reset Password)
    - **`*_api_collection.json`** - Resource endpoints (auto-generated)
 4. Collection akan muncul di sidebar Postman Anda
@@ -168,7 +168,7 @@ Contoh:
 
 ```bash
 # 1. Import Auth Collection
-# File: postman/auth_api_collection.json
+# File: api_collection/auth_api_collection.json
 
 # 2. Register atau Login
 # Request: POST {{base_url}}/auth/login
@@ -181,7 +181,7 @@ Contoh:
 # 4. Generate CRUD + Postman Collection untuk resource
 php scripts/generate.php crud products --write
 
-# 5. Import file postman/product_api_collection.json ke Postman
+# 5. Import file api_collection/product_api_collection.json ke Postman
 
 # 6. Set base_url di Collection Variables (jika berbeda)
 # base_url = http://localhost:8000
@@ -221,7 +221,7 @@ php scripts/generate.php crud-all --write
 
 # Hasilnya:
 # - Model, Controller, Routes untuk semua table
-# - Postman collection untuk setiap table di folder postman/
+# - Postman collection untuk setiap table di folder api_collection/
 ```
 
 ---
@@ -264,7 +264,7 @@ Semua POST/PUT requests sudah include sample data yang smart-generated berdasark
 ## 📖 Collection Structure
 
 ```
-postman/
+api_collection/
 ├── README.md                              # Panduan lengkap (moved to docs/)
 ├── auth_api_collection.json              # Authentication endpoints
 ├── example_product_api_collection.json   # Example Product API

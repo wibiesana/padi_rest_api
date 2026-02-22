@@ -89,11 +89,11 @@ curl http://localhost:8085/
 
 ### 💡 Examples
 
-| Resource                                                      | Description                 |
-| ------------------------------------------------------------- | --------------------------- |
-| **[API Reference](05-examples/API_REFERENCE.md)**             | Complete API documentation  |
-| **[Frontend Examples](05-examples/frontend-examples.js)**     | JavaScript/Axios examples   |
-| **[Postman Collection](05-examples/postman_collection.json)** | Import-ready API collection |
+| Resource                                                  | Description                 |
+| --------------------------------------------------------- | --------------------------- |
+| **[API Reference](05-examples/API_REFERENCE.md)**         | Complete API documentation  |
+| **[Frontend Examples](05-examples/frontend-examples.js)** | JavaScript/Axios examples   |
+| **[API Collection](05-examples/postman_collection.json)** | Import-ready API collection |
 
 **📑 Full Documentation Index:** [INDEX.md](INDEX.md)
 
@@ -226,11 +226,11 @@ curl http://localhost:8085/
 
 ```
 mvc_rest_api/
-├── app/
-│   ├── Config/           # Configuration files
+├── app/                  # Application code
 │   ├── Controllers/      # Controllers (Base + Concrete)
 │   ├── Middleware/       # Middleware (Auth, CORS, RateLimit)
 │   └── Models/           # Models (Base + Concrete)
+├── config/               # Configuration files
 ├── core/                 # Core framework classes
 ├── database/             # Migrations and schemas
 ├── docs/                 # Documentation

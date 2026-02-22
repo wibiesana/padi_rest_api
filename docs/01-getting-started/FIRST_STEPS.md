@@ -242,12 +242,12 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8085/products
 
 ### 2. Using Postman
 
-1. Import collection: `docs/05-examples/postman_collection.json`
+1. Import collection: `api_collection/auth_api_collection.json`
 2. Set environment variable: `API_URL = http://localhost:8085`
 3. Set `access_token` after login
 4. Test all endpoints
 
-See [POSTMAN_GUIDE.md](../03-advanced/POSTMAN_GUIDE.md) for details.
+See [API_COLLECTION_GUIDE.md](../03-advanced/API_COLLECTION_GUIDE.md) for details.
 
 ### 3. Using Frontend
 

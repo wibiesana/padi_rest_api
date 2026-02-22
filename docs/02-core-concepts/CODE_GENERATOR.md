@@ -61,7 +61,7 @@ Creates:
 php scripts/generate.php crud-all --write --overwrite
 ```
 
-Generates complete CRUD for every table in the database, including Postman collections.
+Generates complete CRUD for every table in the database, including API collections.
 
 ---
 
@@ -91,11 +91,11 @@ php scripts/generate.php crud products --write --overwrite
 
 ---
 
-## 📮 Postman Collection (NEW!)
+## 📮 API Collection (NEW!)
 
 ### Automatic Postman Collection Generation
 
-When you run `crud` or `crud-all` commands, Postman collection JSON files are automatically created in the `postman/` folder.
+When you run `crud` or `crud-all` commands, API collection JSON files are automatically created in the `api_collection/` folder.
 
 ```bash
 # Generate CRUD + Postman Collection
@@ -105,8 +105,8 @@ php scripts/generate.php crud products --write
 # 1. Generating Model...
 # 2. Generating Controller...
 # 3. Generating Routes...
-# 4. Generating Postman Collection...
-#    ✓ Postman Collection created at postman/product_api_collection.json
+# 4. Generating API Collection...
+#    ✓ API Collection created at api_collection/product_api_collection.json
 ```
 
 ### What's Included in Collection
@@ -141,7 +141,7 @@ The generator intelligently creates sample request bodies based on your database
 1. **Import to Postman:**
    - Open Postman
    - Click **Import**
-   - Select file from `postman/` folder
+   - Select file from `api_collection/` folder
 
 2. **Configure Variables:**
    - `{{base_url}}` - Your API URL (default: `http://localhost:8000`)
@@ -159,14 +159,14 @@ The generator intelligently creates sample request bodies based on your database
 ### File Structure
 
 ```
-postman/
+api_collection/
 ├── README.md                      # Quick reference (redirects to docs)
 ├── product_api_collection.json    # Product endpoints
 ├── user_api_collection.json       # User endpoints
 └── category_api_collection.json   # Category endpoints
 ```
 
-See [Postman Guide](../03-advanced/POSTMAN_GUIDE.md) for detailed usage guide.
+See [API Collection Guide](../03-advanced/API_COLLECTION_GUIDE.md) for detailed usage guide.
 
 ---
 
@@ -346,10 +346,10 @@ CREATE TABLE products (
 
 exit;
 
-# 2. Generate CRUD + Postman Collection
+# 2. Generate CRUD + API Collection
 php scripts/generate.php crud products --write
 
-# 3. Import postman/product_api_collection.json to Postman
+# 3. Import api_collection/product_api_collection.json to Postman
 
 # 4. Test endpoints using Postman
 ```

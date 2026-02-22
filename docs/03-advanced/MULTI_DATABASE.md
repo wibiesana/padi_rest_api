@@ -47,7 +47,7 @@ PGSQL_PASSWORD=secret
 SQLITE_DATABASE=database/cache.sqlite
 ```
 
-### 2. Configuration is in `app/Config/database.php`
+### 2. Configuration is in `config/database.php`
 
 This file is pre-configured to support all database drivers. You do not need to change it unless you want to add a new connection.
 
@@ -436,7 +436,7 @@ DatabaseManager::addConnection('mongodb', [
 
 ### Error: "Database connection 'xxx' not configured"
 
-**Solution:** Ensure the connection exists in `app/Config/database.php` and environment variables are set in `.env`.
+**Solution:** Ensure the connection exists in `config/database.php` and environment variables are set in `.env`.
 
 ### Error: PDO Driver not found
 
@@ -455,10 +455,10 @@ sudo apt-get install php-sqlite3
 
 ## 📚 Resources
 
-- **Config File:** `app/Config/database.php`
-- **DatabaseManager:** `core/DatabaseManager.php`
-- **Database (Legacy):** `core/Database.php`
-- **Model Base:** `core/ActiveRecord.php`
+- **Config File:** `config/database.php`
+- **DatabaseManager:** `Core\DatabaseManager` (padi-core)
+- **Database (Legacy):** `Core\Database` (padi-core)
+- **Model Base:** `Core\ActiveRecord` (padi-core)
 
 ---
 

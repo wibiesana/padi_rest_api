@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe3004972057d1ceebb1424a1e906c55",
+    "content-hash": "785e303b0458d9c15409315811762d01",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -426,12 +426,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wibiesana/padi_core.git",
-                "reference": "768136ccdacf12f036b69362a36969b5d83f2760"
+                "reference": "d2d7297084fe52c29774f3fec3618089afcbce7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wibiesana/padi_core/zipball/768136ccdacf12f036b69362a36969b5d83f2760",
-                "reference": "768136ccdacf12f036b69362a36969b5d83f2760",
+                "url": "https://api.github.com/repos/wibiesana/padi_core/zipball/d2d7297084fe52c29774f3fec3618089afcbce7c",
+                "reference": "d2d7297084fe52c29774f3fec3618089afcbce7c",
                 "shasum": ""
             },
             "require": {
@@ -444,7 +444,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Core\\": "src/"
+                    "Wibiesana\\Padi\\Core\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -460,9 +460,9 @@
             "description": "Core engine for Padi REST API Framework",
             "support": {
                 "issues": "https://github.com/wibiesana/padi_core/issues",
-                "source": "https://github.com/wibiesana/padi_core/tree/1.0.2"
+                "source": "https://github.com/wibiesana/padi_core/tree/2.0.0"
             },
-            "time": "2026-02-17T05:24:43+00:00"
+            "time": "2026-02-22T07:58:15+00:00"
         }
     ],
     "packages-dev": [
@@ -2155,7 +2155,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,

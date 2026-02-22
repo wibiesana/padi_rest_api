@@ -26,10 +26,6 @@
 - **Code Cleanup**:
   - Removed unused variables and dead code from `Generator.php` for better performance and maintainability.
 
----
-
-## v1.0.5 (2026-02-21)
-
 ### Core & Server Optimizations
 
 - **Database Connection Reliability**:

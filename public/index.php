@@ -23,7 +23,7 @@ function debug_log(string $message, string $level = 'info'): void
 Core\Env::load(__DIR__ . '/../.env');
 
 // Load config
-$config = require __DIR__ . '/../app/Config/app.php';
+$config = require __DIR__ . '/../Config/app.php';
 
 // Prepare router (Caching routes)
 $router = require __DIR__ . '/../routes/api.php';

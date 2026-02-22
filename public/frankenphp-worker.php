@@ -70,7 +70,7 @@ try {
 
     // Load configuration once
     log_message("STEP: Loading Config");
-    $config = require __DIR__ . '/../app/Config/app.php';
+    $config = require __DIR__ . '/../Config/app.php';
 
     log_message("DEBUG: APP_DEBUG is " . ($config['app_debug'] ? 'TRUE' : 'FALSE'));
 

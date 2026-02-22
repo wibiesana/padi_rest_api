@@ -1,6 +1,6 @@
 <?php
 
-use Core\Env;
+use Wibiesana\Padi\Core\Env;
 
 /**
  * Multi-Database Configuration

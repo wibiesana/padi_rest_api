@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use Core\Request;
-use Core\Response;
+use Wibiesana\Padi\Core\Request;
+use Wibiesana\Padi\Core\Response;
 
 class CorsMiddleware
 {

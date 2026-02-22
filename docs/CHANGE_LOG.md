@@ -1,5 +1,24 @@
 # CHANGE LOG
 
+## v1.0.6 (2026-02-22)
+
+### Namespace Refactoring
+
+- **Core Namespace Consolidation**:
+  - Standardized all core framework classes under the `Wibiesana\Padi\Core` namespace.
+  - Updated all internal references, scripts, and templates to reflect the new namespace structure.
+  - This change improves package organization and prevents naming collisions.
+
+### Generator Simplification
+
+- **Streamlined Code Generation**:
+  - Removed the mandatory "Base/Concrete" pattern for Models and Controllers.
+  - The generator now produces single, comprehensive files, reducing clutter in the project structure.
+  - Added a `--force` flag to explicitly allow overwriting existing files when necessary.
+  - Implemented smart checks to prevent accidental overwrites of modified files.
+
+---
+
 ## v1.0.5 (2026-02-21)
 
 ### Core & Server Optimizations

@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use Core\Env;
+use Wibiesana\Padi\Core\Env;
 
 abstract class TestCase extends BaseTestCase
 {

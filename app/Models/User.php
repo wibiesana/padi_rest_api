@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Core\ActiveRecord;
+use Wibiesana\Padi\Core\ActiveRecord;
 
 
 class User extends ActiveRecord

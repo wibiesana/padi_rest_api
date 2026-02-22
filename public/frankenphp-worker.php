@@ -1,9 +1,9 @@
 <?php
 
-use Core\Env;
-use Core\Database;
-use Core\Request;
-use Core\Response;
+use Wibiesana\Padi\Core\Env;
+use Wibiesana\Padi\Core\Database;
+use Wibiesana\Padi\Core\Request;
+use Wibiesana\Padi\Core\Response;
 
 $logFile = '/app/worker_init.log';
 // Ensure log file is writable or try logging to stderr if fails, 

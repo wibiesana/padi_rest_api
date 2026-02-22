@@ -2,14 +2,19 @@
 
 namespace App\Controllers;
 
-use Core\Controller;
+use Wibiesana\Padi\Core\Controller;
+use Wibiesana\Padi\Core\Request;
+use Wibiesana\Padi\Core\Auth;
+use Wibiesana\Padi\Core\Queue;
+use Wibiesana\Padi\Core\Env;
+use Wibiesana\Padi\Core\Database;
 use App\Models\User;
 
 class AuthController extends Controller
 {
     private User $model;
 
-    public function __construct(?\Core\Request $request = null)
+    public function __construct(?Request $request = null)
     {
         parent::__construct($request);
         $this->model = new User();
@@ -44,16 +49,16 @@ class AuthController extends Controller
         $userId = $this->model->createUser($validated);
         $user = $this->model->find($userId);
 
-        $token = \Core\Auth::generateToken([
+        $token = Auth::generateToken([
             'user_id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role']
         ]);
 
         // Push Welcome Email Job to Queue
-        \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
+        Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $user['email'],
-            'subject' => 'Welcome to ' . (\Core\Env::get('APP_NAME', 'Our API')),
+            'subject' => 'Welcome to ' . (Env::get('APP_NAME', 'Our API')),
             'body' => 'Thank you for registering!'
         ]);
 
@@ -130,11 +135,11 @@ class AuthController extends Controller
         // 1 year = 31536000 seconds
         $expiration = $rememberMe ? 31536000 : 3600;
 
-        if (\Core\Env::get('APP_DEBUG') === 'true') {
+        if (Env::get('APP_DEBUG') === 'true') {
             error_log("[Auth] Login request - User: " . $user['username'] . ", Remember Me: " . ($rememberMe ? 'YES' : 'NO') . ", Expiration: " . $expiration);
         }
 
-        $token = \Core\Auth::generateToken([
+        $token = Auth::generateToken([
             'user_id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role'],
@@ -219,7 +224,7 @@ class AuthController extends Controller
         }
 
         // Generate new access token (365 days / 1 year for mobile apps)
-        $token = \Core\Auth::generateToken([
+        $token = Auth::generateToken([
             'user_id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role'],
@@ -274,7 +279,7 @@ class AuthController extends Controller
         $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
         // Store reset token in database
-        $db = \Core\Database::getInstance()->getConnection();
+        $db = Database::getInstance()->getConnection();
 
         // Delete old tokens for this email
         $stmt = $db->prepare("DELETE FROM password_resets WHERE email = :email");
@@ -292,7 +297,7 @@ class AuthController extends Controller
         ]);
 
         // Generate reset URL
-        $resetUrl = (\Core\Env::get('FRONTEND_URL', 'http://localhost:3000')) . '/reset-password?token=' . $token . '&email=' . urlencode($user['email']);
+        $resetUrl = (Env::get('FRONTEND_URL', 'http://localhost:3000')) . '/reset-password?token=' . $token . '&email=' . urlencode($user['email']);
 
         // Send email
         $emailBody = "
@@ -303,13 +308,13 @@ class AuthController extends Controller
             <p>This link will expire in 1 hour.</p>
             <p>If you didn't request this, please ignore this email.</p>
             <br>
-            <p>Best regards,<br>" . (\Core\Env::get('APP_NAME', 'Our API')) . "</p>
+            <p>Best regards,<br>" . (Env::get('APP_NAME', 'Our API')) . "</p>
         ";
 
         // Push email job to queue
-        \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
+        Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $user['email'],
-            'subject' => 'Password Reset Request - ' . (\Core\Env::get('APP_NAME', 'Our API')),
+            'subject' => 'Password Reset Request - ' . (Env::get('APP_NAME', 'Our API')),
             'body' => $emailBody
         ]);
 
@@ -342,7 +347,7 @@ class AuthController extends Controller
         }
 
         // Verify token
-        $db = \Core\Database::getInstance()->getConnection();
+        $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare("
             SELECT * FROM password_resets 
             WHERE email = :email 
@@ -386,12 +391,12 @@ class AuthController extends Controller
             <p>Your password has been successfully reset.</p>
             <p>If you didn't make this change, please contact us immediately.</p>
             <br>
-            <p>Best regards,<br>" . (\Core\Env::get('APP_NAME', 'Our API')) . "</p>
+            <p>Best regards,<br>" . (Env::get('APP_NAME', 'Our API')) . "</p>
         ";
 
-        \Core\Queue::push(\App\Jobs\SendEmailJob::class, [
+        Queue::push(\App\Jobs\SendEmailJob::class, [
             'email' => $validated['email'],
-            'subject' => 'Password Reset Successful - ' . (\Core\Env::get('APP_NAME', 'Our API')),
+            'subject' => 'Password Reset Successful - ' . (Env::get('APP_NAME', 'Our API')),
             'body' => $emailBody
         ]);
 

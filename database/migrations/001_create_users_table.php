@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Core\DatabaseManager;
+use Wibiesana\Padi\Core\DatabaseManager;
 
 return new class
 {

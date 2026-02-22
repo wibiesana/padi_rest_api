@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use Core\Request;
+use Wibiesana\Padi\Core\Request;
 
 /**
  * Role-based Authorization Middleware

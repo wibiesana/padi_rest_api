@@ -1,6 +1,6 @@
 <?php
 
-use Core\Env;
+use Wibiesana\Padi\Core\Env;
 
 $appEnv = Env::get('APP_ENV', 'production');
 

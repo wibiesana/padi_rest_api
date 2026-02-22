@@ -1,6 +1,6 @@
 <?php
 
-use Core\Env;
+use Wibiesana\Padi\Core\Env;
 
 return [
     'jwt_secret' => Env::get('JWT_SECRET', 'your-secret-key-change-this-in-production'),

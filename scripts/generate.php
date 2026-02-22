@@ -11,8 +11,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Define project root path
 define('PADI_ROOT', dirname(__DIR__));
 
-use Core\Generator;
-use Core\Env;
+use Wibiesana\Padi\Core\Generator;
+use Wibiesana\Padi\Core\Env;
 
 // Load environment
 Env::load(__DIR__ . '/../.env');
@@ -35,8 +35,8 @@ if (!extension_loaded('pdo')) {
 }
 
 // Check if required classes exist
-if (!class_exists('Core\Generator')) {
-    echo Colors::$red . "Error: Core\Generator class not found. Run 'composer install' or check your autoloader.\n" . Colors::$reset;
+if (!class_exists('Wibiesana\Padi\Core\Generator')) {
+    echo Colors::$red . "Error: Wibiesana\Padi\Core\Generator class not found. Run 'composer install' or check your autoloader.\n" . Colors::$reset;
     exit(1);
 }
 
@@ -105,7 +105,7 @@ function printHelp()
 function listTables()
 {
     try {
-        $db = Core\Database::getInstance()->getConnection();
+        $db = Wibiesana\Padi\Core\Database::getInstance()->getConnection();
         $stmt = $db->query("SHOW TABLES");
         $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -217,7 +217,7 @@ switch ($command) {
 
     case 'crud-all':
         try {
-            $db = Core\Database::getInstance()->getConnection();
+            $db = Wibiesana\Padi\Core\Database::getInstance()->getConnection();
             $stmt = $db->query("SHOW TABLES");
             $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 

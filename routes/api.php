@@ -1,6 +1,6 @@
 <?php
 
-use Core\Router;
+use Wibiesana\Padi\Core\Router;
 
 $router = new Router();
 

@@ -12,16 +12,16 @@ define('PADI_ROOT', dirname(__DIR__));
 function debug_log(string $message, string $level = 'info'): void
 {
     // Log to PHP error log only if not in production or for critical errors
-    if (Core\Env::get('APP_ENV') === 'development' || $level === 'error') {
+    if (Wibiesana\Padi\Core\Env::get('APP_ENV') === 'development' || $level === 'error') {
         error_log("[$level] $message");
     }
 }
 
 // Load environment variables from .env file
-Core\Env::load(__DIR__ . '/../.env');
+Wibiesana\Padi\Core\Env::load(__DIR__ . '/../.env');
 
 // Debug REQUEST (Development ONLY)
-if (Core\Env::get('APP_ENV') === 'development' && Core\Env::get('APP_DEBUG') === 'true') {
+if (Wibiesana\Padi\Core\Env::get('APP_ENV') === 'development' && Wibiesana\Padi\Core\Env::get('APP_DEBUG') === 'true') {
     file_put_contents(__DIR__ . '/../server_dump.txt', print_r($_SERVER, true));
 }
 
@@ -37,10 +37,10 @@ $router = require __DIR__ . '/../routes/api.php';
 $handler = function () use ($router, $config) {
     // Re-check origin for each request in worker mode
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    $isDevelopment = Core\Env::get('APP_ENV') === 'development';
+    $isDevelopment = Wibiesana\Padi\Core\Env::get('APP_ENV') === 'development';
     $allowedOrigins = array_map(function ($url) {
         return rtrim(trim($url), '/');
-    }, explode(',', Core\Env::get('CORS_ALLOWED_ORIGINS', '')));
+    }, explode(',', Wibiesana\Padi\Core\Env::get('CORS_ALLOWED_ORIGINS', '')));
 
     if (!empty($origin)) {
         if ($isDevelopment || in_array($origin, $allowedOrigins)) {
@@ -81,7 +81,7 @@ $handler = function () use ($router, $config) {
 
     // Set exception handler for global uncaught exceptions
     set_exception_handler(function ($exception) use ($config) {
-        $response = new \Core\Response();
+        $response = new \Wibiesana\Padi\Core\Response();
 
         // Use exception code if it's a valid HTTP status code, otherwise default to 500
         $code = $exception->getCode();
@@ -96,7 +96,7 @@ $handler = function () use ($router, $config) {
         if ($exception instanceof PDOException) {
             $error['message'] = 'Database error occurred';
             $error['message_code'] = 'DATABASE_ERROR';
-            \Core\DatabaseManager::logError($exception);
+            \Wibiesana\Padi\Core\DatabaseManager::logError($exception);
         } else {
             // For general exceptions, use the exception message
             $error['message'] = $exception->getMessage();
@@ -115,17 +115,17 @@ $handler = function () use ($router, $config) {
         $response->json($error, $statusCode);
     });
 
-    // Reset state between requests (Essential for FrankenPHP worker mode)
-    \Core\Database::resetQueryLog();
-    \Core\DatabaseManager::clearErrors();
+    // Reset database query log
+    \Wibiesana\Padi\Core\Database::resetQueryLog();
+    \Wibiesana\Padi\Core\DatabaseManager::clearErrors();
 
-    // Ensure database connections are alive (Fix: MySQL server has gone away)
-    foreach (\Core\DatabaseManager::getConnections() as $connName) {
+    // Health check database connections if in worker mode and needed
+    foreach (\Wibiesana\Padi\Core\DatabaseManager::getConnections() as $connName) {
         try {
-            \Core\DatabaseManager::connection($connName)->query('SELECT 1');
+            \Wibiesana\Padi\Core\DatabaseManager::connection($connName)->query('SELECT 1');
         } catch (\PDOException $e) {
-            // Connection is dead, remove it so it's recreated on next use
-            \Core\DatabaseManager::disconnect($connName);
+            debug_log("DB reconnect for $connName", 'error');
+            \Wibiesana\Padi\Core\DatabaseManager::disconnect($connName);
         }
     }
 
@@ -154,14 +154,15 @@ $handler = function () use ($router, $config) {
         $_SERVER['REQUEST_URI'] = $uri;
     }
 
-    // Create request instance & Dispatch
-    $request = new \Core\Request();
+    // Create fresh request instance for this request
+    $request = new \Wibiesana\Padi\Core\Request();
     $router->dispatch($request);
 };
 
 // Execute handler (Worker mode or traditional)
 if (function_exists('frankenphp_handle_request')) {
-    $maxRequests = (int)Core\Env::get('MAX_REQUESTS', 500);
+    // Terminate worker if it processed too many requests (prevent memory leaks)
+    $maxRequests = (int)\Wibiesana\Padi\Core\Env::get('MAX_REQUESTS', 500);
     for ($count = 0; frankenphp_handle_request(); ++$count) {
         $handler();
 

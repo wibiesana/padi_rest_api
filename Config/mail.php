@@ -1,6 +1,6 @@
 <?php
 
-use Core\Env;
+use Wibiesana\Padi\Core\Env;
 
 return [
     'driver' => Env::get('MAIL_DRIVER', 'smtp'),

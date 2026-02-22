@@ -2,9 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Controllers\Base\PasswordResetController as BaseController;
+use Wibiesana\Padi\Core\Controller;
 
-class PasswordResetController extends BaseController
+
+class PasswordResetController extends Controller
 {
     /**
      * Override methods here to add custom logic.

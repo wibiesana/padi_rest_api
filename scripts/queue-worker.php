@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Core\Env;
-use Core\Queue;
+use Wibiesana\Padi\Core\Env;
+use Wibiesana\Padi\Core\Queue;
 
 Env::load(__DIR__ . '/../.env');
 

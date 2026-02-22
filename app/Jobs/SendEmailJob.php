@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use Core\Logger;
-use Core\Email;
+use Wibiesana\Padi\Core\Logger;
+use Wibiesana\Padi\Core\Email;
 
 class SendEmailJob
 {

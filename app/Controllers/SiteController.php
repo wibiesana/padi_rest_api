@@ -2,9 +2,9 @@
 
 namespace App\Controllers;
 
-use Core\Controller;
-use Core\Response;
-use Core\Env;
+use Wibiesana\Padi\Core\Controller;
+use Wibiesana\Padi\Core\Response;
+use Wibiesana\Padi\Core\Env;
 
 class SiteController extends Controller
 {

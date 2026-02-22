@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use Core\Request;
+use Wibiesana\Padi\Core\Request;
+use Wibiesana\Padi\Core\Auth;
 
 class AuthMiddleware
 {
@@ -16,7 +17,7 @@ class AuthMiddleware
             throw new \Exception('Unauthorized - No token provided', 401);
         }
 
-        $decoded = \Core\Auth::verifyToken($token);
+        $decoded = Auth::verifyToken($token);
 
         if (!$decoded) {
             throw new \Exception('Unauthorized - Invalid or expired token', 401);

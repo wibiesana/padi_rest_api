@@ -2,14 +2,15 @@
 
 namespace App\Controllers;
 
-use Core\Controller;
+use Wibiesana\Padi\Core\Controller;
+use Wibiesana\Padi\Core\Request;
 use App\Models\User;
 
 class UserController extends Controller
 {
     protected User $model;
 
-    public function __construct(?\Core\Request $request = null)
+    public function __construct(?Request $request = null)
     {
         parent::__construct($request);
         $this->model = new User();

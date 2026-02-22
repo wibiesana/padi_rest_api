@@ -198,9 +198,9 @@ $products = Product::findQuery()
 
 ---
 
-## Relationships
+### Defining Relationships
 
-Relationships are defined in the model using `belongsTo`, `hasMany`, or `belongsToMany`.
+Relationships are defined in the model using `belongsTo`, `hasMany`, or `hasOne`.
 
 ```php
 namespace App\Models;
@@ -215,6 +215,14 @@ class Product extends ActiveRecord
     }
 }
 ```
+
+### Automatic Generation ⚡
+
+When you use the [Code Generator](CODE_GENERATOR.md), the framework automatically detects relationships based on your database foreign keys:
+
+- **Direct Relation**: Creates `belongsTo` for table columns ending in `_id`.
+- **Inverse Relation**: Automatically scans other tables for foreign keys pointing to your model and creates `hasMany()` or `hasOne()` (if a unique index exists).
+- **Naming**: Pluralizes `hasMany` relationships automatically (e.g., `user->posts()`).
 
 ---
 

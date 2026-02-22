@@ -170,6 +170,23 @@ See [API Collection Guide](../03-advanced/API_COLLECTION_GUIDE.md) for detailed 
 
 ---
 
+## 🧠 Smart Relationship Detection
+
+One of the most powerful features of the Padi Generator is its ability to automatically detect and write relationship methods in your models.
+
+### 1. Direct Relations (`belongsTo`)
+
+Whenever a table has a Foreign Key (e.g., `category_id`), the generator automatically creates a `belongsTo` method in the model.
+
+### 2. Inverse Relations (`hasMany` / `hasOne`)
+
+The generator now also scans **other tables** for Foreign Keys pointing back to the table being generated:
+
+- **`hasMany`**: If the Foreign Key in the other table is non-unique (e.g., `user_id` in `posts`), the generator creates a pluralized method like `posts()`.
+- **`hasOne`**: If the Foreign Key has a `UNIQUE` index (e.g., `user_id` in `profiles`), the generator creates a singular method like `profile()`.
+
+---
+
 ## What Gets Generated
 
 ### Model Files

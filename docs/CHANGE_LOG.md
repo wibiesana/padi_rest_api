@@ -16,9 +16,19 @@
   - Decoupled recovery logic from `AuthController` for better modularity.
   - Added support for token-based password updates with security expiration checks.
 
+### Generator Enhancements
+
+- **Inverse Relation Detection**:
+  - Implemented automatic detection of `hasMany` and `hasOne` relationships.
+  - The generator now scans all tables to identify foreign keys pointing back to the model being generated.
+  - **Smart Selection**: Automatically decides between `hasOne` (if unique index exists) and `hasMany` (if not).
+  - **Automatic Pluralization**: Generates logical method names (e.g., `user->posts()`) automatically.
+- **Code Cleanup**:
+  - Removed unused variables and dead code from `Generator.php` for better performance and maintainability.
+
 ---
 
-## v1.0.5 (2026-02-21)
+## v2.0.0 (2026-02-21)
 
 ### Core & Server Optimizations
 

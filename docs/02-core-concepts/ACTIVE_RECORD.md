@@ -1,6 +1,6 @@
 # 🗃️ ActiveRecord Guide
 
-**Padi REST API Framework v1.0.1**
+**Padi REST API Framework v1.0.6**
 
 The `ActiveRecord` class is the heart of the framework's data layer. It provides a powerful, fluent interface for database interactions, relationship management, and automated auditing.
 
@@ -320,5 +320,5 @@ class ExternalModel extends ActiveRecord {
 
 ---
 
-**Last Updated:** 2026-02-17  
-**Version:** 1.0.1
+**Last Updated:** 2026-02-22  
+**Version:** 1.0.6

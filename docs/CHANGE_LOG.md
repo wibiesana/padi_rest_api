@@ -17,6 +17,13 @@
   - Added a `--force` flag to explicitly allow overwriting existing files when necessary.
   - Implemented smart checks to prevent accidental overwrites of modified files.
 
+### Authentication & Security
+
+- **Secure Password Reset**:
+  - Implemented `PasswordResetController` and `PasswordReset` model for a robust recovery flow.
+  - Decoupled recovery logic from `AuthController` for better modularity.
+  - Added support for token-based password updates with security expiration checks.
+
 ---
 
 ## v1.0.5 (2026-02-21)

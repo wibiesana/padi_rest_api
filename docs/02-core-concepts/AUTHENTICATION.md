@@ -107,8 +107,10 @@ All endpoints expect and return JSON. Replace `http://localhost:8085` with your 
 - `POST /auth/register` — Register a new user. Required: `name`, `email`, `password`, `password_confirmation`.
 - `POST /auth/login` — Authenticate and retrieve token. Required: `email`, `password`.
 - `GET /auth/me` — Get current authenticated user. Requires `Authorization` header.
-- `POST /auth/logout` — Invalidate token (implementation may remove token from server-side blacklist if used).
+- `POST /auth/logout` — Invalidate token.
 - `POST /auth/refresh` — Exchange an expiring token for a new one.
+- `POST /auth/forgot-password` — Request password reset email.
+- `POST /auth/reset-password` — Reset password using token.
 
 Example request/response are shown in the Quick Start section above.
 
@@ -167,16 +169,19 @@ Troubleshooting checklist:
 
 ---
 
-## Where to go next
+## Password Recovery
 
-- See `docs/02-core-concepts/MODELS.md` for user model examples.
-- See `docs/04-deployment/REDIS_SETUP.md` for using Redis as cache and token blacklist (optional).
+The framework includes a secure password reset flow:
 
-If you want, I can now apply the same beginner-friendly template to other core docs — tell me which folder to proceed with next (e.g., `02-core-concepts`, `04-deployment`).
-}
-}
+1. **Request Reset Link**: `POST /auth/forgot-password`
+   - Payload: `{"email": "user@example.com"}`
+   - The server generates a single-use token and saves it to the `password_resets` table.
+   - For security, the response always suggests success even if the email is not registered.
 
-````
+2. **Reset Password**: `POST /auth/reset-password`
+   - Payload: `{"email": "user@example.com", "token": "...", "password": "...", "password_confirmation": "..."}`
+   - The token is verified against the database and checked for expiration.
+   - Upon success, the user's password is updated and the token is invalidated.
 
 ---
 
@@ -193,7 +198,7 @@ const response = await api.post("/auth/login", {
 
 // Store token
 localStorage.setItem("access_token", response.data.token);
-````
+```
 
 ### Send Token with Requests
 

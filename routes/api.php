@@ -44,8 +44,8 @@ $router->group(['prefix' => 'auth'], function ($router) {
     $router->post('/logout', 'AuthController@logout');
 
     // Password recovery (rate limited)
-    $router->post('/forgot-password', 'AuthController@forgotPassword')->middleware('RateLimitMiddleware');
-    $router->post('/reset-password', 'AuthController@resetPassword')->middleware('RateLimitMiddleware');
+    $router->post('/forgot-password', 'PasswordResetController@forgotPassword')->middleware('RateLimitMiddleware');
+    $router->post('/reset-password', 'PasswordResetController@passwordReset')->middleware('RateLimitMiddleware');
 
     // Get current user info (protected)
     $router->get('/me', 'AuthController@me')->middleware('AuthMiddleware');

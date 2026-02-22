@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Wibiesana\Padi\Core\ActiveRecord;
+use Wibiesana\Padi\Core\Query;
 
 
 class User extends ActiveRecord
@@ -41,21 +42,17 @@ class User extends ActiveRecord
      */
     public function search(string $keyword): array
     {
-        $searchTerm = "%$keyword%";
-
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE username LIKE :keyword
-                   OR email LIKE :keyword2
-                   OR status LIKE :keyword3
-                   OR email_verified_at LIKE :keyword4
-                LIMIT 100";
-
-        return $this->query($sql, [
-            'keyword' => $searchTerm,
-            'keyword2' => $searchTerm,
-            'keyword3' => $searchTerm,
-            'keyword4' => $searchTerm
-        ]);
+        return Query::find()
+            ->from($this->table)
+            ->where([
+                'OR',
+                ['LIKE', 'username', "%$keyword%"],
+                ['LIKE', 'email', "%$keyword%"],
+                ['LIKE', 'status', "%$keyword%"],
+                ['LIKE', 'email_verified_at', "%$keyword%"]
+            ])
+            ->limit(100)
+            ->all();
     }
     /**
      * Automatically hash password and set defaults before saving

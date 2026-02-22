@@ -2,13 +2,13 @@
 
 ## Overview
 
-Fitur forgot password dan reset password memungkinkan user untuk mereset password mereka melalui email verification.
+The forgot password and password reset features allow users to reset their passwords via email verification.
 
-## Alur Kerja
+## Workflow
 
 ### 1. Forgot Password (Request Reset)
 
-User meminta reset password dengan mengirimkan email mereka:
+The user requests a password reset by submitting their email:
 
 ```bash
 POST /auth/forgot-password
@@ -29,20 +29,20 @@ Content-Type: application/json
 }
 ```
 
-**Catatan:** Response selalu success untuk mencegah email enumeration attack.
+**Note:** The response is always a success message to prevent email enumeration attacks.
 
-### 2. Email Dikirim
+### 2. Email Sent
 
-System akan:
+The system will:
 
-- Generate token unik (64 karakter hex)
-- Simpan token di database dengan expiry 1 jam
-- Kirim email berisi link reset password
+- Generate a unique token (64 hex characters)
+- Save the token in the database with a 1-hour expiry
+- Send an email containing the password reset link
 - Link format: `{FRONTEND_URL}/reset-password?token={TOKEN}&email={EMAIL}`
 
 ### 3. Reset Password
 
-User mengakses link dari email dan submit form reset password:
+The user accesses the link from the email and submits the password reset form:
 
 ```bash
 POST /auth/reset-password
@@ -56,7 +56,7 @@ Content-Type: application/json
 }
 ```
 
-**Response Success:**
+**Success Response:**
 
 ```json
 {
@@ -66,7 +66,7 @@ Content-Type: application/json
 }
 ```
 
-**Response Error (Invalid Token):**
+**Error Response (Invalid Token):**
 
 ```json
 {
@@ -78,13 +78,13 @@ Content-Type: application/json
 
 ## Password Requirements
 
-Password harus memenuhi kriteria:
+Passwords must meet the following criteria:
 
-- ✅ Minimal 8 karakter
-- ✅ Minimal 1 huruf besar (A-Z)
-- ✅ Minimal 1 huruf kecil (a-z)
-- ✅ Minimal 1 angka (0-9)
-- ✅ Minimal 1 karakter special (@$!%\*?&#)
+- ✅ Minimum 8 characters
+- ✅ At least 1 uppercase letter (A-Z)
+- ✅ At least 1 lowercase letter (a-z)
+- ✅ At least 1 number (0-9)
+- ✅ At least 1 special character (@$!%\*?&#)
 
 ## Database Schema
 
@@ -107,35 +107,35 @@ CREATE TABLE password_resets (
 
 ### 1. Token Expiration
 
-- Token berlaku selama 1 jam
-- Setelah expired, token tidak bisa digunakan
+- Tokens are valid for 1 hour.
+- After expiration, the token cannot be used.
 
 ### 2. One-Time Use
 
-- Token dihapus setelah digunakan
-- Tidak bisa digunakan lebih dari sekali
+- Tokens are deleted after use.
+- Cannot be used more than once.
 
 ### 3. Email Enumeration Prevention
 
-- Response selalu success meskipun email tidak terdaftar
-- Mencegah attacker mengetahui email yang terdaftar
+- Response is always success even if the email is not registered.
+- Prevents attackers from knowing which emails are registered.
 
 ### 4. Token Security
 
-- Token 64 karakter random hex (32 bytes)
-- Cryptographically secure random
+- 64-character random hex token (32 bytes).
+- Cryptographically secure random strings.
 
 ### 5. Old Token Cleanup
 
-- Token lama dihapus saat request reset baru
-- Hanya 1 active token per email
+- Old tokens are deleted when a new reset request is made.
+- Only 1 active token is allowed per email.
 
 ## Configuration
 
 ### Environment Variables
 
 ```env
-# Frontend URL untuk reset password page
+# Frontend URL for the password reset page
 FRONTEND_URL=http://localhost:3000
 
 # Email Configuration
@@ -151,16 +151,16 @@ MAIL_FROM_NAME="Your App Name"
 
 ## Migration
 
-Jalankan migration untuk membuat table `password_resets`:
+Run the migration to create the `password_resets` table:
 
 ```bash
 php scripts/migrate.php migrate
 ```
 
-Ini akan membuat table berdasarkan file:
+This will create the table based on the file:
 
 ```
-database/migrations/006_create_password_resets_table.php
+database/migrations/002_create_password_resets_table.php
 ```
 
 ## Frontend Integration
@@ -184,7 +184,7 @@ export default function ForgotPassword() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/auth/forgot-password",
+        "http://localhost:8085/auth/forgot-password",
         {
           email,
         },
@@ -239,7 +239,7 @@ export default function ResetPassword() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/auth/reset-password",
+        "http://localhost:8085/auth/reset-password",
         {
           email,
           token,
@@ -318,7 +318,7 @@ const handleSubmit = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8000/auth/forgot-password",
+      "http://localhost:8085/auth/forgot-password",
       {
         email: email.value,
       },
@@ -383,7 +383,7 @@ const handleSubmit = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8000/auth/reset-password",
+      "http://localhost:8085/auth/reset-password",
       {
         email: email.value,
         token: token.value,
@@ -419,7 +419,7 @@ const handleSubmit = async () => {
 
 3. **Check Email:**
    - Check your email inbox (or Mailtrap if testing)
-   - Copy token from email URL
+   - Copy the token from the email URL
 
 4. **Test Reset Password:**
    - Request: `POST /auth/reset-password`
@@ -430,7 +430,7 @@ const handleSubmit = async () => {
 **Request Reset:**
 
 ```bash
-curl -X POST http://localhost:8000/auth/forgot-password \
+curl -X POST http://localhost:8085/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com"}'
 ```
@@ -438,7 +438,7 @@ curl -X POST http://localhost:8000/auth/forgot-password \
 **Reset Password:**
 
 ```bash
-curl -X POST http://localhost:8000/auth/reset-password \
+curl -X POST http://localhost:8085/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{
     "email":"user@example.com",
@@ -450,7 +450,7 @@ curl -X POST http://localhost:8000/auth/reset-password \
 
 ## Email Templates
 
-Email template bisa di-customize di `AuthController`:
+Email templates can be customized in `AuthController`:
 
 ### Forgot Password Email Template
 
@@ -477,31 +477,31 @@ Email template bisa di-customize di `AuthController`:
 ### Email Not Received
 
 1. Check email configuration in `.env`
-2. Check queue worker is running: `php scripts/queue-worker.php`
+2. Check if the queue worker is running: `php scripts/queue-worker.php`
 3. Check spam/junk folder
 4. Verify SMTP credentials
 
 ### Token Expired
 
-- Token hanya valid 1 jam
-- Request reset password baru
+- Tokens are only valid for 1 hour.
+- Request a new password reset.
 
 ### Token Invalid
 
-- Token hanya bisa digunakan sekali
-- Pastikan token dari URL email benar
-- Request reset password baru
+- Tokens can only be used once.
+- Ensure the token from the email URL is correct.
+- Request a new password reset.
 
 ### Password Validation Failed
 
-- Check password requirements
-- Minimal 8 karakter dengan uppercase, lowercase, angka, dan special char
+- Check password requirements.
+- Minimum 8 characters with uppercase, lowercase, numbers, and special characters.
 
 ## API Reference
 
 ### POST /auth/forgot-password
 
-Request password reset link.
+Request a password reset link.
 
 **Request:**
 
@@ -523,7 +523,7 @@ Request password reset link.
 
 ### POST /auth/reset-password
 
-Reset password using token.
+Reset password using a token.
 
 **Request:**
 

@@ -1,6 +1,6 @@
 # 📦 Models Guide
 
-**Padi REST API Framework v1.0.6**
+**Padi REST API Framework v2.0.0**
 
 ---
 

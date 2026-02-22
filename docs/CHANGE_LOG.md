@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## v1.0.6 (2026-02-22)
+## v2.0.0 (2026-02-22)
 
 ### Namespace Refactoring
 
@@ -28,7 +28,7 @@
 
 ---
 
-## v2.0.0 (2026-02-21)
+## v1.0.5 (2026-02-21)
 
 ### Core & Server Optimizations
 

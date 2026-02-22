@@ -10,6 +10,9 @@
 - **Improved Routing & Hosting**:
   - Enhanced URI normalization in `public/index.php` to better support shared hosting environments and sub-directory deployments.
   - Better handling of `REQUEST_URI` when the script path is included in the URL.
+- **Project Structure Refactoring**:
+  - Relocated the `Config/` directory from `app/Config/` to the project root for better accessibility and standardization across the framework.
+  - Updated `Core\Auth`, `Core\DatabaseManager`, `Core\Email`, and `Core\Logger` to support the new configuration path.
 
 ### Generator Improvements
 

@@ -114,7 +114,7 @@ The framework comes with several pre-built middlewares:
 1.  **AuthMiddleware**: Verifies JWT tokens and attaches the decoded user object to `$request->user`.
 2.  **RoleMiddleware**: Checks if the authenticated user has a specific role (e.g., `admin`, `manager`).
 3.  **RateLimitMiddleware**: Implements API rate limiting based on IP address.
-4.  **CorsMiddleware**: Handles Cross-Origin Resource Sharing (though CORS is now primarily handled in `public/index.php`).
+4.  **CorsMiddleware**: Handles Cross-Origin Resource Sharing (though CORS is now primarily handled in the `Core\Application` core).
 
 ---
 
@@ -130,5 +130,5 @@ In **Worker Mode**, `exit;` is avoided to keep the process alive. Therefore, whe
 
 ---
 
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0
+**Last Updated:** 2026-02-23  
+**Version:** 2.0.1

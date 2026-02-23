@@ -1,7 +1,7 @@
 # 🌾 Padi REST API Framework
 
-**Version:** 2.0.0  
-**Last Updated:** 2026-02-21  
+**Version:** 2.0.1  
+**Last Updated:** 2026-02-23  
 **Status:** Production Ready ✅
 
 ---

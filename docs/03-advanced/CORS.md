@@ -38,7 +38,7 @@ CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
 
 ## 🛠️ How it Works
 
-The framework handles CORS automatically in `public/index.php`. It performs the following actions for every request:
+The framework handles CORS automatically within the `Wibiesana\Padi\Core\Application` class during the request lifecycle. It performs the following actions for every request:
 
 1.  **Origin Validation**: Checks the `Origin` header against your `CORS_ALLOWED_ORIGINS` whitelist.
 2.  **Dynamic Headers**: If the origin matches, it sends the appropriate `Access-Control-Allow-Origin` and `Access-Control-Allow-Credentials` headers.
@@ -77,5 +77,5 @@ Unlike traditional PHP scripts that use `exit;` to handle preflight (`OPTIONS`) 
 
 ---
 
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0
+**Last Updated:** 2026-02-23  
+**Version:** 2.0.1

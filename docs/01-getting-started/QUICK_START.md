@@ -20,7 +20,7 @@ cd my-app
 Then run the setup script:
 
 ```bash
-php scripts/init.php
+php padi init
 ```
 
 Or on Windows:
@@ -72,35 +72,31 @@ The script will guide you through:
 
 ```bash
 # Run all migrations
-php scripts/migrate.php migrate
-
-# Run specific tables
-php scripts/migrate.php migrate --tables=users,posts
+php padi migrate
 
 # Check status
-php scripts/migrate.php status
+php padi migrate:status
 
 # Rollback
-php scripts/migrate.php rollback
+php padi migrate:rollback
 ```
 
 ### Generate CRUD
 
 ```bash
-# List tables
-php scripts/generate.php list
-
 # Generate for one table
-php scripts/generate.php crud users --write
+php padi make:controller UserController
+php padi make:model User users
 
-# Generate all
-php scripts/generate.php crud-all --write
+# Complete CRUD scaffolding
+php padi generate:crud users
+php padi ga
 ```
 
 ### Start Server
 
 ```bash
-php -S localhost:8085 -t public
+php padi serve
 ```
 
 Visit: `http://localhost:8085`

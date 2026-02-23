@@ -17,6 +17,10 @@
   - `generate:crud` (alias `g`): Generate complete CRUD scaffolding for a single table.
   - `generate:crud-all` (alias `ga`): Bulk generate CRUD for all tables in the database with auto-routing.
 - **Improved Batch Scripts**: Replaced legacy `init_app.bat` and `init_server.bat` with native `padi` CLI commands for better consistency and error handling.
+- **Core Architecture Refactoring**:
+  - Refactored `public/index.php` into a dedicated `Wibiesana\Padi\Core\Application` class.
+  - Slimmed down the entry point to a minimal bootstrap script.
+  - Improved separation of concerns and maintainability for the core request lifecycle.
 
 ### Performance & Stability
 

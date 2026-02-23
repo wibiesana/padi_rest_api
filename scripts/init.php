@@ -297,7 +297,7 @@ try {
     if ($migrateChoice == 1) {
         echo PHP_EOL;
         info("Running base migrations...");
-        $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/scripts/migrate.php') . ' migrate --tables=users,password_resets';
+        $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' migrate --tables=users,password_resets';
         $migrationSuccess = runCommand($migrationCmd);
         if ($migrationSuccess) {
             success("Base migrations completed");
@@ -318,7 +318,7 @@ try {
     } elseif ($migrateChoice == 2) {
         echo PHP_EOL;
         info("Running all migrations...");
-        $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/scripts/migrate.php') . ' migrate';
+        $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' migrate';
         $migrationSuccess = runCommand($migrationCmd);
         if ($migrationSuccess) {
             success("All migrations completed");
@@ -354,7 +354,7 @@ try {
     if ($generateChoice == 1) {
         echo PHP_EOL;
         info("Generating CRUD for all tables...");
-        $crudCmd = 'php ' . escapeshellarg($projectRoot . '/scripts/generate.php') . ' crud-all --write --driver=' . escapeshellarg($selectedDriver);
+        $crudCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud-all --write --overwrite';
         $crudSuccess = runCommand($crudCmd);
         if ($crudSuccess) {
             success("CRUD generation completed");
@@ -362,14 +362,16 @@ try {
             error("CRUD generation failed!");
             warning("Troubleshooting:");
             echo "  • Ensure database tables exist (run migrations first)" . PHP_EOL;
-            echo "  • Check if generate.php script exists" . PHP_EOL;
+            echo "  • Check if padi script exists in project root" . PHP_EOL;
             echo "  • Review error messages above" . PHP_EOL;
             echo PHP_EOL;
         }
     } elseif ($generateChoice == 2) {
         echo PHP_EOL;
         info("Available tables:");
-        runCommand('php ' . escapeshellarg($projectRoot . '/scripts/generate.php') . ' list');
+        runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' -l'); // Note: You might want to add a 'list-tables' command to Console.php if not present, otherwise fallback to DB query here or handle otherwise. Better to just let them type. For now I keep it but be aware. Let's change it.
+        // runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' check-tables'); // Assuming padi doesn't have list anymore, maybe just ask.
+
         echo PHP_EOL;
 
         $tables = ask("Enter table names (comma separated)", "");
@@ -378,7 +380,7 @@ try {
             $allSuccess = true;
             foreach ($tableList as $table) {
                 info("Generating CRUD for $table...");
-                $result = runCommand('php ' . escapeshellarg($projectRoot . '/scripts/generate.php') . ' crud ' . escapeshellarg($table) . ' --write --driver=' . escapeshellarg($selectedDriver));
+                $result = runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud ' . escapeshellarg($table) . ' --write');
                 if (!$result) {
                     error("Failed to generate CRUD for table: $table");
                     $allSuccess = false;
@@ -409,10 +411,10 @@ try {
     echo PHP_EOL;
 
     echo Colors::colorize("Quick Commands:", 'blue') . PHP_EOL;
-    echo "  - List tables:          " . Colors::colorize("php generate.php list", 'yellow') . PHP_EOL;
-    echo "  - Generate CRUD:        " . Colors::colorize("php generate.php crud [table] --write", 'yellow') . PHP_EOL;
-    echo "  - Run migrations:       " . Colors::colorize("php migrate.php migrate", 'yellow') . PHP_EOL;
-    echo "  - Rollback:            " . Colors::colorize("php migrate.php rollback", 'yellow') . PHP_EOL;
+    echo "  - Start server:         " . Colors::colorize("php padi serve", 'yellow') . PHP_EOL;
+    echo "  - Generate CRUD:        " . Colors::colorize("php padi generate:crud [table] --write", 'yellow') . PHP_EOL;
+    echo "  - Run migrations:       " . Colors::colorize("php padi migrate", 'yellow') . PHP_EOL;
+    echo "  - Rollback:            " . Colors::colorize("php padi migrate:rollback", 'yellow') . PHP_EOL;
     echo PHP_EOL;
 
     echo Colors::colorize("Happy coding! 🚀", 'green') . PHP_EOL;

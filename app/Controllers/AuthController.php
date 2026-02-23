@@ -7,7 +7,6 @@ use Wibiesana\Padi\Core\Request;
 use Wibiesana\Padi\Core\Auth;
 use Wibiesana\Padi\Core\Queue;
 use Wibiesana\Padi\Core\Env;
-use Wibiesana\Padi\Core\Database;
 use App\Models\User;
 
 class AuthController extends Controller

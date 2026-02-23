@@ -1,6 +1,6 @@
-# ⚡ Code Generator
+# ⚡ Code Generator & CLI
 
-**Padi REST API Framework v1.0.1**
+**Padi REST API Framework v2.0.1**
 
 ---
 
@@ -10,7 +10,109 @@ The Code Generator automatically creates Models, Controllers, and Routes from yo
 
 ---
 
-## Generator Commands
+## Padi CLI (NEW! 🚀)
+
+The framework now includes a powerful CLI tool named `padi` in your project root. It provides a more streamlined way to run generator commands and manage your application.
+
+### Basic Usage
+
+```bash
+php padi <command> [arguments] [options]
+```
+
+---
+
+## Generator Commands (CLI)
+
+### Serve Application
+
+Start the local development server:
+
+```bash
+php padi serve
+# Or with options
+php padi serve --port=8888 --host=0.0.0.0
+```
+
+### Initialize Application (Setup Wizard)
+
+Run the interactive setup wizard to configure `.env`, database, and generate initial keys:
+
+```bash
+php padi init
+# Alias
+php padi setup
+```
+
+### Create Controller
+
+```bash
+php padi make:controller Product
+```
+
+Creates:
+
+- `app/Controllers/Base/ProductController.php`
+- `app/Controllers/ProductController.php`
+
+### Create Model
+
+```bash
+php padi make:model products
+```
+
+Creates:
+
+- `app/Models/Base/Product.php`
+- `app/Models/Product.php`
+
+### Create Migration
+
+```bash
+php padi make:migration create_orders_table
+```
+
+Creates a new migration file in `database/migrations/` with a timestamp prefix.
+
+### Run Migrations
+
+```bash
+php padi migrate
+php padi migrate:rollback
+php padi migrate:status
+```
+
+### Generate Complete CRUD
+
+```bash
+php padi generate:crud products
+# Alias
+php padi g products
+```
+
+Creates:
+
+- Model (Base + Concrete)
+- Controller (Base + Concrete)
+- API Resource
+- Postman Collection
+- Updates `routes/api.php`
+
+### Generate CRUD for All Tables
+
+```bash
+php padi generate:crud-all
+# Alias
+php padi ga
+```
+
+Generates complete CRUD for **every table** in the database. When using this command, routes are automatically written to `api.php`.
+
+---
+
+## Legacy Generator Scripts (scripts/generate.php)
+
+While the `padi` CLI is recommended, the legacy scripts are still available for backward compatibility.
 
 ### List All Tables
 
@@ -18,50 +120,11 @@ The Code Generator automatically creates Models, Controllers, and Routes from yo
 php scripts/generate.php list
 ```
 
-Shows all tables in your database.
-
-### Generate Model Only
-
-```bash
-php scripts/generate.php model products
-```
-
-Creates:
-
-- `app/Models/Base/Product.php` (auto-generated)
-- `app/Models/Product.php` (if doesn't exist)
-
-### Generate Controller Only
-
-```bash
-php scripts/generate.php controller Product
-```
-
-Creates:
-
-- `app/Controllers/Base/ProductController.php` (auto-generated)
-- `app/Controllers/ProductController.php` (if doesn't exist)
-
-### Generate Complete CRUD
+### Generate CRUD
 
 ```bash
 php scripts/generate.php crud products --write
 ```
-
-Creates:
-
-- Model (Base + Concrete)
-- Controller (Base + Concrete)
-- Updates `routes/api.php`
-- **Postman Collection** (NEW! 🎉)
-
-### Generate CRUD for All Tables
-
-```bash
-php scripts/generate.php crud-all --write --overwrite
-```
-
-Generates complete CRUD for every table in the database, including API collections.
 
 ---
 
@@ -144,7 +207,7 @@ The generator intelligently creates sample request bodies based on your database
    - Select file from `api_collection/` folder
 
 2. **Configure Variables:**
-   - `{{base_url}}` - Your API URL (default: `http://localhost:8000`)
+   - `{{base_url}}` - Your API URL (default: `http://localhost:8085`)
    - `{{token}}` - Auth token (empty by default)
 
 3. **Get Auth Token:**

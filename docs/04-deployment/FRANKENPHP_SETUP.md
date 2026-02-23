@@ -174,7 +174,7 @@ services:
   api:
     image: dunglas/frankenphp
     ports:
-      - "8000:8085"
+      - "8085:8085"
     volumes:
       - .:/app
     environment:

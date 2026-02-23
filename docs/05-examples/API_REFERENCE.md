@@ -286,7 +286,7 @@ GET /products?page=1&per_page=20&search=laptop&sort=price&order=desc
 ```
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 59
-X-RateLimit-Reset: 1707480000
+X-RateLimit-Reset: 1707480850
 ```
 
 ### Exceeded Response (429)

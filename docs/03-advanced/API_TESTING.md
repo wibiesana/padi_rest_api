@@ -71,7 +71,7 @@ curl -X POST http://localhost:8085/api/products \
 curl -X PUT http://localhost:8085/api/products/1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -d "{\"name\":\"Updated Laptop\",\"price\":18000000}"
+  -d "{\"name\":\"Updated Laptop\",\"price\":18085000}"
 ```
 
 ### 9. Update Stock (Protected)

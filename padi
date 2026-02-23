@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Define project root path
+define('PADI_ROOT', __DIR__);
+
+// Load environment variables from .env file
+if (file_exists(__DIR__ . '/.env')) {
+    Wibiesana\Padi\Core\Env::load(__DIR__ . '/.env');
+}
+
+// Run console
+$console = new Wibiesana\Padi\Core\Console($argv);
+$console->run();

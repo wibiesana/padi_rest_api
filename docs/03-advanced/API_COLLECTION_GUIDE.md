@@ -46,7 +46,7 @@ Output akan menampilkan:
 
 Collection menggunakan 2 variable:
 
-- `{{base_url}}` - URL base aplikasi Anda (default: `http://localhost:8000`)
+- `{{base_url}}` - URL base aplikasi Anda (default: `http://localhost:8085`)
 - `{{token}}` - Bearer token untuk autentikasi (kosong secara default)
 
 **Cara set variable:**
@@ -184,7 +184,7 @@ php scripts/generate.php crud products --write
 # 5. Import file api_collection/product_api_collection.json ke Postman
 
 # 6. Set base_url di Collection Variables (jika berbeda)
-# base_url = http://localhost:8000
+# base_url = http://localhost:8085
 
 # 7. Test endpoint GET All Products
 # Request: GET {{base_url}}/products

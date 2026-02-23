@@ -1,6 +1,6 @@
 # 🌾 Padi REST API Framework - Documentation
 
-> **Version 1.0.5** | Production Ready | Last Updated: 2026-02-21
+> **Version 2.0.1** | Production Ready | Last Updated: 2026-02-23
 
 Welcome to the official documentation for **Padi REST API Framework** - a high-performance, lightweight PHP framework designed for building professional REST APIs with maximum speed and minimal overhead.
 
@@ -588,6 +588,7 @@ docs/
 ## 🌟 Key Features
 
 - ⚡ **Auto CRUD Generator** - Generate models, controllers, and routes automatically
+- 🚀 **Padi CLI** - Powerful command-line interface for development and automation
 - 🔐 **JWT Authentication** - Secure token-based authentication built-in
 - 🗄️ **Multi-Database** - MySQL, MariaDB, PostgreSQL, SQLite support
 - 🚀 **FrankenPHP Ready** - 3-10x performance boost with worker mode
@@ -618,7 +619,7 @@ docs/
 
 ---
 
-**Framework:** Padi REST API v1.0.5  
+**Framework:** Padi REST API v2.0.1  
 **Status:** Production Ready ✅  
 **Security Score:** 9.0/10 🛡️  
 **Performance Score:** 8.5/10 ⚡  

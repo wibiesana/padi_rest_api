@@ -175,6 +175,11 @@ gunzip < backup_file.sql.gz | docker compose exec -T mysql mysql -u root -proot_
 - **Sebab:** Worker mode meng-cache kode di memory.
 - **Solusi:** Restart container: `docker compose restart padi_worker`.
 
+### 3. Memory Usage Increases Over Time
+
+- **Sebab:** Meskipun framework sudah diproteksi dengan auto-reset state per request, aplikasi yang mengelola ribuan data statis sendiri mungkin mengalami memory leak.
+- **Solusi:** Gunakan `MAX_REQUESTS` di konfigurasi FrankenPHP untuk merestart worker secara periodik secara otomatis.
+
 ### 3. Permission Denied di Folder Storage
 
 - **Solusi:** Jalankan command `chown` dan `chmod` di dalam container (lihat bagian Security).
@@ -194,5 +199,5 @@ gunzip < backup_file.sql.gz | docker compose exec -T mysql mysql -u root -proot_
 
 ---
 
-**Last Updated:** 2026-02-09  
-**Version:** 2.1.0 (Docker Optimized) 🐳🚀
+**Last Updated:** 2026-02-23  
+**Version:** 2.0.1 (Stable Worker Mode) 🐳🚀

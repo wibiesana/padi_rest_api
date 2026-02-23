@@ -1,5 +1,38 @@
 # CHANGE LOG
 
+## v2.0.1 (2026-02-23)
+
+### New Console CLI (Padi CLI)
+
+- **Introduction of `padi` CLI**:
+  - Created a new command-line interface inspired by `artisan` and `yii`.
+  - Added entry point executable `padi` in the project root.
+- **Built-in Commands**:
+  - `serve`: Start the PHP development server with host/port options.
+  - `init` (alias `setup`): Launch the interactive setup wizard for new projects.
+  - `make:controller`: Generate new controllers.
+  - `make:model`: Generate models from database tables.
+  - `make:migration`: Generate new migration files with timestamps.
+  - `migrate`, `migrate:rollback`, `migrate:status`: Manage database migrations.
+  - `generate:crud` (alias `g`): Generate complete CRUD scaffolding for a single table.
+  - `generate:crud-all` (alias `ga`): Bulk generate CRUD for all tables in the database with auto-routing.
+- **Improved Batch Scripts**: Replaced legacy `init_app.bat` and `init_server.bat` with native `padi` CLI commands for better consistency and error handling.
+
+### Performance & Stability
+
+- **High-Performance Query Builder**:
+  - Optimized `Query::buildWhere()` loop logic.
+  - Reduced complexity from O(N²) to O(N) by eliminating redundant `array_keys()` and `array_search()` calls during condition parsing.
+- **FrankenPHP Worker Mode Support**:
+  - **Memory Leak Protection**: Automatic reset of static states (Query logs, database errors, and query counters) at the beginning of every request dispatch to ensure stability in long-running worker processes.
+  - **Graceful Termination**: Implemented `TerminateException` for clean control flow exit when sending JSON/Redirect responses, preventing unwanted execution of remaining controller logic in worker mode.
+
+### Documentation Enhancements
+
+- **Reorganized Documentation**:
+  - Updated all documentation files to reflect the new versioning.
+  - Added CLI documentation to `CODE_GENERATOR.md`.
+
 ## v2.0.0 (2026-02-22)
 
 ### Namespace Refactoring

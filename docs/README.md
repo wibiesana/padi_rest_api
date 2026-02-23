@@ -52,6 +52,7 @@ curl http://localhost:8085/
 
 | Topic                                                          | Description                           |
 | -------------------------------------------------------------- | ------------------------------------- |
+| **[Padi CLI](02-core-concepts/CLI_INTERFACE.md)**              | Pusat kendali & command interface     |
 | **[Authentication](02-core-concepts/AUTHENTICATION.md)**       | JWT authentication & security         |
 | **[Models](02-core-concepts/MODELS.md)**                       | Database models & CRUD operations     |
 | **[Controllers](02-core-concepts/CONTROLLERS.md)**             | Request handling & responses          |
@@ -153,13 +154,13 @@ curl http://localhost:8085/
 
 ### Common Tasks
 
-| Task              | Command/Guide                                    |
-| ----------------- | ------------------------------------------------ |
-| Install framework | `composer install`                               |
-| Generate CRUD     | `php scripts/generate.php crud products --write` |
-| Run migrations    | `php scripts/migrate.php migrate`                |
-| Start dev server  | `php -S localhost:8085 -t public`                |
-| Test API          | `curl http://localhost:8085/`                    |
+| Task              | Command/Guide                                             |
+| ----------------- | --------------------------------------------------------- |
+| Install framework | `composer install`                                        |
+| Generate CRUD     | `php padi generate:crud products --write --protected=all` |
+| Run migrations    | `php padi migrate --tables=users,posts`                   |
+| Start dev server  | `php padi serve`                                          |
+| Test API          | `curl http://localhost:8085/`                             |
 
 ### Authentication Endpoints
 
@@ -253,7 +254,7 @@ mvc_rest_api/
 
 ```bash
 # Generate Model + Controller + Routes
-php scripts/generate.php crud products --write
+php padi generate:crud products --write
 
 # Test endpoints
 curl http://localhost:8085/products

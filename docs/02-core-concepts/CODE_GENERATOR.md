@@ -20,6 +20,8 @@ The framework now includes a powerful CLI tool named `padi` in your project root
 php padi <command> [arguments] [options]
 ```
 
+> **Note:** Untuk daftar perintah CLI yang lebih lengkap dan rapi, silakan lihat panduan **[Padi CLI Interface](CLI_INTERFACE.md)**.
+
 ---
 
 ## Generator Commands (CLI)
@@ -110,36 +112,15 @@ Generates complete CRUD for **every table** in the database. When using this com
 
 ---
 
-## Legacy Generator Scripts (scripts/generate.php)
-
-While the `padi` CLI is recommended, the legacy scripts are still available for backward compatibility.
-
-### List All Tables
-
-```bash
-php scripts/generate.php list
-```
-
-### Generate CRUD
-
-```bash
-php scripts/generate.php crud products --write
-```
-
----
-
 ## Command Options
 
 ### `--write`
 
-Actually write files (without this, it's dry-run mode).
+Actually write files (instead of dry-run mode). Required for `crud` and `crud-all`.
 
 ```bash
-# Dry run (preview only)
-php scripts/generate.php crud products
-
-# Actually create files
-php scripts/generate.php crud products --write
+# Actually create files and write to routes/api.php
+php padi generate:crud products --write
 ```
 
 ### `--overwrite`
@@ -147,10 +128,38 @@ php scripts/generate.php crud products --write
 Overwrite existing base files.
 
 ```bash
-php scripts/generate.php crud products --write --overwrite
+php padi generate:crud products --write --overwrite
 ```
 
 **⚠️ Warning:** This overwrites Base files only. Concrete files are never overwritten.
+
+### `--protected`
+
+Define route protection (middleware).
+
+```bash
+# Protect all routes (require auth)
+php padi generate:crud products --write --protected=all
+
+# No protected routes
+php padi generate:crud products --write --protected=none
+```
+
+### `--tables` (for Migrations)
+
+Run migrations for specific tables.
+
+```bash
+php padi migrate --tables=users,posts
+```
+
+### `--step` (for Rollback)
+
+Rollback multiple steps.
+
+```bash
+php padi migrate:rollback --step=2
+```
 
 ---
 
@@ -158,11 +167,11 @@ php scripts/generate.php crud products --write --overwrite
 
 ### Automatic Postman Collection Generation
 
-When you run `crud` or `crud-all` commands, API collection JSON files are automatically created in the `api_collection/` folder.
+When you run `crud` or `crud-all` commands with `--write`, API collection JSON files are automatically created in the `api_collection/` folder.
 
 ```bash
 # Generate CRUD + Postman Collection
-php scripts/generate.php crud products --write
+php padi generate:crud products --write
 
 # Output:
 # 1. Generating Model...
@@ -427,7 +436,7 @@ CREATE TABLE products (
 exit;
 
 # 2. Generate CRUD + API Collection
-php scripts/generate.php crud products --write
+php padi generate:crud products --write --protected=all
 
 # 3. Import api_collection/product_api_collection.json to Postman
 
@@ -438,7 +447,7 @@ php scripts/generate.php crud products --write
 
 ```bash
 # Generate CRUD for all tables
-php scripts/generate.php crud-all --write --overwrite
+php padi generate:crud-all --write --overwrite
 
 # This creates Models, Controllers, and Routes for:
 # - users
@@ -452,7 +461,7 @@ php scripts/generate.php crud-all --write --overwrite
 
 ```bash
 # After adding new columns to products table
-php scripts/generate.php crud products --write --overwrite
+php padi generate:crud products --write --overwrite
 
 # This updates:
 # - app/Models/Base/Product.php (with new columns in $fillable)
@@ -541,7 +550,7 @@ $router->get('/products/category/{categoryId}', [ProductController::class, 'byCa
 If your tables have prefixes (e.g., `tbl_products`):
 
 ```bash
-php scripts/generate.php crud tbl_products --write
+php padi generate:crud tbl_products --write
 ```
 
 This creates:
@@ -589,18 +598,15 @@ You can customize these templates to match your coding style.
 ✅ **DO:**
 
 ```bash
-# Preview first
-php scripts/generate.php crud products
-
 # Then write
-php scripts/generate.php crud products --write
+php padi generate:crud products --write
 ```
 
 ❌ **DON'T:**
 
 ```bash
 # Forget --write and wonder why nothing happened
-php scripts/generate.php crud products
+php padi generate:crud products
 ```
 
 ### 2. Never Edit Base Files
@@ -621,7 +627,7 @@ php scripts/generate.php crud products
 
 ```bash
 # After adding columns to table
-php scripts/generate.php crud products --write --overwrite
+php padi generate:crud products --write --overwrite
 ```
 
 This updates `$fillable` array in base model.
@@ -662,7 +668,7 @@ Enable debug output:
 APP_DEBUG=true
 
 # Run generator
-php scripts/generate.php crud products --write
+php padi generate:crud products --write
 ```
 
 ---
@@ -676,7 +682,7 @@ php scripts/generate.php crud products --write
 mysql -u root -p rest_api_db < database/schema.sql
 
 # 2. Generate CRUD
-php scripts/generate.php crud products --write
+php padi generate:crud products --write
 
 # 3. Customize model (optional)
 # Edit app/Models/Product.php

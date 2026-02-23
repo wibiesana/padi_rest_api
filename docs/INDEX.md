@@ -99,6 +99,15 @@ Perfect for developers new to Padi REST API or setting up a new project.
 
 Essential knowledge for building with Padi REST API.
 
+### Padi CLI (Console)
+
+**[📄 CLI_INTERFACE.md](02-core-concepts/CLI_INTERFACE.md)** ✨ NEW
+
+- Overview & sentralisasi perintah
+- Daftar perintah (App, Make, Migrate, Generate)
+- Opsi & parameter global (`--write`, `--overwrite`, dll)
+- Contoh alur kerja pengembangan
+
 ### Authentication & Security
 
 **[📄 AUTHENTICATION.md](02-core-concepts/AUTHENTICATION.md)** ✨ NEW
@@ -507,22 +516,23 @@ Concise overview with links to:
 
 ### Common Tasks
 
-| Task                  | Documentation                                                  |
-| --------------------- | -------------------------------------------------------------- |
-| Install framework     | [INSTALLATION.md](01-getting-started/INSTALLATION.md)          |
-| Configure environment | [CONFIGURATION.md](01-getting-started/CONFIGURATION.md)        |
-| First API calls       | [FIRST_STEPS.md](01-getting-started/FIRST_STEPS.md)            |
-| Setup database        | [DATABASE_SETUP.md](02-core-concepts/DATABASE_SETUP.md)        |
-| Generate CRUD         | [CODE_GENERATOR.md](02-core-concepts/CODE_GENERATOR.md)        |
-| Add authentication    | [AUTHENTICATION.md](02-core-concepts/AUTHENTICATION.md)        |
-| Create models         | [MODELS.md](02-core-concepts/MODELS.md)                        |
-| Build controllers     | [CONTROLLERS.md](02-core-concepts/CONTROLLERS.md)              |
-| Connect frontend      | [FRONTEND_INTEGRATION.md](03-advanced/FRONTEND_INTEGRATION.md) |
-| Security hardening    | [SECURITY.md](03-advanced/SECURITY.md)                         |
-| Deploy to production  | [PRODUCTION.md](04-deployment/PRODUCTION.md)                   |
-| Deploy with Docker    | [DOCKER.md](04-deployment/DOCKER.md)                           |
-| Troubleshoot issues   | [TROUBLESHOOTING.md](04-deployment/TROUBLESHOOTING.md)         |
-| API reference         | [API_REFERENCE.md](05-examples/API_REFERENCE.md)               |
+| Topic                                                    | Description                                                    |
+| -------------------------------------------------------- | -------------------------------------------------------------- |
+| **[Padi CLI](02-core-concepts/CLI_INTERFACE.md)**        | Pusat kendali & command interface                              |
+| **[Authentication](02-core-concepts/AUTHENTICATION.md)** | JWT authentication & security                                  |
+| Install framework                                        | [INSTALLATION.md](01-getting-started/INSTALLATION.md)          |
+| Configure environment                                    | [CONFIGURATION.md](01-getting-started/CONFIGURATION.md)        |
+| First API calls                                          | [FIRST_STEPS.md](01-getting-started/FIRST_STEPS.md)            |
+| Setup database                                           | [DATABASE_SETUP.md](02-core-concepts/DATABASE_SETUP.md)        |
+| Generate CRUD                                            | [CODE_GENERATOR.md](02-core-concepts/CODE_GENERATOR.md)        |
+| Create models                                            | [MODELS.md](02-core-concepts/MODELS.md)                        |
+| Build controllers                                        | [CONTROLLERS.md](02-core-concepts/CONTROLLERS.md)              |
+| Connect frontend                                         | [FRONTEND_INTEGRATION.md](03-advanced/FRONTEND_INTEGRATION.md) |
+| Security hardening                                       | [SECURITY.md](03-advanced/SECURITY.md)                         |
+| Deploy to production                                     | [PRODUCTION.md](04-deployment/PRODUCTION.md)                   |
+| Deploy with Docker                                       | [DOCKER.md](04-deployment/DOCKER.md)                           |
+| Troubleshoot issues                                      | [TROUBLESHOOTING.md](04-deployment/TROUBLESHOOTING.md)         |
+| API reference                                            | [API_REFERENCE.md](05-examples/API_REFERENCE.md)               |
 
 ---
 

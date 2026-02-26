@@ -2,6 +2,17 @@
 
 ## v2.0.2 (2026-02-26)
 
+### 🐋 Docker & Infrastructure
+
+- **Docker Compose Stack Decoupling**:
+  - Renamed all containers, networks, and volumes across `docker-compose.yml`, `docker-compose.standard.yml`, `docker-compose.worker.yml`, and `docker-compose.nginx.yml` to be unique (prefixes: `padi_dev_`, `padi_std_`, `padi_wrk_`, `padi_ngx_`).
+  - This allows all deployment modes to run simultaneously on the same host without naming conflicts.
+- **Port Mapping Isolation**:
+  - Assigned unique host ports for each environment: Development (8085), Standard (8086), Worker (8087), and Nginx (8088/8443).
+- **Environment Fixes**:
+  - Fixed duplicate `JWT_SECRET` key in `docker-compose.worker.yml`.
+  - Standardized `REDIS_HOST` configuration across all compose files to point to their respective environment-specific Redis containers.
+
 ### 🔴 Critical Security Fixes
 
 - **Cache: PHP Object Injection Prevention**:

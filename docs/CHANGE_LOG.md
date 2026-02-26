@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## v2.0.2 (2026-02-26)
+## v2.0.3 (2026-02-26)
 
 ### 🐋 Docker & Infrastructure
 
@@ -12,6 +12,12 @@
 - **Environment Fixes**:
   - Fixed duplicate `JWT_SECRET` key in `docker-compose.worker.yml`.
   - Standardized `REDIS_HOST` configuration across all compose files to point to their respective environment-specific Redis containers.
+- **Route Management Refactor**:
+  - Relocated `routes` directory to `app/Routes` for better structure within the application bundle. All core systems (Application, Generator) now point to `/app/Routes/api.php`.
+
+---
+
+## v2.0.2 (2026-02-26)
 
 ### 🔴 Critical Security Fixes
 

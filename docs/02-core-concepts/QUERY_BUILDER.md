@@ -256,3 +256,33 @@ $total = Post::findQuery()
 ## 🔒 Security
 
 The Query Builder automatically uses **PDO Prepared Statements** for all values entered through `where()`, `andWhere()`, `orWhere()`, and `having()` methods. This ensures your application is safe from **SQL Injection** attacks.
+
+### LIMIT/OFFSET Safety (v2.0.2)
+
+As of v2.0.2, `LIMIT` and `OFFSET` values are also **bound as `PDO::PARAM_INT`** parameters instead of being interpolated into the SQL string. This prevents potential SQL injection through manipulated pagination values.
+
+### PDO Type Binding (v2.0.2)
+
+All bound parameters use proper PDO types:
+
+| PHP Type | PDO Type          |
+| -------- | ----------------- |
+| `int`    | `PDO::PARAM_INT`  |
+| `bool`   | `PDO::PARAM_BOOL` |
+| `null`   | `PDO::PARAM_NULL` |
+| `string` | `PDO::PARAM_STR`  |
+
+```php
+// All values are properly typed and bound:
+$query->where(['status' => 'active'])  // STR
+      ->andWhere(['>', 'views', 100])  // INT
+      ->whereNull('deleted_at')        // NULL
+      ->limit(10)                      // PARAM_INT (not interpolated)
+      ->offset(20)                     // PARAM_INT (not interpolated)
+      ->all();
+```
+
+---
+
+**Last Updated:** 2026-02-26
+**Version:** 2.0.2

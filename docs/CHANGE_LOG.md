@@ -1,5 +1,98 @@
 # CHANGE LOG
 
+## v2.0.2 (2026-02-26)
+
+### 🔴 Critical Security Fixes
+
+- **Cache: PHP Object Injection Prevention**:
+  - Replaced `unserialize()` with `json_encode()`/`json_decode()` for file cache storage. Using `unserialize()` on untrusted data enables PHP Object Injection attacks that can lead to remote code execution.
+- **Query Builder: SQL Injection via LIMIT/OFFSET**:
+  - `LIMIT` and `OFFSET` values are now bound as `PDO::PARAM_INT` parameters instead of being directly interpolated into the SQL string. This prevents potential SQL injection through manipulated limit/offset values.
+- **File Upload: Path Traversal Prevention**:
+  - Added `sanitizePath()` method with null byte injection protection, directory traversal component removal (`..`), and `realpath()` verification on delete operations.
+  - Added dangerous file extension blacklist (`.php`, `.phar`, `.exe`, `.sh`, etc.) to block remote code execution via uploads.
+  - Added MIME type verification using `finfo` as defense-in-depth against file disguise attacks.
+- **Response: Header Injection Prevention**:
+  - Download filenames are now sanitized to prevent HTTP header injection via `\r\n` characters.
+  - Redirect URLs are validated to prevent open redirect attacks.
+- **Env: Operator Precedence Bug Fix**:
+  - Fixed critical bug in `Env::get()` where the `?:` operator was used instead of explicit `false` check. `getenv()` returns `false` (not empty string) when a variable is not found, causing `?:` to also swallow legitimate empty string values.
+
+### ⚡ Performance Optimizations
+
+- **Response: GZip Compression Rewrite**:
+  - Replaced `ob_start('ob_gzhandler')` with manual `gzencode()`. The `ob_gzhandler` approach creates output buffer leaks in FrankenPHP worker mode since buffers persist between request iterations.
+  - `JSON_PRETTY_PRINT` is now only applied in development mode, saving ~30% bandwidth in production.
+  - Compression is automatically skipped for small payloads (< 1KB) where the overhead outweighs the benefit.
+- **Request: Single Input Read**:
+  - `php://input` is now read exactly **once** and cached internally. Previously, `raw()` would re-read the input stream, which returns empty on the second read.
+  - `input()` method now performs direct key lookup instead of creating a merged array on every call.
+- **Auth: JWT Verification Optimization**:
+  - Pre-creates `Firebase\JWT\Key` object once and caches it (eliminated per-verification instantiation).
+  - Added quick JWT format validation (`substr_count('.') !== 2`) before expensive `JWT::decode()`.
+  - `Auth::userId()` and `Auth::user()` no longer create a new `Request()` instance (which re-reads `php://input`). Now accepts optional `$request` parameter or reads directly from `$_SERVER`.
+- **DatabaseManager: Connection Optimizations**:
+  - MySQL/MariaDB: `STRICT_TRANS_TABLES` SQL mode enabled for data integrity.
+  - MySQL/MariaDB: `MYSQL_ATTR_FOUND_ROWS` enabled for accurate affected-row counts.
+  - SQLite: WAL journal mode, 20MB cache, and `NORMAL` synchronous mode for ~5x faster writes.
+  - Default connection timeout set to 5 seconds to prevent hanging on unresponsive databases.
+- **Query Builder: Proper PDO Type Binding**:
+  - New `bindAndExecute()` method uses proper PDO parameter types: `PARAM_INT` for integers, `PARAM_BOOL` for booleans, `PARAM_NULL` for null values.
+- **Cache: Faster Hashing & Atomic Writes**:
+  - File cache keys now use `xxh3` hash (10x faster than `md5`, non-crypto use is safe for cache keys).
+  - Atomic file writes via temp file + `rename()` prevent partial/corrupted reads under concurrent access.
+- **Queue: Cached Table Init**:
+  - `CREATE TABLE IF NOT EXISTS` is now cached with a static flag, preventing redundant DDL queries on every `push()` call.
+  - Added MySQL index `idx_queue_available(queue, available_at, reserved_at)` for fast job lookup.
+- **Router: Modern PHP Constructs**:
+  - `isCollection()` now uses PHP 8.1+ `array_is_list()` (faster than manual key checking).
+  - Response format routing uses `match` expression instead of `switch`.
+
+### 🏗️ FrankenPHP Worker Mode Fixes
+
+- **Application: Per-Request Cleanup**:
+  - New `cleanupRequest()` method flushes all output buffers and clears superglobals (`$_GET`, `$_POST`, `$_FILES`, `$_COOKIE`) between worker iterations to prevent state bleed.
+  - `gc_collect_cycles()` called before graceful worker restart to free circular references.
+- **Response: Output Buffer Leak Fix**:
+  - Replaced `ob_gzhandler` (which creates persistent output buffers across worker iterations) with explicit `gzencode()`.
+- **Auth: Input Stream Fix**:
+  - `Auth::userId()` no longer creates `new Request()` which would re-read the already-consumed `php://input` stream. Falls back to `$_SERVER['HTTP_AUTHORIZATION']` or `$_SERVER['REDIRECT_HTTP_AUTHORIZATION']` directly.
+
+### 🛡️ Security Headers
+
+- **New Default Headers** (set per request in `Application.php`):
+  - `X-Frame-Options: DENY` — Prevents clickjacking.
+  - `X-Content-Type-Options: nosniff` — Prevents MIME sniffing.
+  - `X-XSS-Protection: 0` — Disabled (modern browsers use CSP instead; old value `1; mode=block` can introduce vulnerabilities).
+  - `Referrer-Policy: strict-origin-when-cross-origin` — Controls referrer information leakage.
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()` — Restricts browser feature access.
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains` — HSTS (production HTTPS only).
+  - `Access-Control-Max-Age: 86400` — Preflight cache for 24 hours (reduces OPTIONS requests).
+  - `Vary: Origin` — Proper CORS response caching.
+
+### 📦 New Features & Improvements
+
+- **Validator**: Added `array`, `regex`, and `nullable` validation rules. String length checks now use `mb_strlen()` for Unicode support.
+- **Logger**: Added `critical()` log level method.
+- **File**: New `sanitizePath()` for path sanitization. Cryptographically secure filenames via `random_bytes(16)`.
+- **Controller**: `isOwner()` now uses strict integer comparison with type cast to prevent type juggling bypass.
+- **Response**: Added HTTP status codes: 301, 304, 405, 409, 429, 502, 503.
+- **Router**: `getStatusCodeName()` made `public static` for reuse from Controller. Added codes: 405, 409, 429, 502, 503.
+- **Queue**: Multi-database DDL support (PostgreSQL, SQLite, MySQL). Transaction rollback safety in error handler.
+- **Email**: Added recipient email validation, config file existence check, UTF-8 charset, SMTP timeout setting.
+- **Resource**: Proper `mixed` type hints and static arrow functions for collection mapping.
+- **All Files**: Added `declare(strict_types=1)` across all core classes.
+
+### 🔧 Directory Permission Hardening
+
+- Changed default directory creation permissions from `0777` to `0750` across all core classes:
+  - `Cache.php` — `storage/cache/`
+  - `Logger.php` — `storage/logs/`
+  - `File.php` — `uploads/`
+  - `DatabaseManager.php` — SQLite database directory
+
+---
+
 ## v2.0.1 (2026-02-23)
 
 ### New Console CLI (Padi CLI)

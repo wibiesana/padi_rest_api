@@ -1,6 +1,6 @@
 # 🚀 Background Jobs & Queue
 
-**Padi REST API Framework v1.0.0**
+**Padi REST API Framework v2.0.2**
 
 The Queue system allows you to offload time-consuming tasks (like sending emails, generating reports, or calling slow third-party APIs) to the background.
 
@@ -30,7 +30,7 @@ A Job is a simple PHP class located in the `app/Jobs` directory. It must impleme
 ```php
 namespace App\Jobs;
 
-use Core\Logger;
+use Wibiesana\Padi\Core\Logger;
 
 class ProcessImageJob
 {
@@ -60,7 +60,7 @@ You can push a job from anywhere in your application (typically from a Controlle
 ### 1. Simple Push
 
 ```php
-use Core\Queue;
+use Wibiesana\Padi\Core\Queue;
 use App\Jobs\ProcessImageJob;
 
 Queue::push(ProcessImageJob::class, [
@@ -102,7 +102,12 @@ QUEUE_MAX_ATTEMPTS=3
 
 # Default queue name
 QUEUE_NAME=default
+
+# Seconds to sleep between job polls (default: 3)
+QUEUE_SLEEP=3
 ```
+
+> **v2.0.2 Improvements**: Table initialization is cached (no repeated `CREATE TABLE IF NOT EXISTS` per push), multi-DB DDL support (MySQL, PostgreSQL, SQLite), and transaction rollback safety in error handler.
 
 ---
 
@@ -115,5 +120,5 @@ QUEUE_NAME=default
 
 ---
 
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0
+**Last Updated:** 2026-02-26  
+**Version:** 2.0.2

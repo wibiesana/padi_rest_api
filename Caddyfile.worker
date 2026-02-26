@@ -11,7 +11,7 @@
 
     # Enable PHP with FrankenPHP worker mode for maximum performance
     php_server {
-        worker /app/public/frankenphp-worker.php 10
+        worker /app/public/index.php 10
     }
 
     # Enable file server for static assets

@@ -1,6 +1,6 @@
 # 🎮 Controllers Guide
 
-**Padi REST API Framework v2.0.0**
+**Padi REST API Framework v2.0.2**
 
 Controllers in Padi REST API handle HTTP requests, perform business logic, and return responses. They serve as the "brain" of your application's endpoints.
 
@@ -133,7 +133,9 @@ public function store()
     $validated = $this->validate([
         'name' => 'required|max:100',
         'price' => 'required|numeric',
-        'category_id' => 'exists:categories,id'
+        'category_id' => 'required|integer|exists:categories,id',
+        'tags' => 'nullable|array',        // NEW in v2.0.2
+        'sku' => 'regex:/^[A-Z0-9-]+$/'    // NEW in v2.0.2
     ]);
 
     // Code execution only reaches here if validation passes.
@@ -200,5 +202,5 @@ class ProductController extends Base\ProductController
 
 ---
 
-**Last Updated:** 2026-02-22  
-**Version:** 2.0.0
+**Last Updated:** 2026-02-26  
+**Version:** 2.0.2

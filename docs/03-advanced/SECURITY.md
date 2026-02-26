@@ -1,12 +1,12 @@
 # 🔒 Security Best Practices
 
-**Padi REST API Framework v1.0.0**
+**Padi REST API Framework v2.0.2**
 
 ---
 
 ## Security Overview
 
-### Security Score: 9.0/10 🛡️
+### Security Score: 9.5/10 🛡️
 
 Padi REST API implements multiple layers of security to protect your application and data.
 
@@ -31,18 +31,25 @@ Padi REST API implements multiple layers of security to protect your application
 
 ## Implemented Security Features
 
-| Feature                      | Status | Description                                 |
-| ---------------------------- | ------ | ------------------------------------------- |
-| **SQL Injection Protection** | ✅     | PDO prepared statements + column validation |
-| **XSS Protection**           | ✅     | X-XSS-Protection header                     |
-| **CSRF Protection**          | ✅     | Stateless JWT (no cookies)                  |
-| **Clickjacking Protection**  | ✅     | X-Frame-Options: DENY                       |
-| **MIME Sniffing Protection** | ✅     | X-Content-Type-Options: nosniff             |
-| **Password Hashing**         | ✅     | Bcrypt with cost 10                         |
-| **Rate Limiting**            | ✅     | 60 requests/minute per IP                   |
-| **CORS Whitelist**           | ✅     | Environment-based configuration             |
-| **HTTPS Enforcement**        | ✅     | HSTS header (production)                    |
-| **Input Validation**         | ✅     | Required for all endpoints                  |
+| Feature                         | Status | Description                                               |
+| ------------------------------- | ------ | --------------------------------------------------------- |
+| **SQL Injection Protection**    | ✅     | PDO prepared statements + LIMIT/OFFSET bound as PARAM_INT |
+| **XSS Protection**              | ✅     | CSP headers (X-XSS-Protection deprecated in favor of CSP) |
+| **CSRF Protection**             | ✅     | Stateless JWT (no cookies)                                |
+| **Clickjacking Protection**     | ✅     | X-Frame-Options: DENY                                     |
+| **MIME Sniffing Protection**    | ✅     | X-Content-Type-Options: nosniff                           |
+| **Password Hashing**            | ✅     | Bcrypt with cost 10                                       |
+| **Rate Limiting**               | ✅     | 60 requests/minute per IP                                 |
+| **CORS Whitelist**              | ✅     | Environment-based configuration + Vary: Origin            |
+| **HTTPS Enforcement**           | ✅     | HSTS header (production)                                  |
+| **Input Validation**            | ✅     | Required for all endpoints                                |
+| **Path Traversal Protection**   | ✅     | `sanitizePath()` + `realpath()` verification              |
+| **File Upload Security**        | ✅     | Extension blacklist + MIME verification                   |
+| **Header Injection Protection** | ✅     | Filename sanitization in downloads                        |
+| **Open Redirect Prevention**    | ✅     | URL validation on redirects                               |
+| **Referrer Policy**             | ✅     | `strict-origin-when-cross-origin`                         |
+| **Permissions Policy**          | ✅     | Camera, microphone, geolocation disabled by default       |
+| **Object Injection Prevention** | ✅     | JSON encode/decode instead of unserialize for cache       |
 
 ---
 
@@ -51,59 +58,166 @@ Padi REST API implements multiple layers of security to protect your application
 ### How It Works
 
 1. **PDO Prepared Statements** - All queries use parameterized statements
-2. **Column Name Validation** - Validates column names against table schema
-3. **Input Sanitization** - Automatic sanitization of user input
+2. **LIMIT/OFFSET Binding** - Bound as `PDO::PARAM_INT` (not interpolated into SQL) **(v2.0.2)**
+3. **Column Name Validation** - Validates column names against table schema
+4. **Emulated Prepares Disabled** - `PDO::ATTR_EMULATE_PREPARES = false` ensures real server-side prepared statements
 
 ### Example
 
 ```php
 // ✅ SAFE - Uses prepared statements
-$products = Query::table('products')
-    ->where('status', '=', $userInput)
-    ->get();
-
-// ✅ SAFE - Validates column names
-$products = Query::table('products')
-    ->orderBy($userColumn, 'DESC')  // Validated against schema
-    ->get();
+$products = Query::find()->from('products')
+    ->where(['status' => $userInput])
+    ->limit(10)   // Bound as PDO::PARAM_INT
+    ->offset(20)  // Bound as PDO::PARAM_INT
+    ->all();
 
 // ❌ UNSAFE - Raw SQL (avoid)
 $sql = "SELECT * FROM products WHERE status = '$userInput'";
-```
-
----
-
-## XSS (Cross-Site Scripting) Protection
-
-### Security Headers
-
-```
-X-XSS-Protection: 1; mode=block
-X-Content-Type-Options: nosniff
-```
-
-### Input Sanitization
-
-```php
-// Automatic HTML escaping in responses
-$this->jsonResponse([
-    'name' => htmlspecialchars($userInput, ENT_QUOTES, 'UTF-8')
-]);
 ```
 
 ### Best Practices
 
 ✅ **DO:**
 
-- Validate and sanitize all user input
-- Use JSON responses (automatic escaping)
-- Set proper Content-Type headers
+- Use the Query Builder or ActiveRecord for all database operations
+- Use parameterized conditions (`where(['column' => $value])`)
+- Validate and whitelist column names for dynamic sorting
 
 ❌ **DON'T:**
 
-- Trust user input
-- Render HTML from user data without escaping
-- Disable XSS protection headers
+- Write raw SQL with string concatenation
+- Interpolate user input directly into SQL strings
+- Trust `$_GET`/`$_POST` values for column or table names
+
+---
+
+## Security Headers (v2.0.2)
+
+### Automatically Added Headers
+
+The framework now sets comprehensive security headers on **every response**:
+
+```
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Strict-Transport-Security: max-age=31536000; includeSubDomains  (HTTPS only)
+Access-Control-Max-Age: 86400
+Vary: Origin
+```
+
+> **Note:** `X-XSS-Protection` is set to `0` (disabled) because modern browsers have deprecated the built-in XSS auditor. Using `1; mode=block` can actually introduce vulnerabilities. Use Content-Security-Policy (CSP) instead.
+
+### Additional Headers (Optional)
+
+```php
+// Add in middleware for enhanced protection
+header("Content-Security-Policy: default-src 'self'");
+```
+
+### Best Practices
+
+✅ **DO:**
+
+- Keep all default security headers enabled
+- Add Content-Security-Policy for stricter protection
+- Use HSTS in production with HTTPS
+
+❌ **DON'T:**
+
+- Remove or override security headers without understanding their purpose
+- Use `X-XSS-Protection: 1; mode=block` (deprecated, can cause vulnerabilities)
+- Disable `X-Frame-Options` unless you need to embed your API in iframes
+
+---
+
+## File Upload Security (v2.0.2)
+
+### Built-in Protections
+
+The `Core\File` class now includes multiple layers of upload security:
+
+```php
+use Wibiesana\Padi\Core\File;
+
+// ✅ SAFE - Extension whitelist + blacklist + MIME check
+$path = File::upload($_FILES['document'], 'documents', ['jpg', 'png', 'pdf']);
+```
+
+### Security Layers
+
+1. **Extension Blacklist** — Blocks dangerous extensions (`.php`, `.phar`, `.exe`, `.sh`, etc.) regardless of whitelist
+2. **Extension Whitelist** — Only allows specified file types when provided
+3. **MIME Type Verification** — Uses `finfo` to verify file content matches extension
+4. **Path Traversal Protection** — `sanitizePath()` removes `..`, null bytes, and normalizes separators
+5. **Secure Filenames** — Uses `bin2hex(random_bytes(16))` (32-character hex) instead of `uniqid()`
+6. **Delete Verification** — `realpath()` check ensures deletion stays within uploads directory
+7. **Directory Permissions** — `0750` (owner: rwx, group: rx, others: none)
+
+### Dangerous Extension Blacklist
+
+The following extensions are **always blocked**, even if listed in `$allowedTypes`:
+
+```
+php, phtml, phar, php3, php4, php5, php7, php8, phps
+cgi, pl, asp, aspx, shtml, htaccess
+sh, bat, cmd, com, exe, dll, msi
+py, rb, js, jsp, war
+```
+
+### Best Practices
+
+✅ **DO:**
+
+- Always specify an extension whitelist (`$allowedTypes`)
+- Validate file size limits appropriate for your use case
+- Store files outside the web root when possible
+- Use the built-in `File::upload()` instead of manual `move_uploaded_file()`
+
+❌ **DON'T:**
+
+- Trust the original filename from the client
+- Trust the `$_FILES['type']` MIME (it's client-controlled)
+- Allow executable file extensions under any circumstance
+- Use `0777` directory permissions for upload folders
+
+---
+
+## Cache Security (v2.0.2)
+
+### Object Injection Prevention
+
+**Before (v2.0.1):** File cache used `serialize()`/`unserialize()` which is vulnerable to PHP Object Injection attacks.
+
+**After (v2.0.2):** File cache uses `json_encode()`/`json_decode()` which cannot instantiate PHP objects.
+
+```php
+// ✅ SAFE - JSON-based serialization (v2.0.2)
+Cache::set('user', ['name' => 'John'], 3600);
+
+// File content: {"key":"user","value":{"name":"John"},"expires":1735000000}
+```
+
+### Atomic Writes
+
+Cache files are now written atomically (temp file + rename) to prevent partial reads under concurrent access.
+
+### Best Practices
+
+✅ **DO:**
+
+- Only cache JSON-serializable data (arrays, strings, numbers, booleans)
+- Set appropriate TTL for sensitive data (short expiry)
+- Use Redis in production for better isolation and performance
+
+❌ **DON'T:**
+
+- Cache user passwords or secret tokens
+- Use `serialize()`/`unserialize()` for custom cache implementations
+- Set `0777` permissions on cache directories
 
 ---
 
@@ -156,17 +270,17 @@ if (password_verify($inputPassword, $hashedPassword)) {
 
 ✅ **DO:**
 
-- Use bcrypt with cost 10+
+- Use `password_hash()` with `PASSWORD_BCRYPT` (cost 10+)
 - Enforce strong password requirements
 - Implement password reset with email verification
 - Rate limit login attempts
 
 ❌ **DON'T:**
 
-- Store plain passwords
+- Store plain text passwords
 - Use weak hashing (MD5, SHA1)
-- Allow weak passwords
-- Log passwords
+- Allow weak or common passwords
+- Log passwords in any form
 
 ---
 
@@ -177,9 +291,6 @@ if (password_verify($inputPassword, $hashedPassword)) {
 ```bash
 # Generate 64-character random secret
 php -r "echo bin2hex(random_bytes(32));"
-
-# Example output:
-# 9a6d4f7ebe57a4ebd702e6108f4e5bd1722fa2812ae4b9ae696ce68739e06b18b
 ```
 
 ### JWT Configuration
@@ -190,23 +301,33 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRY=3600
 ```
 
+### Built-in Security Checks (v2.0.2)
+
+The framework automatically validates JWT secrets at startup:
+
+- ❌ Rejects secrets shorter than 32 characters
+- ❌ Rejects common weak secrets (`secret`, `change-this`, `your-secret-key`, etc.)
+- ✅ Pre-creates `Key` object once for efficient verification
+- ✅ Adds `nbf` (not-before) claim to generated tokens
+- ✅ Quick JWT format validation before expensive decode
+
 ### Best Practices
 
 ✅ **DO:**
 
-- Use 64+ character random secret
+- Use 64+ character random secret (`bin2hex(random_bytes(32))`)
 - Use different secrets for dev/staging/production
 - Set appropriate expiry (1-24 hours)
-- Implement token refresh
-- Validate tokens on every request
+- Implement token refresh for long sessions
+- Validate tokens on every protected request
 
 ❌ **DON'T:**
 
-- Use weak secrets ("secret", "password")
+- Use weak secrets (`"secret"`, `"password"`, `"change-this"`)
 - Share secrets between environments
-- Set very long expiry (> 24 hours)
-- Store JWT_SECRET in code
-- Commit .env to version control
+- Set very long expiry (> 24 hours) without refresh
+- Store JWT_SECRET in source code
+- Commit `.env` to version control
 
 ---
 
@@ -230,6 +351,19 @@ CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
 
 **Comma-separated list** of allowed origins
 
+### CORS Headers (v2.0.2)
+
+```
+Access-Control-Allow-Origin: <matched origin>
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Response-Format, Accept, Origin
+Access-Control-Max-Age: 86400
+Vary: Origin
+```
+
+The `Vary: Origin` header ensures proper caching of CORS responses by proxies and CDNs.
+
 ### Best Practices
 
 ✅ **DO:**
@@ -246,78 +380,6 @@ CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
 
 ---
 
-## Rate Limiting
-
-### Configuration
-
-```env
-RATE_LIMIT_MAX=60
-RATE_LIMIT_WINDOW=60
-```
-
-- **60 requests per minute** per IP address
-- Returns `429 Too Many Requests` when exceeded
-
-### Adjust for Production
-
-```env
-# Stricter limits for production
-RATE_LIMIT_MAX=30
-RATE_LIMIT_WINDOW=60
-
-# Or per endpoint (custom implementation)
-```
-
-### Best Practices
-
-✅ **DO:**
-
-- Set appropriate limits for your use case
-- Monitor rate limit violations
-- Implement different limits for different endpoints
-
-❌ **DON'T:**
-
-- Set limits too high (allows abuse)
-- Set limits too low (frustrates users)
-- Disable rate limiting in production
-
----
-
-## HTTPS Enforcement
-
-### Enable HTTPS
-
-```env
-APP_ENV=production
-APP_URL=https://api.yourdomain.com
-```
-
-### HSTS Header
-
-```
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-```
-
-Forces browsers to use HTTPS for 1 year.
-
-### Best Practices
-
-✅ **DO:**
-
-- Use HTTPS in production
-- Enable HSTS header
-- Use valid SSL/TLS certificate
-- Redirect HTTP to HTTPS
-
-❌ **DON'T:**
-
-- Use HTTP in production
-- Use self-signed certificates in production
-- Allow mixed content (HTTP + HTTPS)
-
----
-
 ## Input Validation
 
 ### Validation Rules
@@ -331,89 +393,61 @@ protected function getValidationRules(): array
         'name' => 'required|string|max:255',
         'age' => 'required|numeric|min:18|max:120',
         'status' => 'required|in:active,inactive',
-        'user_id' => 'required|exists:users,id'
+        'user_id' => 'required|exists:users,id',
+        'tags' => 'array',              // NEW in v2.0.2
+        'phone' => 'regex:/^\+[0-9]+$/' // NEW in v2.0.2
     ];
 }
 ```
 
 ### Available Rules
 
-| Rule                  | Example              | Description           |
-| --------------------- | -------------------- | --------------------- |
-| `required`            | `required`           | Field must be present |
-| `email`               | `email`              | Must be valid email   |
-| `numeric`             | `numeric`            | Must be number        |
-| `string`              | `string`             | Must be string        |
-| `min:n`               | `min:8`              | Minimum length/value  |
-| `max:n`               | `max:255`            | Maximum length/value  |
-| `in:a,b`              | `in:active,inactive` | Must be one of values |
-| `exists:table,column` | `exists:users,id`    | Must exist in table   |
-| `unique:table,column` | `unique:users,email` | Must be unique        |
+| Rule                  | Example              | Description                     |
+| --------------------- | -------------------- | ------------------------------- |
+| `required`            | `required`           | Field must be present           |
+| `email`               | `email`              | Must be valid email             |
+| `numeric`             | `numeric`            | Must be number                  |
+| `integer`             | `integer`            | Must be integer **(v2.0.2)**    |
+| `min:n`               | `min:8`              | Minimum length (mb_strlen)      |
+| `max:n`               | `max:255`            | Maximum length (mb_strlen)      |
+| `in:a,b`              | `in:active,inactive` | Must be one of values           |
+| `exists:table,column` | `exists:users,id`    | Must exist in table             |
+| `unique:table,column` | `unique:users,email` | Must be unique                  |
+| `confirmed`           | `confirmed`          | Must match \_confirmation field |
+| `date`                | `date`               | Must be valid date              |
+| `boolean`             | `boolean`            | Must be true/false/0/1          |
+| `array`               | `array`              | Must be array **(v2.0.2)**      |
+| `regex:pattern`       | `regex:/^[A-Z]+$/`   | Must match regex **(v2.0.2)**   |
+| `nullable`            | `nullable`           | Allows null values **(v2.0.2)** |
 
 ### Best Practices
 
 ✅ **DO:**
 
-- Validate all user input
-- Use strict validation rules
-- Sanitize input before processing
-- Return clear validation errors
+- Validate **all** user input on every endpoint
+- Use strict validation rules (`required`, `email`, `min`, `max`)
+- Return clear, actionable validation error messages
+- Use `unique` rule for fields that must be unique (email, username)
 
 ❌ **DON'T:**
 
-- Trust user input
-- Skip validation
-- Use weak validation rules
-
----
-
-## Error Handling
-
-### Production Error Handling
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-```
-
-**Never expose:**
-
-- Stack traces
-- Database errors
-- File paths
-- Internal implementation details
-
-### Error Response Format
-
-```json
-{
-  "success": false,
-  "message": "An error occurred",
-  "errors": {
-    "field": ["Validation error"]
-  }
-}
-```
-
-### Best Practices
-
-✅ **DO:**
-
-- Log errors server-side
-- Return generic error messages
-- Use appropriate HTTP status codes
-- Monitor error logs
-
-❌ **DON'T:**
-
-- Expose stack traces to users
-- Return database errors
-- Show file paths
-- Ignore errors
+- Trust user input without validation
+- Skip validation on update endpoints
+- Use overly permissive rules (e.g., only `required` for an email field)
+- Expose internal field names in validation errors
 
 ---
 
 ## Database Security
+
+### Connection Security (v2.0.2)
+
+```php
+// Automatically configured:
+PDO::ATTR_EMULATE_PREPARES => false,  // Real prepared statements
+PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+PDO::ATTR_STRINGIFY_FETCHES => false, // Preserve data types
+```
 
 ### Strong Database Password
 
@@ -441,127 +475,106 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON rest_api_db.* TO 'api_user'@'localhost';
 
 ✅ **DO:**
 
-- Use strong database password
-- Create dedicated database user
-- Grant minimum necessary permissions
-- Use different credentials for dev/production
+- Use strong, randomly generated database password
+- Create a dedicated database user for the application
+- Grant only `SELECT, INSERT, UPDATE, DELETE` permissions
+- Use different credentials for dev/staging/production
+- Enable SSL for database connections in production
 
 ❌ **DON'T:**
 
-- Use root user
-- Use weak passwords
-- Grant all permissions
-- Share database credentials
+- Use `root` user for the application
+- Use weak or empty passwords
+- Grant `ALL PRIVILEGES` or `DROP`/`CREATE`/`ALTER`
+- Share database credentials across environments
+- Expose database credentials in logs or error messages
 
 ---
 
-## File Upload Security
+## Directory Permissions (v2.0.2)
 
-### Validation
+All directories created by the framework use restrictive permissions:
 
-```php
-// Validate file type
-$allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-if (!in_array($_FILES['file']['type'], $allowedTypes)) {
-    throw new Exception('Invalid file type');
-}
+| Directory        | Permission | Description           |
+| ---------------- | ---------- | --------------------- |
+| `storage/cache/` | `0750`     | Cache files           |
+| `storage/logs/`  | `0750`     | Log files             |
+| `uploads/`       | `0750`     | Uploaded files        |
+| SQLite DB dir    | `0750`     | SQLite database files |
 
-// Validate file size (5MB max)
-$maxSize = 5 * 1024 * 1024;
-if ($_FILES['file']['size'] > $maxSize) {
-    throw new Exception('File too large');
-}
-
-// Generate unique filename
-$filename = bin2hex(random_bytes(16)) . '.' . $extension;
-```
-
-### Best Practices
-
-✅ **DO:**
-
-- Validate file type and size
-- Generate unique filenames
-- Store files outside web root
-- Scan for malware
-
-❌ **DON'T:**
-
-- Trust file extensions
-- Use original filenames
-- Store in public directory
-- Allow executable files
+> **Changed from `0777` to `0750`** — Only the owner can write, group can read/execute, others have no access.
 
 ---
 
-## API Key Security
+## Rate Limiting
 
-### Environment Variables
+### Configuration
 
 ```env
-# Never hardcode API keys
-STRIPE_API_KEY=sk_live_...
-SENDGRID_API_KEY=SG...
+RATE_LIMIT_MAX=60
+RATE_LIMIT_WINDOW=60
+```
+
+- **60 requests per minute** per IP address
+- Returns `429 Too Many Requests` when exceeded
+
+### Best Practices
+
+✅ **DO:**
+
+- Set appropriate limits for your use case
+- Monitor rate limit violations in logs
+- Consider different limits for different endpoints (e.g., stricter for login)
+
+❌ **DON'T:**
+
+- Set limits too high (allows brute-force attacks)
+- Set limits too low (frustrates legitimate users)
+- Disable rate limiting in production
+
+---
+
+## Error Handling
+
+### Production Error Handling
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+```
+
+**Never expose:**
+
+- Stack traces
+- Database errors
+- File paths
+- Internal implementation details
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "message": "An error occurred",
+  "message_code": "INTERNAL_SERVER_ERROR"
+}
 ```
 
 ### Best Practices
 
 ✅ **DO:**
 
-- Store API keys in .env
-- Use different keys for dev/production
-- Rotate keys regularly
-- Monitor API key usage
+- Log all errors server-side with `Logger::error()`
+- Return generic error messages to clients in production
+- Use appropriate HTTP status codes (400, 401, 403, 404, 422, 500)
+- Monitor error logs regularly
 
 ❌ **DON'T:**
 
-- Hardcode API keys
-- Commit keys to version control
-- Share keys
-- Use same keys across environments
-
----
-
-## Security Headers
-
-### Automatically Added Headers
-
-```
-X-Frame-Options: DENY
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 1; mode=block
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-```
-
-### Additional Headers (Optional)
-
-```php
-// Add in middleware
-header('Content-Security-Policy: default-src \'self\'');
-header('Referrer-Policy: no-referrer');
-header('Permissions-Policy: geolocation=(), microphone=()');
-```
-
----
-
-## Security Monitoring
-
-### What to Monitor
-
-- Failed login attempts
-- Rate limit violations
-- Validation errors
-- Database errors
-- Unusual API usage patterns
-
-### Logging
-
-```php
-// Log security events
-error_log("Failed login attempt: " . $email);
-error_log("Rate limit exceeded: " . $ip);
-error_log("Validation failed: " . json_encode($errors));
-```
+- Expose stack traces to end users
+- Return raw database error messages
+- Show file paths or internal class names
+- Set `APP_DEBUG=true` in production
 
 ---
 
@@ -571,20 +584,23 @@ error_log("Validation failed: " . json_encode($errors));
 
 - [ ] APP_ENV=production
 - [ ] APP_DEBUG=false
-- [ ] Strong JWT_SECRET
-- [ ] CORS configured
+- [ ] Strong JWT_SECRET (64+ chars)
+- [ ] CORS configured (specific domains)
 - [ ] HTTPS enabled
 - [ ] Rate limiting active
 - [ ] Input validation on all endpoints
 - [ ] Error logging enabled
+- [ ] File upload restrictions configured
+- [ ] Directory permissions verified (0750)
 
 ### Database Security
 
 - [ ] Strong database password
 - [ ] Dedicated database user
 - [ ] Minimum permissions
+- [ ] Emulated prepares disabled
 - [ ] Regular backups
-- [ ] Connection encryption
+- [ ] Connection encryption (SSL)
 
 ### Infrastructure Security
 
@@ -605,3 +621,6 @@ error_log("Validation failed: " . json_encode($errors));
 ---
 
 **Previous:** [← Frontend Integration](FRONTEND_INTEGRATION.md) | **Next:** [Production Deployment →](../04-deployment/PRODUCTION.md)
+
+**Last Updated:** 2026-02-26
+**Version:** 2.0.2

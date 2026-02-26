@@ -92,33 +92,44 @@ frankenphp run
 
 Padi REST API is **100% compatible** with worker mode out of the box. Key components involved:
 
-### 1. Worker Script (`public/frankenphp-worker.php`)
+### 1. Application Class (`Application.php`)
 
-This script handles the request loop, ensuring the application stays in memory while resetting state between requests.
+The `Application::run()` method handles the FrankenPHP worker loop with automatic per-request cleanup:
 
-### 2. Framework Compatibility
+- **`cleanupRequest()`** — Flushes output buffers, clears `$_GET`, `$_POST`, `$_FILES`, `$_COOKIE` between iterations
+- **`gc_collect_cycles()`** — Called before graceful restart to free circular references
+- **`MAX_REQUESTS`** — Configurable limit (default: 500) before worker restarts
 
-- **`core/Response.php`**: Replaced all `exit;` calls with a `terminate()` method that understands worker mode. It `returns` in worker mode but `exits` in traditional mode.
-- **`core/Database.php`**: Added `resetQueryLog()` to prevent memory leaks by clearing query history between requests.
+### 2. Framework Compatibility (v2.0.2)
+
+- **`Response.php`**: Uses `TerminateException` instead of `exit()`. GZip uses manual `gzencode()` (not `ob_gzhandler` which leaks buffers between iterations).
+- **`Database.php`**: `resetQueryCount()` clears query logs per request.
+- **`DatabaseManager.php`**: `clearErrors()` resets error history per request.
+- **`Auth.php`**: `userId()` reads from `$_SERVER` directly (does not create `new Request()` which would re-read consumed `php://input`).
+- **`Application.php`**: Health-checks active DB connections with `SELECT 1` to detect stale connections.
 
 ---
 
 ## Technical Reference
 
-### State Management
+### State Management (v2.0.2)
 
-The worker automatically resets:
+The worker automatically resets **per request**:
 
-- ✅ Database query logs
+- ✅ Database query logs & error history
 - ✅ Request/Response objects
-- ✅ Exception handlers
-- ✅ Output buffers
+- ✅ Output buffers (flushed via `ob_end_clean()`)
+- ✅ Superglobals (`$_GET`, `$_POST`, `$_FILES`, `$_COOKIE`)
 
-The worker keeps in memory:
+The worker keeps in memory **across requests**:
 
-- ✅ Loaded classes & Compiled code
+- ✅ Loaded classes & compiled code
 - ✅ Autoloader cache
-- ✅ Route definitions
+- ✅ Route definitions (compiled regex)
+- ✅ Database connections (health-checked)
+- ✅ Redis connections (Cache driver)
+- ✅ JWT Key object (Auth)
+- ✅ Logger instance
 
 ### Memory Management
 
@@ -126,6 +137,7 @@ Worker mode often uses **less memory** in high-traffic scenarios because it does
 
 - **Traditional PHP**: ~15MB per request
 - **Worker Mode**: ~8MB total (shared state)
+- **Graceful Restart**: After `MAX_REQUESTS` iterations, the worker exits so FrankenPHP spawns a fresh one
 
 ---
 
@@ -196,7 +208,36 @@ services:
 
 ### Issue: Memory Leaks
 
-**Solution**: If memory grows continuously, check for unclosed resources or large static variables that aren't being reset.
+**Solution**: As of v2.0.2, the framework automatically:
+
+- Flushes output buffers between requests (`cleanupRequest()`)
+- Clears superglobals between requests
+- Runs `gc_collect_cycles()` before worker restart
+- Restarts after `MAX_REQUESTS` iterations (default: 500)
+
+If leaks persist, check for large static variables in your **extend/** code.
+
+### Issue: "MySQL server has gone away"
+
+**Solution**: The framework health-checks DB connections with `SELECT 1` before each request. If a connection is stale, it's automatically disconnected and reconnected on next use.
+
+### Issue: Auth returns null in worker mode
+
+**Solution**: As of v2.0.2, `Auth::userId()` reads from `$_SERVER['HTTP_AUTHORIZATION']` directly instead of creating a new `Request()` (which would re-read the already-consumed `php://input` stream).
+
+---
+
+## Configuration
+
+### Environment Variables
+
+```env
+# Maximum requests before worker restart (prevents memory buildup)
+MAX_REQUESTS=500
+
+# Enable GZip compression (uses gzencode, not ob_gzhandler)
+ENABLE_COMPRESSION=true
+```
 
 ---
 
@@ -206,12 +247,15 @@ services:
 A: No. The framework handles all abstraction.
 
 **Q: Can I use `die()` or `exit()`?**  
-A: Avoid them. Use `throw new Exception()` or controller return methods. The framework converts `exit` into a safe `return` for workers.
+A: Avoid them. Use `throw new Exception()` or controller return methods. The framework uses `TerminateException` for safe control flow in workers.
 
 **Q: Is it safe for database connections?**  
-A: Yes. Connections are managed and kept alive where possible, or re-established if lost.
+A: Yes. Connections are health-checked per request and auto-reconnected if stale.
+
+**Q: What about output buffers?**  
+A: The framework flushes all output buffers between requests via `cleanupRequest()`. GZip uses `gzencode()` (not `ob_gzhandler`) to avoid buffer leaks.
 
 ---
 
-**Last Updated:** 2026-02-09  
-**Version:** 2.1.0 (FrankenPHP Optimized)
+**Last Updated:** 2026-02-26  
+**Version:** 2.0.2

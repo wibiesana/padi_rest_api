@@ -2,10 +2,11 @@ version: "3.8"
 
 # Development docker-compose.yml - FrankenPHP Standard + Redis
 # Simple setup for local development
+# Port: 8085 (app), 6379 (redis)
 # For production deployment, use specific compose files:
-#   docker compose -f docker-compose.standard.yml up -d  # Standard mode + Redis
-#   docker compose -f docker-compose.worker.yml up -d    # Worker mode + Redis (fastest)
-#   docker compose -f docker-compose.nginx.yml up -d     # Full stack with Nginx + Redis
+#   docker compose -f docker-compose.standard.yml up -d  # Standard mode (port 8086)
+#   docker compose -f docker-compose.worker.yml up -d    # Worker mode (port 8087)
+#   docker compose -f docker-compose.nginx.yml up -d     # Nginx reverse proxy (port 8088)
 
 services:
   # FrankenPHP Application - Standard (HTTP) mode
@@ -14,7 +15,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development
-    container_name: padi_app
+    container_name: padi_dev_app
     restart: unless-stopped
     ports:
       - "8085:8085"
@@ -46,7 +47,7 @@ services:
 
       # Cache: Use Redis when running in Docker
       - CACHE_DRIVER=redis
-      - REDIS_HOST=redis
+      - REDIS_HOST=padi_dev_redis
       - REDIS_PORT=6379
 
       - CORS_ALLOWED_ORIGINS=
@@ -55,27 +56,27 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - padi_network
+      - padi_dev_network
     depends_on:
-      - redis
+      - padi_dev_redis
     command: ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile.standard"]
 
   # Redis for cache/session/rate-limit
-  redis:
+  padi_dev_redis:
     image: redis:7-alpine
-    container_name: padi_redis
+    container_name: padi_dev_redis
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - padi_dev_redis_data:/data
     ports:
       - "6379:6379"
     networks:
-      - padi_network
+      - padi_dev_network
 
 networks:
-  padi_network:
+  padi_dev_network:
     driver: bridge
 
 volumes:
-  redis_data:
+  padi_dev_redis_data:
     driver: local

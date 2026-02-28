@@ -8,7 +8,7 @@ Complete guide for deploying Padi REST API Framework using Docker with support f
 
 ## 🏗️ Architecture & Modes
 
-Tersedia **3 mode deployment** yang sudah dikonfigurasi untuk memenuhi berbagai kebutuhan skenario:
+There are **3 deployment modes** pre-configured for various scenarios:
 
 | Mode           | Compose File                  | Best For                     | Performance           | Feature                            |
 | :------------- | :---------------------------- | :--------------------------- | :-------------------- | :--------------------------------- |
@@ -16,7 +16,7 @@ Tersedia **3 mode deployment** yang sudah dikonfigurasi untuk memenuhi berbagai 
 | **Worker**     | `docker-compose.worker.yml`   | **Production (Recommended)** | ⚡ **10-100x Faster** | High concurrency, memory efficient |
 | **Full Stack** | `docker-compose.nginx.yml`    | Production with SSL/TLS      | ⚡ **10-100x Faster** | Nginx reverse proxy + SSL          |
 
-🎯 **Redis selalu terinstall** dan dikonfigurasi secara default di semua mode deployment!
+🎯 **Redis** is always installed and configured by default in all deployment modes!
 
 ---
 
@@ -33,7 +33,7 @@ php -r "echo bin2hex(random_bytes(32));"
 # Paste result into .env: JWT_SECRET=...
 ```
 
-### 2. Pilih dan Jalankan Mode
+### 2. Choose and Run Mode
 
 #### 🔹 Standard Mode (Development)
 
@@ -42,7 +42,7 @@ docker compose -f docker-compose.standard.yml up -d
 ```
 
 - **API:** http://localhost:8085
-- **Gunakan:** Saat mengembangkan fitur baru (mendukung auto-reload).
+- **Use for:** Developing new features (supports auto-reload).
 
 #### ⚡ Worker Mode (Production)
 
@@ -51,27 +51,27 @@ docker compose -f docker-compose.worker.yml up -d
 ```
 
 - **API:** http://localhost:8085
-- **Gunakan:** Untuk performa maksimal di lingkungan produksi.
-- **Catatan:** Lakukan restart container setelah perubahan kode (`docker compose restart padi_worker`).
+- **Use for:** Maximum performance in production environments.
+- **Note:** Restart the container after code changes (`docker compose restart padi_worker`).
 
 #### 🔒 Full Stack Mode (Nginx + SSL)
 
 ```bash
-# 1. Letakkan sertifikat di docker/nginx/ssl/ (fullchain.pem & privkey.pem)
-# 2. Update server_name di docker/nginx/nginx.conf
+# 1. Place certificates in docker/nginx/ssl/ (fullchain.pem & privkey.pem)
+# 2. Update server_name in docker/nginx/nginx.conf
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-- **API:** http://localhost (HTTP) atau https://localhost (HTTPS)
-- **Gunakan:** Deployment produksi dengan SSL dan Reverse Proxy.
+- **API:** http://localhost (HTTP) or https://localhost (HTTPS)
+- **Use for:** Production deployment with SSL and Reverse Proxy.
 
 ---
 
-## � Configuration
+## ⚙️ Configuration
 
 ### Redis Cache (Default Enabled)
 
-Redis secara otomatis dikonfigurasi sebagai cache driver utama.
+Redis is automatically configured as the primary cache driver.
 
 ```env
 CACHE_DRIVER=redis
@@ -82,13 +82,13 @@ REDIS_PORT=6379
 **Test Redis Connection:**
 
 ```bash
-# Sesuaikan nama file compose dengan mode yang Anda gunakan
+# Adjust the compose file name according to your mode
 docker compose -f docker-compose.worker.yml exec padi_worker php scripts/test_redis.php
 ```
 
 ### Database Management
 
-Jika menggunakan container MySQL di Docker:
+If using the MySQL container in Docker:
 
 ```bash
 # Run migrations
@@ -102,14 +102,14 @@ docker compose exec mysql mysqldump -u root -p rest_api_db > backup.sql
 
 ## 🔄 Management Commands
 
-| Action             | Command (Gunakan `-f <file>` sesuai mode) |
-| :----------------- | :---------------------------------------- |
-| **Start Services** | `docker compose up -d`                    |
-| **Stop Services**  | `docker compose down`                     |
-| **View Logs**      | `docker compose logs -f <service_name>`   |
-| **Check Status**   | `docker compose ps`                       |
-| **Rebuild Image**  | `docker compose build --no-cache`         |
-| **Shell Access**   | `docker compose exec <service_name> bash` |
+| Action             | Command (Use `-f <file>` matching your mode) |
+| :----------------- | :------------------------------------------- |
+| **Start Services** | `docker compose up -d`                       |
+| **Stop Services**  | `docker compose down`                        |
+| **View Logs**      | `docker compose logs -f <service_name>`      |
+| **Check Status**   | `docker compose ps`                          |
+| **Rebuild Image**  | `docker compose build --no-cache`            |
+| **Shell Access**   | `docker compose exec <service_name> bash`    |
 
 ---
 
@@ -117,7 +117,7 @@ docker compose exec mysql mysqldump -u root -p rest_api_db > backup.sql
 
 ### FrankenPHP Worker Settings
 
-Ubah jumlah worker di `Dockerfile` untuk menangani traffic tinggi:
+Change the number of workers in `Dockerfile` to handle high traffic:
 
 ```dockerfile
 # Default: 4 workers
@@ -127,23 +127,23 @@ CMD ["frankenphp", "php-server", "--worker", "public/frankenphp-worker.php", "--
 ### Horizontal Scaling
 
 ```bash
-# Memperbanyak instance app (hanya di mode yang mendukung load balancer)
+# Scale up app instances (only in modes supporting a load balancer)
 docker compose up -d --scale padi_app=3
 ```
 
 ---
 
-## �️ Security Best Practices
+## 🛡️ Security Best Practices
 
-- ✅ **Disable Debug:** Pastikan `APP_DEBUG=false` di `.env` produksi.
-- ✅ **Strong Secret:** Gunakan `JWT_SECRET` minimal 64 karakter.
+- ✅ **Disable Debug:** Ensure `APP_DEBUG=false` in your production `.env`.
+- ✅ **Strong Secret:** Use a `JWT_SECRET` of at least 64 characters.
 - ✅ **File Permissions:**
   ```bash
   docker compose exec padi_app chown -R www-data:www-data storage
   docker compose exec padi_app chmod -R 775 storage
   ```
-- ✅ **SSL/TLS:** Selalu gunakan HTTPS di lingkungan produksi.
-- ✅ **Firewall:** Jangan ekspose port database (3306) ke publik.
+- ✅ **SSL/TLS:** Always use HTTPS in production environments.
+- ✅ **Firewall:** Do not expose the database port (3306) to the public.
 
 ---
 
@@ -163,30 +163,30 @@ gunzip < backup_file.sql.gz | docker compose exec -T mysql mysql -u root -proot_
 
 ---
 
-## � Troubleshooting
+## 🔧 Troubleshooting
 
 ### 1. Redis Connection Failed
 
-- **Cek Status:** `docker compose ps redis`
-- **Solusi:** Pastikan `REDIS_HOST=redis` di `.env`.
+- **Check Status:** `docker compose ps redis`
+- **Solution:** Ensure `REDIS_HOST=redis` in `.env`.
 
-### 2. Kode Tidak Berubah (Worker Mode)
+### 2. Code Doesn't Change (Worker Mode)
 
-- **Sebab:** Worker mode meng-cache kode di memory.
-- **Solusi:** Restart container: `docker compose restart padi_worker`.
+- **Cause:** Worker mode caches code in memory.
+- **Solution:** Restart the container: `docker compose restart padi_worker`.
 
 ### 3. Memory Usage Increases Over Time
 
-- **Sebab:** Meskipun framework sudah diproteksi dengan auto-reset state per request, aplikasi yang mengelola ribuan data statis sendiri mungkin mengalami memory leak.
-- **Solusi:** Gunakan `MAX_REQUESTS` di konfigurasi FrankenPHP untuk merestart worker secara periodik secara otomatis.
+- **Cause:** Even though the framework resets state per request, applications managing large static data themselves might leak memory.
+- **Solution:** Rely on `MAX_REQUESTS` in FrankenPHP configuration to automatically restart the worker periodically.
 
-### 3. Permission Denied di Folder Storage
+### 4. Permission Denied in Storage Folder
 
-- **Solusi:** Jalankan command `chown` dan `chmod` di dalam container (lihat bagian Security).
+- **Solution:** Run the `chown` and `chmod` commands inside the container (see Security section).
 
-### 4. Port 8085 Sudah Digunakan
+### 5. Port 8085 is in Use
 
-- **Solusi:** Ubah port mapping di file `docker-compose.yml` yang Anda gunakan.
+- **Solution:** Change the port mapping in the `docker-compose.yml` file you are using.
 
 ---
 

@@ -1,8 +1,8 @@
-## Data Pagination - Masalah Terpecahkan!
+## Data Pagination - Problem Solved!
 
-Sekarang API sudah menghasilkan data pagination yang lengkap dalam response. Berikut adalah contoh response yang akan Anda dapatkan:
+The API now generates complete pagination data in the response. Here is an example of the response you will receive:
 
-### ✅ Response Format Dengan Pagination
+### ✅ Response Format With Pagination
 
 **URL:** `GET /posts?page=1&per_page=5`
 
@@ -40,20 +40,20 @@ Sekarang API sudah menghasilkan data pagination yang lengkap dalam response. Ber
 }
 ```
 
-### 📊 Informasi Pagination Yang Tersedia
+### 📊 Available Pagination Information
 
-Field dalam `meta` object memberikan semua informasi yang Anda butuhkan untuk frontend pagination:
+The fields within the `meta` object provide all the information you need for frontend pagination:
 
-- **`total`**: Total jumlah items keseluruhan (25)
-- **`per_page`**: Jumlah items per halaman (5)
-- **`current_page`**: Halaman saat ini (1)
-- **`last_page`**: Halaman terakhir (5)
-- **`from`**: Index item pertama di halaman ini (1)
-- **`to`**: Index item terakhir di halaman ini (5)
+- **`total`**: Total number of items (25)
+- **`per_page`**: Number of items per page (5)
+- **`current_page`**: The current page (1)
+- **`last_page`**: The last page (5)
+- **`from`**: Index of the first item on this page (1)
+- **`to`**: Index of the last item on this page (5)
 
-### 🎯 Implementasi Frontend
+### 🎯 Frontend Implementation
 
-**Komponen Pagination:**
+**Pagination Component:**
 
 ```javascript
 function Pagination({ meta, onPageChange }) {
@@ -83,7 +83,7 @@ function Pagination({ meta, onPageChange }) {
   );
 }
 
-// Contoh penggunaan
+// Usage Example
 const [posts, setPosts] = useState([]);
 const [pagination, setPagination] = useState(null);
 
@@ -98,22 +98,22 @@ async function fetchPosts(page = 1) {
 }
 ```
 
-### 🔧 Yang Sudah Diperbaiki
+### 🔧 What's Been Fixed
 
-1. **✅ ActiveRecord.paginate()** - Menghasilkan `meta` key instead of `pagination`
-2. **✅ Controller.collection()** - Menerima dan mengirim `meta` data
-3. **✅ Generator templates** - Updated untuk menggunakan struktur yang benar
+1. **✅ ActiveRecord.paginate()** - Generates `meta` key instead of `pagination`
+2. **✅ Controller.collection()** - Accepts and sends `meta` data
+3. **✅ Generator templates** - Updated to use the correct structure
 4. **✅ Response format** - Consistent `item` + `meta` structure
-5. **✅ Documentation** - Complete examples untuk semua frontend frameworks
+5. **✅ Documentation** - Complete examples for all frontend frameworks
 
-### 🚀 Cara Testing
+### 🚀 How to Test
 
 ```bash
 # Test pagination endpoint
 curl "http://localhost:8085/posts?page=1&per_page=5"
 
-# Test tanpa pagination
+# Test without pagination
 curl "http://localhost:8085/posts/all"
 ```
 
-Sekarang Anda bisa mengimplementasikan pagination di frontend dengan mudah menggunakan data yang lengkap di field `meta`! 🎉
+You can now easily implement pagination in the frontend using the complete data in the `meta` field! 🎉

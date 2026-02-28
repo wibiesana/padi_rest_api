@@ -1,92 +1,92 @@
 # FrankenPHP Mode Configuration
 
-Aplikasi ini mendukung dua mode operasional FrankenPHP:
+This application supports two FrankenPHP operational modes:
 
-## Mode yang Tersedia
+## Available Modes
 
 ### 1. **Standard Mode** (Default)
 
-- PHP dijalankan untuk setiap request
-- Cocok untuk development dan debugging
-- Memory usage lebih rendah
-- Performa: ~50-70ms per request
+- PHP runs for every request
+- Suitable for development and debugging
+- Lower memory usage
+- Performance: ~50-70ms per request
 
 ### 2. **Worker Mode** (Production)
 
-- PHP worker tetap di memory
-- Bootstrap aplikasi hanya sekali
-- Performa tinggi untuk production
-- Performa: ~25-35ms per request setelah warm-up
+- PHP worker stays in memory
+- Application bootstrap happens only once
+- High performance for production
+- Performance: ~25-35ms per request after warm-up
 
-## Cara Menggunakan
+## How to Use
 
-### Metode 1: Quick Switch (Tanpa Rebuild)
+### Method 1: Quick Switch (No Rebuild)
 
-Cepat, tidak perlu rebuild image:
+Fast, no need to rebuild the image:
 
 ```powershell
-# Switch ke worker mode
+# Switch to worker mode
 .\quick-switch.ps1 worker
 
-# Switch ke standard mode
+# Switch to standard mode
 .\quick-switch.ps1 standard
 ```
 
-### Metode 2: Full Rebuild
+### Method 2: Full Rebuild
 
-Rebuild image dari awal (lebih aman):
+Rebuild the image from scratch (safer):
 
 ```powershell
-# Switch ke worker mode
+# Switch to worker mode
 .\switch-mode.ps1 worker
 
-# Switch ke standard mode
+# Switch to standard mode
 .\switch-mode.ps1 standard
 ```
 
-### Metode 3: Manual
+### Method 3: Manual
 
 ```powershell
-# 1. Copy Caddyfile yang diinginkan
+# 1. Copy the desired Caddyfile
 Copy-Item Caddyfile.worker Caddyfile
-# atau
+# or
 Copy-Item Caddyfile.standard Caddyfile
 
 # 2. Restart container
 docker-compose restart app
 ```
 
-## File Konfigurasi
+## Configuration Files
 
-- `Caddyfile.standard` - Konfigurasi standard mode
-- `Caddyfile.worker` - Konfigurasi worker mode
-- `Caddyfile` - File aktif yang digunakan (di-copy dari salah satu di atas)
+- `Caddyfile.standard` - Standard mode configuration
+- `Caddyfile.worker` - Worker mode configuration
+- `Caddyfile` - Active configuration file (copied from one of the above)
 
-## Testing Performa
+## Performance Testing
 
 ```powershell
 # Single request
 curl http://localhost:8085/
 
-# Multiple requests untuk test performa
+# Multiple requests for performance testing
 1..10 | ForEach-Object {
     Measure-Command { curl.exe -s http://localhost:8085/ | Out-Null } |
     Select-Object -ExpandProperty TotalMilliseconds
 }
 ```
 
-## Rekomendasi
+## Recommendations
 
-- **Development**: Gunakan **standard mode** untuk debugging yang lebih mudah
-- **Production**: Gunakan **worker mode** untuk performa maksimal
-- **Testing**: Gunakan **standard mode** untuk test yang lebih konsisten
+- **Development**: Use **standard mode** for easier debugging
+- **Production**: Use **worker mode** for maximum performance
+- **Testing**: Use **standard mode** for more consistent tests
 
 ## Troubleshooting
 
-Jika ada masalah setelah switch mode:
+If you encounter issues after switching modes:
 
 ```powershell
-# Reset dan rebuild
+# Reset and rebuild
 docker-compose down
 docker-compose build --no-cache
 docker-compose up -d

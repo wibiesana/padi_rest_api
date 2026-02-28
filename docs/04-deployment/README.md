@@ -1,22 +1,22 @@
 # Deployment Documentation
 
-Dokumentasi lengkap untuk deployment dan konfigurasi production Padi REST API.
+Complete documentation for deploying and configuring Padi REST API in production.
 
-## 📚 Daftar Dokumentasi
+## 📚 Documentation List
 
 ### Docker & Redis
 
-- **[DOCKER_MODE_SELECTION.md](DOCKER_MODE_SELECTION.md)** ✨ - Pilih mode deployment Docker (Standard/Worker/Nginx)
-- **[DOCKER_DEPLOY.md](DOCKER_DEPLOY.md)** ✨ - Complete Docker deployment guide dengan Redis
-- **[REDIS_SETUP.md](REDIS_SETUP.md)** ✨ - Redis cache configuration dan setup
+- **[DOCKER_MODE_SELECTION.md](DOCKER_MODE_SELECTION.md)** ✨ - Choose Docker deployment mode (Standard/Worker/Nginx)
+- **[DOCKER_DEPLOY.md](DOCKER_DEPLOY.md)** ✨ - Complete Docker deployment guide with Redis
+- **[REDIS_SETUP.md](REDIS_SETUP.md)** ✨ - Redis cache configuration and setup
 - **[DOCKER.md](DOCKER.md)** - Docker deployment guide
 
 ### FrankenPHP & Performance
 
-- **[MODE_SWITCHING.md](MODE_SWITCHING.md)** - Cara switch antara Worker Mode dan Standard Mode
-- **[PERFORMANCE.md](PERFORMANCE.md)** - Benchmark dan comparison performa kedua mode
-- **[FRANKENPHP_SETUP.md](FRANKENPHP_SETUP.md)** - Setup lengkap FrankenPHP
-- **[FRANKENPHP_IMPLEMENTATION.md](FRANKENPHP_IMPLEMENTATION.md)** - Detail implementasi FrankenPHP
+- **[MODE_SWITCHING.md](MODE_SWITCHING.md)** - How to switch between Worker Mode and Standard Mode
+- **[PERFORMANCE.md](PERFORMANCE.md)** - Benchmark and performance comparison of both modes
+- **[FRANKENPHP_SETUP.md](FRANKENPHP_SETUP.md)** - Complete FrankenPHP setup guide
+- **[FRANKENPHP_IMPLEMENTATION.md](FRANKENPHP_IMPLEMENTATION.md)** - FrankenPHP implementation details
 
 ### Deployment
 
@@ -38,7 +38,7 @@ docker compose -f docker-compose.worker.yml up -d
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-See [DOCKER_MODE_SELECTION.md](DOCKER_MODE_SELECTION.md) for detailed guide.
+See [DOCKER_MODE_SELECTION.md](DOCKER_MODE_SELECTION.md) for a detailed guide.
 
 ### Switch FrankenPHP Mode
 
@@ -57,12 +57,12 @@ See [DOCKER_MODE_SELECTION.md](DOCKER_MODE_SELECTION.md) for detailed guide.
 | Worker   | ~40ms      | ~28ms         | Production  |
 | Standard | ~110ms     | ~30ms         | Development |
 
-## 📖 Dokumentasi Terkait
+## 📖 Related Documentation
 
-- [Getting Started](../01-getting-started/) - Setup awal aplikasi
-- [Core Concepts](../02-core-concepts/) - Konsep dasar framework
-- [Advanced](../03-advanced/) - Fitur advanced
-- [Examples](../05-examples/) - Contoh implementasi
+- [Getting Started](../01-getting-started/) - Initial application setup
+- [Core Concepts](../02-core-concepts/) - Basic framework concepts
+- [Advanced](../03-advanced/) - Advanced features
+- [Examples](../05-examples/) - Implementation examples
 
 ## 🔗 Quick Links
 

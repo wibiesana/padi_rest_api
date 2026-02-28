@@ -189,13 +189,13 @@ try {
 export const useApi = () => {
   const handleError = (data) => {
     const messages = {
-      INVALID_CREDENTIALS: "Username atau password salah",
-      INVALID_TOKEN: "Sesi Anda telah berakhir",
-      NO_TOKEN_PROVIDED: "Silakan login terlebih dahulu",
-      VALIDATION_FAILED: "Data yang Anda masukkan tidak valid",
-      DATABASE_ERROR: "Gangguan pada server data",
-      NOT_FOUND: "Data tidak ditemukan",
-      FORBIDDEN: "Anda tidak memiliki akses",
+      INVALID_CREDENTIALS: "Invalid username or password",
+      INVALID_TOKEN: "Your session has expired",
+      NO_TOKEN_PROVIDED: "Please log in first",
+      VALIDATION_FAILED: "The data you entered is invalid",
+      DATABASE_ERROR: "Database server error",
+      NOT_FOUND: "Data not found",
+      FORBIDDEN: "You do not have permission to access this",
     };
 
     return messages[data.message_code] || data.message;

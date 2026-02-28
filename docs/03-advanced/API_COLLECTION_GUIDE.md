@@ -1,20 +1,20 @@
 # 📮 Postman Collections Guide
 
-Panduan lengkap penggunaan Postman Collections untuk testing API Padi REST Framework.
+Complete guide for using Postman Collections to test the Padi REST Framework API.
 
 ---
 
-## 📦 Cara Menggunakan
+## 📦 How to Use
 
 ### 1. Generate Postman Collection
 
-Saat Anda menjalankan generate CRUD, Postman collection akan otomatis dibuat:
+When you run the CRUD generator, a Postman collection will be automatically created:
 
 ```bash
 php scripts/generate.php crud products --write
 ```
 
-Output akan menampilkan:
+The output will show:
 
 ```
 1. Generating Model...
@@ -33,32 +33,32 @@ Output akan menampilkan:
   Import this file to Postman to test the API endpoints
 ```
 
-### 2. Import ke Postman
+### 2. Import to Postman
 
-1. Buka aplikasi Postman
-2. Klik **Import** di pojok kiri atas
-3. Pilih file `.json` dari folder `api_collection/`:
+1. Open the Postman application
+2. Click **Import** in the top left corner
+3. Select the `.json` file from the `api_collection/` folder:
    - **`auth_api_collection.json`** - Authentication endpoints (Login, Register, Get Me, Forgot/Reset Password)
    - **`*_api_collection.json`** - Resource endpoints (auto-generated)
-4. Collection akan muncul di sidebar Postman Anda
+4. The collection will appear in your Postman sidebar
 
 ### 3. Setup Environment Variables
 
-Collection menggunakan 2 variable:
+The collections use 2 variables:
 
-- `{{base_url}}` - URL base aplikasi Anda (default: `http://localhost:8085`)
-- `{{token}}` - Bearer token untuk autentikasi (kosong secara default)
+- `{{base_url}}` - The base URL of your application (default: `http://localhost:8085`)
+- `{{token}}` - Bearer token for authentication (empty by default)
 
-**Cara set variable:**
+**How to set variables:**
 
-1. Di Postman, klik nama collection
-2. Pilih tab **Variables**
-3. Update nilai `base_url` sesuai server Anda
-4. Update nilai `token` dengan token hasil login
+1. In Postman, click the collection name
+2. Select the **Variables** tab
+3. Update the `base_url` value according to your server
+4. Update the `token` value with the token returned after login
 
 ### 4. Testing API
 
-Setiap collection berisi endpoint standar CRUD:
+Each collection contains standard CRUD endpoints:
 
 ✅ **GET** - Get All (Paginated) - `GET /resource?page=1&per_page=10`
 ✅ **GET** - Search - `GET /resource?search=keyword`
@@ -68,7 +68,7 @@ Setiap collection berisi endpoint standar CRUD:
 ✅ **PUT** - Update (Protected) - `PUT /resource/1`
 ✅ **DELETE** - Delete (Protected) - `DELETE /resource/1`
 
-Endpoint dengan label **(Protected)** memerlukan Authentication token.
+Endpoints labeled **(Protected)** require an Authentication token.
 
 **Authentication Collection:**
 
@@ -81,21 +81,21 @@ Endpoint dengan label **(Protected)** memerlukan Authentication token.
 
 ---
 
-## 🔐 Mendapatkan Authentication Token
+## 🔐 Getting the Authentication Token
 
-**Otomatis (Recommended):**
+**Automatic (Recommended):**
 
-1. Import collection `auth_api_collection.json`
-2. Jalankan request **Register** atau **Login**
-3. Token akan otomatis disimpan ke variable `{{token}}` (via Test Script)
-4. Gunakan untuk request protected endpoints
+1. Import the `auth_api_collection.json` collection
+2. Run the **Register** or **Login** request
+3. The token will automatically be saved to the `{{token}}` variable (via Test Script)
+4. Use it for subsequent requests to protected endpoints
 
 **Manual:**
 
-1. Jalankan request **POST /auth/register** atau **POST /auth/login**
-2. Copy token dari response
-3. Paste token ke variable `{{token}}` di Collection Variables
-4. Token akan otomatis ditambahkan ke header protected endpoints:
+1. Run the **POST /auth/register** or **POST /auth/login** request
+2. Copy the token from the response
+3. Paste the token into the `{{token}}` variable in Collection Variables
+4. The token will be automatically added to the headers of protected endpoints:
    ```
    Authorization: Bearer {{token}}
    ```
@@ -104,7 +104,7 @@ Endpoint dengan label **(Protected)** memerlukan Authentication token.
 
 ## 📝 Sample Request Body
 
-Setiap request POST/PUT sudah dilengkapi dengan sample data berdasarkan schema database:
+Every POST/PUT request includes smart-generated sample data based on the database schema:
 
 ```json
 {
@@ -116,46 +116,46 @@ Setiap request POST/PUT sudah dilengkapi dengan sample data berdasarkan schema d
 }
 ```
 
-Edit sesuai kebutuhan Anda.
+Edit this as needed for your tests.
 
 ---
 
 ## 🚀 Tips
 
-1. **Generate untuk semua table sekaligus:**
+1. **Generate for all tables at once:**
 
    ```bash
    php scripts/generate.php crud-all --write
    ```
 
-   Ini akan membuat collection untuk semua table di database.
+   This will create a collection for every table in the database.
 
 2. **Organize collections:**
-   - Import semua collections
-   - Buat Folder di Postman untuk mengelompokkan
-   - Gunakan Workspace untuk project berbeda
+   - Import all collections
+   - Create Folders in Postman to group them
+   - Use Workspaces for different projects
 
-3. **Share dengan team:**
-   - Export collection dari Postman
-   - Commit ke Git repository
-   - Team bisa import langsung
+3. **Share with your team:**
+   - Export the collection from Postman
+   - Commit it to your Git repository
+   - Your team can import it directly
 
 4. **Update collection:**
-   - Jika schema berubah, jalankan generate ulang
-   - File akan di-overwrite dengan data terbaru
-   - Import ulang ke Postman
+   - If the schema changes, run the generator again
+   - The file will be overwritten with the latest data
+   - Re-import it into Postman
 
 ---
 
 ## 📁 File Naming Convention
 
-File collection menggunakan format:
+Collection files use the following format:
 
 ```
 {model_name}_api_collection.json
 ```
 
-Contoh:
+Example:
 
 - `auth_api_collection.json` - Authentication endpoints (manual/provided)
 - `product_api_collection.json` - Auto-generated
@@ -164,26 +164,26 @@ Contoh:
 
 ---
 
-## 🎯 Contoh Workflow
+## 🎯 Example Workflow
 
 ```bash
 # 1. Import Auth Collection
 # File: api_collection/auth_api_collection.json
 
-# 2. Register atau Login
+# 2. Register or Login
 # Request: POST {{base_url}}/auth/login
-# Token akan otomatis tersimpan di {{token}} variable
+# Token will be automatically saved to {{token}} variable
 
 # 3. Test Get Me
 # Request: GET {{base_url}}/auth/me
-# Token otomatis terkirim via Authorization header
+# Token is automatically sent via Authorization header
 
-# 4. Generate CRUD + Postman Collection untuk resource
+# 4. Generate CRUD + Postman Collection for resource
 php scripts/generate.php crud products --write
 
-# 5. Import file api_collection/product_api_collection.json ke Postman
+# 5. Import api_collection/product_api_collection.json into Postman
 
-# 6. Set base_url di Collection Variables (jika berbeda)
+# 6. Set base_url in Collection Variables (if different)
 # base_url = http://localhost:8085
 
 # 7. Test endpoint GET All Products
@@ -191,20 +191,20 @@ php scripts/generate.php crud products --write
 
 # 8. Test protected endpoint Create Product
 # Request: POST {{base_url}}/products
-# Authorization: Bearer {{token}} (otomatis dari variable)
+# Authorization: Bearer {{token}} (automatic from variable)
 ```
 
 ---
 
 ## 🔧 Customization
 
-Jika ingin customize collection, edit method `generatePostmanCollection()` di file:
+If you want to customize the collection generation, edit the `generatePostmanCollection()` method in:
 
 ```
 core/Generator.php
 ```
 
-Anda bisa mengubah:
+You can modify:
 
 - Sample data generation
 - Endpoint structure
@@ -216,12 +216,12 @@ Anda bisa mengubah:
 ## ⚙️ Advanced: Generate All Collections
 
 ```bash
-# Generate CRUD untuk semua table + Postman collections
+# Generate CRUD for all tables + Postman collections
 php scripts/generate.php crud-all --write
 
-# Hasilnya:
-# - Model, Controller, Routes untuk semua table
-# - Postman collection untuk setiap table di folder api_collection/
+# Results:
+# - Model, Controller, Routes for all tables
+# - Postman collection for each table in api_collection/ folder
 ```
 
 ---
@@ -230,7 +230,7 @@ php scripts/generate.php crud-all --write
 
 ### Auto-Save Token
 
-Login dan Register endpoints dilengkapi dengan Test Script yang otomatis menyimpan token:
+Login and Register endpoints include a Test Script that automatically saves the token:
 
 ```javascript
 // Auto-save token from response
@@ -245,7 +245,7 @@ if (pm.response.code === 200) {
 
 ### Protected Endpoints
 
-Endpoint yang memerlukan authentication otomatis include Bearer token di header:
+Endpoints that require authentication automatically include the Bearer token in the header:
 
 ```
 Authorization: Bearer {{token}}
@@ -253,7 +253,7 @@ Authorization: Bearer {{token}}
 
 ### Sample Data
 
-Semua POST/PUT requests sudah include sample data yang smart-generated berdasarkan:
+All POST/PUT requests include sample data that is automatically generated based on:
 
 - Column names (email, phone, name, etc)
 - Data types (int, varchar, decimal, etc)
@@ -265,7 +265,7 @@ Semua POST/PUT requests sudah include sample data yang smart-generated berdasark
 
 ```
 api_collection/
-├── README.md                              # Panduan lengkap (moved to docs/)
+├── README.md                              # Complete guide (moved to docs/)
 ├── auth_api_collection.json              # Authentication endpoints
 ├── example_product_api_collection.json   # Example Product API
 └── *_api_collection.json                 # Auto-generated collections
@@ -290,12 +290,12 @@ api_collection/
 POST /auth/login
 ```
 
-- Jika sudah register, bisa langsung pakai
-- Token akan auto-saved
+- If already registered, log in directly
+- The token will be auto-saved
 
 ### Step 3: Create Resources
 
-Jalankan requests ini berurutan:
+Run these requests sequentially:
 
 1. **Create Tag** → Saves tag_id
 2. **Create Post** → Saves post_id
@@ -308,20 +308,20 @@ Jalankan requests ini berurutan:
 - Get All Posts
 - Get Post by ID
 - Get All Comments
-- dll.
+- etc.
 
 ### Step 5: Test UPDATE/DELETE
 
 - Update Post
 - Delete Comment
 - Unlink Tag
-- dll.
+- etc.
 
 ---
 
 ## 🔑 Environment Variables
 
-Collection menggunakan variables otomatis:
+Collections use automatic variables:
 
 | Variable     | Description              | Auto-Saved? |
 | ------------ | ------------------------ | ----------- |
@@ -332,18 +332,18 @@ Collection menggunakan variables otomatis:
 | `tag_id`     | Last created tag         | ✅ Yes      |
 | `comment_id` | Last created comment     | ✅ Yes      |
 
-**Note:** Variables di-save otomatis setelah sukses create!
+**Note:** Variables are auto-saved upon a successful create response (201)!
 
 ---
 
 ## 📝 Test Scripts Included
 
-Collection sudah include **test scripts** yang otomatis:
+Collections come with **test scripts** that automatically run in Postman:
 
 ### Register/Login
 
 ```javascript
-// Auto-save token setelah login
+// Auto-save token after login
 if (pm.response.code === 201) {
   const response = pm.response.json();
   pm.collectionVariables.set("auth_token", response.data.token);
@@ -354,7 +354,7 @@ if (pm.response.code === 201) {
 ### Create Post/Tag/Comment
 
 ```javascript
-// Auto-save ID setelah create
+// Auto-save ID after create
 if (pm.response.code === 201) {
   const response = pm.response.json();
   pm.collectionVariables.set("post_id", response.data.id);
@@ -478,7 +478,7 @@ Headers: Authorization: Bearer {{auth_token}}
 
 1. Click collection name
 2. Click **Variables** tab
-3. Lihat semua variables
+3. View all variables
 
 ### Edit Base URL
 
@@ -488,7 +488,7 @@ Headers: Authorization: Bearer {{auth_token}}
 
 ### Manual Token Input
 
-Jika token tidak auto-save:
+If the token doesn't auto-save:
 
 1. Variables tab
 2. Find `auth_token`
@@ -538,7 +538,7 @@ Jika token tidak auto-save:
 
 ### "Unauthorized" Error
 
-**Problem:** Request butuh auth tapi token tidak ada
+**Problem:** Request needs auth but token is missing
 
 **Solution:**
 
@@ -548,33 +548,33 @@ Jika token tidak auto-save:
 
 ### Variables Not Saved
 
-**Problem:** IDs tidak auto-save setelah create
+**Problem:** IDs don't auto-save after create
 
 **Solution:**
 
 1. Check response code = 201
-2. Check test script ada
+2. Check test script exists
 3. Manual save: Variables tab → paste ID
 
 ### 404 Not Found
 
-**Problem:** Endpoint tidak ditemukan
+**Problem:** Endpoint not found
 
 **Solution:**
 
 1. Check server running: `php -S localhost:8085 -t public`
-2. Check `base_url` variable correct
+2. Check `base_url` variable is correct
 3. Check endpoint path
 
 ### Invalid JSON
 
-**Problem:** Request body format salah
+**Problem:** Incorrect request body format
 
 **Solution:**
 
 1. Check JSON syntax (commas, brackets)
 2. Use Postman's JSON validator
-3. Copy from examples di collection
+3. Copy from examples in the collection
 
 ---
 
@@ -585,22 +585,22 @@ Jika token tidak auto-save:
 1. Click collection → **Run**
 2. Select requests
 3. Click **Run Collection**
-4. Semua requests dijalankan otomatis!
+4. All requests are run sequentially!
 
 ### 2. Export Results
 
 - Runner → Export Results
-- Share hasil testing
+- Share test results
 
 ### 3. Create Environment
 
-- Lebih baik: Buat env untuk dev/staging/prod
-- Duplik collection variables ke environment
-- Switch environment sesuai kebutuhan
+- Recommended: Create environments for dev/staging/prod
+- Move collection variables to the environment
+- Switch environment as needed
 
 ### 4. Use Pre-request Scripts
 
-Tambahkan logic sebelum request:
+Add logic before a request:
 
 ```javascript
 // Pre-request Script
@@ -612,7 +612,7 @@ pm.collectionVariables.set("timestamp", timestamp);
 
 ## ✅ Checklist
 
-Sebelum testing:
+Before testing:
 
 - [ ] Server running (`php -S localhost:8085 -t public`)
 - [ ] Database migrated (`php scripts/migrate.php migrate`)
@@ -621,7 +621,7 @@ Sebelum testing:
 
 Workflow:
 
-- [ ] Register/Login untuk get token
+- [ ] Register/Login to get token
 - [ ] Create resources (Post, Tag, etc.)
 - [ ] Test GET endpoints
 - [ ] Test UPDATE endpoints

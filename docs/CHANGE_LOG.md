@@ -1,5 +1,21 @@
 # CHANGE LOG
 
+## v2.0.4 (2026-02-28)
+
+### 🌍 Documentation Language Update
+
+- **Full English Translation**:
+  - Translated all remaining Indonesian documentation to English for a unified, global developer experience.
+  - Files translated:
+    - `04-deployment/MODE_SWITCHING.md`
+    - `04-deployment/DOCKER.md`
+    - `04-deployment/README.md`
+    - `03-advanced/PAGINATION.md`
+    - `03-advanced/ERROR_HANDLING.md`
+    - `03-advanced/API_COLLECTION_GUIDE.md`
+    - `02-core-concepts/CODE_GENERATOR.md`
+    - `02-core-concepts/CLI_INTERFACE.md`
+
 ## v2.0.3 (2026-02-28)
 
 ### 🔴 Critical Bug Fix

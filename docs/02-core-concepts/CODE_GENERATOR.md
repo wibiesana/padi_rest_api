@@ -20,7 +20,7 @@ The framework now includes a powerful CLI tool named `padi` in your project root
 php padi <command> [arguments] [options]
 ```
 
-> **Note:** Untuk daftar perintah CLI yang lebih lengkap dan rapi, silakan lihat panduan **[Padi CLI Interface](CLI_INTERFACE.md)**.
+> **Note:** For a more complete and organized list of CLI commands, please see the **[Padi CLI Interface](CLI_INTERFACE.md)** guide.
 
 ---
 

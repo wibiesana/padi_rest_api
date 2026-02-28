@@ -6,19 +6,19 @@
 
 ## 📖 Overview
 
-**Padi CLI** adalah pusat kendali aplikasi Anda. Ia menggantikan skrip terpisah yang dulunya berada di folder `scripts/` menjadi satu antarmuka tunggal yang konsisten dan kuat. Menggunakan sistem **Console Core** yang modern, Padi CLI memudahkan proses pengembangan, migrasi database, hingga pembangkitan kode otomatis.
+**Padi CLI** is the control center for your application. It replaces the separate scripts that used to reside in the `scripts/` folder with a single, consistent, and powerful interface. Built on a modern **Console Core** system, Padi CLI streamlines everything from development processes and database migrations to automated code generation.
 
 ---
 
-## 🚀 Penggunaan Dasar
+## 🚀 Basic Usage
 
-Panggil perintah utama melalui terminal di root proyek Anda:
+Run the main command from your terminal in the root of your project:
 
 ```bash
 php padi <command> [arguments] [options]
 ```
 
-Daftar perintah lengkap dapat dilihat dengan:
+To see the complete list of commands, use:
 
 ```bash
 php padi help
@@ -26,74 +26,74 @@ php padi help
 
 ---
 
-## 🛠️ Daftar Perintah (Commands)
+## 🛠️ Command List
 
-### 📂 Aplikasi (Application)
+### 📂 Application (Application)
 
-| Perintah         | Deskripsi                                                           |
-| :--------------- | :------------------------------------------------------------------ |
-| `php padi init`  | Menjalankan Setup Wizard interaktif (Konfigurasi .env, DB, & Keys). |
-| `php padi serve` | Menjalankan development server lokal (Default port: 8085).          |
+| Command          | Description                                                      |
+| :--------------- | :--------------------------------------------------------------- |
+| `php padi init`  | Runs the interactive Setup Wizard (configures .env, DB, & Keys). |
+| `php padi serve` | Starts the local development server (Default port: 8085).        |
 
-### 🔨 Pembuatan Kode (Make)
+### 🔨 Code Generation (Make)
 
-Digunakan untuk membuat file boilerplate baru secara cepat.
+Used to quickly scaffold new boilerplate files.
 
-| Perintah          | Contoh                              | Luaran                                               |
-| :---------------- | :---------------------------------- | :--------------------------------------------------- |
-| `make:controller` | `php padi make:controller Product`  | Membuat controller di `app/Controllers/`.            |
-| `make:model`      | `php padi make:model products`      | Membuat model ActiveRecord di `app/Models/`.         |
-| `make:migration`  | `php padi make:migration add_stock` | Membuat file migrasi baru di `database/migrations/`. |
+| Command           | Example                             | Output                                                  |
+| :---------------- | :---------------------------------- | :------------------------------------------------------ |
+| `make:controller` | `php padi make:controller Product`  | Creates a controller in `app/Controllers/`.             |
+| `make:model`      | `php padi make:model products`      | Creates an ActiveRecord model in `app/Models/`.         |
+| `make:migration`  | `php padi make:migration add_stock` | Creates a new migration file in `database/migrations/`. |
 
-### 🗄️ Migrasi Database (Migrate)
+### 🗄️ Database Migrations (Migrate)
 
-Mengelola perubahan skema database Anda secara terstruktur.
+Manage your database schema changes in a structured way.
 
-| Perintah                    | Deskripsi                                        |
+| Command                     | Description                                      |
 | :-------------------------- | :----------------------------------------------- |
-| `php padi migrate`          | Menjalankan semua migrasi yang belum dieksekusi. |
-| `php padi migrate:status`   | Melihat status migrasi yang sudah/belum jalan.   |
-| `php padi migrate:rollback` | Membatalkan migrasi terakhir.                    |
+| `php padi migrate`          | Runs all pending migrations.                     |
+| `php padi migrate:status`   | Shows the status of executed/pending migrations. |
+| `php padi migrate:rollback` | Rolls back the last batch of migrations.         |
 
-### ⚡ Generator CRUD (Generate)
+### ⚡ CRUD Generator (Generate)
 
-Otomasi penuh untuk membuat fitur API lengkap dari tabel database.
+Full automation to create a complete API feature from a database table.
 
-| Perintah                              | Deskripsi                                                          |
-| :------------------------------------ | :----------------------------------------------------------------- |
-| `php padi generate:crud <table_name>` | Membuat Model, Controller, Resource, Routes, & Postman Collection. |
-| `php padi generate:crud-all`          | Membuat CRUD lengkap untuk **seluruh** tabel di database (Bulk).   |
-
----
-
-## ⚙️ Opsi & Parameter (Flags)
-
-Padi CLI mendukung berbagai flag fleksibel untuk menyesuaikan hasil eksekusi:
-
-### 📄 Opsi Global
-
-- `--write`: Wajib disertakan pada `generate:crud` agar file benar-benar ditulis ke disk (mencegah penulisan tidak sengaja).
-- `--overwrite`: Mengizinkan penimpaan file **Base** yang sudah ada (sangat berguna setelah Anda mengubah skema database).
-- `--force`: Memaksa regenerasi pada tabel yang dilindungi (seperti `users`).
-
-### 🛡️ Opsi Keamanan
-
-- `--protected=all`: Membuat seluruh rute yang dihasilkan otomatis memiliki middleware `Auth`.
-- `--protected=none`: Semua rute publik (tanpa autentikasi).
-- `--middleware=Auth,RoleMiddleware:admin`: Menambahkan middleware kustom ke rute yang dihasilkan.
-
-### 🗄️ Opsi Database & Server
-
-- `--tables=users,posts`: (Khusus `migrate`) Hanya menjalankan migrasi untuk tabel tertentu.
-- `--step=2`: (Khusus `rollback`) Membatalkan migrasi sebanyak X langkah ke belakang.
-- `--port=9000`: (Khusus `serve`) Menjalankan server di port tertentu.
-- `--host=0.0.0.0`: (Khusus `serve`) Mengubah bind host server.
+| Command                               | Description                                                          |
+| :------------------------------------ | :------------------------------------------------------------------- |
+| `php padi generate:crud <table_name>` | Generates Model, Controller, Resource, Routes, & Postman Collection. |
+| `php padi generate:crud-all`          | Generates complete CRUD for **all** tables in the database (Bulk).   |
 
 ---
 
-## 💡 Contoh Alur Kerja (Workflow)
+## ⚙️ Options & Flags
 
-### 1. Memulai Proyek Baru
+Padi CLI supports flexible flags to customize command execution:
+
+### 📄 Global Options
+
+- `--write`: Mandatory for `generate:crud` to actually write files to disk (prevents accidental overwrites).
+- `--overwrite`: Allows overwriting existing **Base** files (very useful after you've changed the database schema).
+- `--force`: Forces regeneration on protected tables (such as `users`).
+
+### 🛡️ Security Options
+
+- `--protected=all`: Automatically applies the `Auth` middleware to all generated routes.
+- `--protected=none`: Makes all routes public (no authentication required).
+- `--middleware=Auth,RoleMiddleware:admin`: Adds custom middleware to the generated routes.
+
+### 🗄️ Database & Server Options
+
+- `--tables=users,posts`: (For `migrate` only) Runs migrations exclusively for the specified tables.
+- `--step=2`: (For `rollback` only) Rolls back the migrations by X steps.
+- `--port=9000`: (For `serve` only) Runs the server on a specific port.
+- `--host=0.0.0.0`: (For `serve` only) Changes the server bind host.
+
+---
+
+## 💡 Example Workflow
+
+### 1. Starting a New Project
 
 ```bash
 composer install
@@ -101,31 +101,31 @@ php padi init
 php padi serve
 ```
 
-### 2. Membuat Fitur CRUD Terproteksi
+### 2. Generating a Protected CRUD Feature
 
-Misalkan Anda baru saja membuat tabel `products` di database:
+Suppose you just created a `products` table in your database:
 
 ```bash
-# Hasilkan kode lengkap dengan proteksi Login
+# Generate the complete code with Login protection
 php padi generate:crud products --write --protected=all
 ```
 
-### 3. Mengelola Migrasi Spesifik
+### 3. Managing Specific Migrations
 
 ```bash
-# Jalankan migrasi hanya untuk tabel transaksi
+# Run migrations only for the transactions and orders tables
 php padi migrate --tables=transactions,orders
 
-# Rollback 3 langkah terakhir
+# Rollback the last 3 steps
 php padi migrate:rollback --step=3
 ```
 
 ---
 
-## 🔍 Tips & Trik
+## 🔍 Tips & Tricks
 
-- **Dry Run**: Gunakan `generate:crud` tanpa `--write` untuk melihat pratinjau file apa saja yang akan dibuat tanpa benar-benar menyentuh disk.
-- **Alias Cepat**: Anda bisa menggunakan `php padi g` untuk `generate:crud` dan `php padi ga` untuk `generate:crud-all`.
+- **Dry Run**: Use `generate:crud` without `--write` to preview which files will be created without touching the disk.
+- **Quick Aliases**: You can use `php padi g` for `generate:crud` and `php padi ga` for `generate:crud-all`.
 
 ---
 

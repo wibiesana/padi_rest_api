@@ -1,6 +1,50 @@
 # CHANGE LOG
 
-## v2.0.3 (2026-02-26)
+## v2.0.3 (2026-02-28)
+
+### 🔴 Critical Bug Fix
+
+- **Health Check: Connection Not Reconnected**:
+  - Fixed a critical bug where `healthCheckConnections()` would disconnect a stale database connection but **not reconnect** it. This caused subsequent requests in worker mode to fail with "MySQL server has gone away" errors. The health check now forces an immediate reconnect after disconnecting a stale connection and resets the `Database` singleton to prevent stale PDO references.
+
+### 🏗️ FrankenPHP Worker Mode Improvements
+
+- **Database Singleton Reset**:
+  - Added `Database::resetInstance()` method to clear the singleton when connections are recycled. Called automatically in `cleanupRequest()` and after health check reconnection to prevent stale PDO references persisting across worker iterations.
+- **Column Cache Lifecycle**:
+  - Added `ActiveRecord::clearColumnsCache()` to manage memory during worker lifetime. Called during graceful worker restart (`$count >= MAX_REQUESTS`) to release accumulated column metadata.
+- **Query Builder State Safety**:
+  - Added `Query::reset()` method to clear all query builder state for safe reuse in long-lived processes.
+  - Fixed `Query::paginate()` to **restore** `limit` and `offset` state after execution, preventing state leakage when the query builder is reused.
+- **Error History Cap**:
+  - `DatabaseManager::logError()` now caps the error history array at 50 entries per-request to prevent unbounded memory growth if many errors occur within a single request cycle.
+
+### 🌐 Shared Hosting Optimizations
+
+- **MySQL/MariaDB Session Timeout**:
+  - `createMySQLConnection()` now sets `SESSION wait_timeout` and `SESSION interactive_timeout` based on the `wait_timeout` config key (default: 28800s). This prevents premature connection closure on shared hosting environments that default to very low timeout values (60-300s).
+- **Connection Limit Protection**:
+  - Added max connection limit check in `DatabaseManager::connection()`. Throws `PDOException` when the configured `max_connections` limit (default: 10) is reached, preventing shared hosting connection exhaustion. Configurable via `config/database.php`.
+- **Batch Insert Chunking**:
+  - `ActiveRecord::batchInsert()` now accepts a `$chunkSize` parameter (default: 500) and automatically splits large datasets into smaller INSERT statements. This prevents exceeding the `max_allowed_packet` limit (typically 1MB-16MB on shared hosting).
+
+### 🔍 Query Builder Enhancements (v2.0.3)
+
+- **`whereRaw($expression, $params)`**: New method for complex WHERE conditions that require raw SQL (subqueries, `CASE WHEN`, etc.). Parameters are still safely bound via PDO.
+- **`exists()` Optimization**: Rewritten to use `SELECT 1 LIMIT 1` instead of `one()` which fetched the entire row with all columns. Significantly reduces data transfer for existence checks.
+- **Version**: Query Builder version constant updated to `2.0.3`.
+
+### 🗃️ ActiveRecord Enhancements (v2.0.3)
+
+- **`findOrFail($id)`**: New convenience method that throws a 404 exception if the record is not found, eliminating repetitive null-check boilerplate in controllers.
+- **`count($conditions)`**: New dedicated count method for quick record counting with optional WHERE conditions, without needing the full Query Builder.
+- **`upsert($data, $updateColumns)`**: New atomic INSERT ... ON DUPLICATE KEY UPDATE for MariaDB/MySQL. Useful for sync operations and bulk data imports.
+
+### 📊 DatabaseManager Monitoring (v2.0.3)
+
+- **`isConnected($name)`**: Check if a specific connection is active and responds to a `SELECT 1` ping. Returns boolean.
+- **`getConnectionCount()`**: Returns the number of active database connections. Useful for monitoring connection usage on limited shared hosting.
+- **`getStatus()`**: Returns a comprehensive status array with active connection count, per-connection health status (`healthy`/`stale`), and error count. Ideal for health check endpoints.
 
 ### 🐋 Docker & Infrastructure
 

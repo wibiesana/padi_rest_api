@@ -100,23 +100,25 @@ The `Application::run()` method handles the FrankenPHP worker loop with automati
 - **`gc_collect_cycles()`** — Called before graceful restart to free circular references
 - **`MAX_REQUESTS`** — Configurable limit (default: 500) before worker restarts
 
-### 2. Framework Compatibility (v2.0.2)
+### 2. Framework Compatibility (v2.0.3)
 
 - **`Response.php`**: Uses `TerminateException` instead of `exit()`. GZip uses manual `gzencode()` (not `ob_gzhandler` which leaks buffers between iterations).
-- **`Database.php`**: `resetQueryCount()` clears query logs per request.
-- **`DatabaseManager.php`**: `clearErrors()` resets error history per request.
+- **`Database.php`**: `resetQueryCount()` clears query logs per request. `resetInstance()` clears singleton when connections are recycled (v2.0.3).
+- **`DatabaseManager.php`**: `clearErrors()` resets error history per request. Error history capped at 50 entries (v2.0.3).
+- **`ActiveRecord.php`**: `clearColumnsCache()` releases column metadata during graceful restart (v2.0.3).
 - **`Auth.php`**: `userId()` reads from `$_SERVER` directly (does not create `new Request()` which would re-read consumed `php://input`).
-- **`Application.php`**: Health-checks active DB connections with `SELECT 1` to detect stale connections.
+- **`Application.php`**: Health-checks active DB connections with `SELECT 1` and **forces immediate reconnect** if stale (v2.0.3 fix).
 
 ---
 
 ## Technical Reference
 
-### State Management (v2.0.2)
+### State Management (v2.0.3)
 
 The worker automatically resets **per request**:
 
 - ✅ Database query logs & error history
+- ✅ Database singleton instance (prevents stale PDO references)
 - ✅ Request/Response objects
 - ✅ Output buffers (flushed via `ob_end_clean()`)
 - ✅ Superglobals (`$_GET`, `$_POST`, `$_FILES`, `$_COOKIE`)
@@ -126,7 +128,8 @@ The worker keeps in memory **across requests**:
 - ✅ Loaded classes & compiled code
 - ✅ Autoloader cache
 - ✅ Route definitions (compiled regex)
-- ✅ Database connections (health-checked)
+- ✅ Database connections (health-checked + auto-reconnected)
+- ✅ Column metadata cache (cleared on graceful restart)
 - ✅ Redis connections (Cache driver)
 - ✅ JWT Key object (Auth)
 - ✅ Logger instance
@@ -137,7 +140,7 @@ Worker mode often uses **less memory** in high-traffic scenarios because it does
 
 - **Traditional PHP**: ~15MB per request
 - **Worker Mode**: ~8MB total (shared state)
-- **Graceful Restart**: After `MAX_REQUESTS` iterations, the worker exits so FrankenPHP spawns a fresh one
+- **Graceful Restart**: After `MAX_REQUESTS` iterations, column cache is cleared, GC runs, then the worker exits
 
 ---
 
@@ -219,7 +222,9 @@ If leaks persist, check for large static variables in your **extend/** code.
 
 ### Issue: "MySQL server has gone away"
 
-**Solution**: The framework health-checks DB connections with `SELECT 1` before each request. If a connection is stale, it's automatically disconnected and reconnected on next use.
+**Solution (v2.0.3)**: The framework health-checks DB connections with `SELECT 1` before each request. If a connection is stale, it's automatically disconnected **and immediately reconnected**. The `Database` singleton is also reset to prevent stale PDO references.
+
+> **v2.0.3 Fix**: Previously, stale connections were only disconnected but not reconnected, which could cause the current request to fail.
 
 ### Issue: Auth returns null in worker mode
 
@@ -257,5 +262,34 @@ A: The framework flushes all output buffers between requests via `cleanupRequest
 
 ---
 
-**Last Updated:** 2026-02-26  
-**Version:** 2.0.2
+## 🌐 Shared Hosting Notes (v2.0.3)
+
+For shared hosting deployments:
+
+- **Connection Limits**: Configure `max_connections` in `config/database.php` (default: 10). The framework throws an exception before exhausting the limit.
+- **Session Timeout**: Configure `wait_timeout` in `config/database.php` to prevent premature disconnection (default: 28800s, some hosts set as low as 60s).
+- **Batch Insert Chunking**: `batchInsert()` auto-chunks to 500 rows to respect `max_allowed_packet`.
+- **Connection Monitoring**: Use `DatabaseManager::getStatus()` for health check endpoints.
+
+```php
+// config/database.php
+return [
+    'default' => 'mysql',
+    'max_connections' => 10,  // Shared hosting protection
+    'connections' => [
+        'mysql' => [
+            'driver' => 'mysql',
+            'host' => Env::get('DB_HOST', 'localhost'),
+            'database' => Env::get('DB_DATABASE'),
+            'username' => Env::get('DB_USERNAME'),
+            'password' => Env::get('DB_PASSWORD'),
+            'wait_timeout' => 28800,  // Session timeout in seconds
+        ],
+    ],
+];
+```
+
+---
+
+**Last Updated:** 2026-02-28  
+**Version:** 2.0.3

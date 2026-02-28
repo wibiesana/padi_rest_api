@@ -1,6 +1,6 @@
 # 🗃️ ActiveRecord Guide
 
-**Padi REST API Framework v2.0.0**
+**Padi REST API Framework v2.0.3**
 
 The `ActiveRecord` class is the heart of the framework's data layer. It provides a powerful, fluent interface for database interactions, relationship management, and automated auditing.
 
@@ -18,6 +18,7 @@ The `ActiveRecord` class is the heart of the framework's data layer. It provides
 - [Default Ordering](#default-ordering)
 - [Lifecycle Hooks (Yii Style)](#lifecycle-hooks)
 - [Database Connection Switching](#database-connection-switching)
+- [Worker Mode & Shared Hosting (v2.0.3)](#worker-mode--shared-hosting-v203)
 
 ---
 
@@ -56,6 +57,13 @@ $all = (new Product())->all();
 
 // Filtered results
 $active = (new Product())->where(['status' => 'active']);
+
+// Find or throw 404 (v2.0.3)
+$product = (new Product())->findOrFail(1);
+
+// Count records (v2.0.3)
+$total = (new Product())->count();
+$activeCount = (new Product())->count(['status' => 'active']);
 ```
 
 ### Writing Data
@@ -130,10 +138,21 @@ Perform high-performance bulk inserts or updates.
     ['name' => 'Item B', 'price' => 20],
 ]);
 
+// Batch Insert with custom chunk size (v2.0.3)
+// Automatically splits into multiple INSERT statements
+// to respect max_allowed_packet limit on shared hosting
+(new Product())->batchInsert($thousandItems, chunkSize: 200);
+
 // Update All matching conditions
 $affectedRows = (new Product())->updateAll(
     ['status' => 'discontinued'],
     ['stock' => 0]
+);
+
+// Upsert - Insert or Update on duplicate key (v2.0.3, MariaDB/MySQL)
+(new Product())->upsert(
+    ['sku' => 'PRD-001', 'name' => 'Coffee', 'price' => 15.00],
+    ['name', 'price'] // columns to update on duplicate
 );
 ```
 
@@ -311,14 +330,56 @@ class ExternalModel extends ActiveRecord {
 
 ---
 
-## 💡 Best Practices
+## 🌐 Worker Mode & Shared Hosting (v2.0.3)
 
-1. **Use findQuery()**: For complex chaining, use `$model->findQuery()` which returns a `Query` builder instance.
-2. **Hide Sensitive Data**: Always add `password`, `token`, etc. to the `$hidden` array.
-3. **Reference in beforeSave**: The `$data` parameter is passed by reference (`&$data`). Use it to modify values before they hit the database.
-4. **Fail Fast**: Return `false` in `beforeDelete` if a record has active dependencies to maintain data integrity.
+### Column Cache Management
+
+In FrankenPHP worker mode, ActiveRecord caches table column metadata in a static array for performance. The cache persists across requests but is automatically cleared during graceful worker restart.
+
+```php
+// Manual cache clear (rarely needed)
+ActiveRecord::clearColumnsCache();
+```
+
+### Batch Insert Chunking
+
+Shared hosting often has low `max_allowed_packet` limits. The `batchInsert()` method automatically chunks large datasets to avoid exceeding these limits.
+
+```php
+// Default chunk size: 500 rows per INSERT
+(new Product())->batchInsert($largeDataset);
+
+// Custom chunk size for constrained environments
+(new Product())->batchInsert($largeDataset, chunkSize: 100);
+```
+
+### Upsert (INSERT ON DUPLICATE KEY UPDATE)
+
+Atomic insert-or-update for MariaDB/MySQL:
+
+```php
+// Insert new record, or update 'name' and 'price' if duplicate key
+(new Product())->upsert(
+    ['sku' => 'PRD-001', 'name' => 'Premium Coffee', 'price' => 15.00],
+    ['name', 'price'] // columns to update on conflict
+);
+
+// Update ALL columns on conflict (omit second parameter)
+(new Product())->upsert(['sku' => 'PRD-001', 'name' => 'Coffee', 'price' => 14.50]);
+```
 
 ---
 
-**Last Updated:** 2026-02-22  
-**Version:** 2.0.0
+## 💡 Best Practices
+
+1. **Use findQuery()**: For complex chaining, use `$model->findQuery()` which returns a `Query` builder instance.
+2. **Use findOrFail()**: In controllers, prefer `findOrFail()` over `find()` + manual null check for cleaner code.
+3. **Hide Sensitive Data**: Always add `password`, `token`, etc. to the `$hidden` array.
+4. **Reference in beforeSave**: The `$data` parameter is passed by reference (`&$data`). Use it to modify values before they hit the database.
+5. **Fail Fast**: Return `false` in `beforeDelete` if a record has active dependencies to maintain data integrity.
+6. **Use upsert() for sync**: When importing or syncing data, prefer `upsert()` over separate find-then-update logic.
+
+---
+
+**Last Updated:** 2026-02-28  
+**Version:** 2.0.3

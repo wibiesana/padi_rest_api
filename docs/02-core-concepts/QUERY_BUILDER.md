@@ -122,6 +122,18 @@ $query->whereNull('deleted_at');
 $query->whereNotNull('updated_at');
 ```
 
+### `whereRaw($expression, $params)` (v2.0.3)
+
+For complex WHERE conditions that require raw SQL (subqueries, `CASE WHEN`, etc.). **Always bind parameters** to prevent SQL injection.
+
+```php
+// Raw condition with bound parameter
+$query->whereRaw('price > :min_price', [':min_price' => 100]);
+
+// Subquery
+$query->whereRaw('category_id IN (SELECT id FROM categories WHERE active = 1)');
+```
+
 ### `join($type, $table, $on)`
 
 Adds a JOIN. Shortcuts available: `innerJoin()`, `leftJoin()`, `rightJoin()`.
@@ -195,6 +207,18 @@ echo $query->where(['id' => 1])->rawSql();
 // SELECT * FROM users WHERE id = '1'
 ```
 
+### `reset()` (v2.0.3)
+
+Resets all query builder state for safe reuse. Important in FrankenPHP worker mode where objects may persist across requests.
+
+```php
+$query = Query::find()->from('users');
+$active = $query->where(['status' => 'active'])->all();
+
+// Reset and reuse the same builder
+$banned = $query->reset()->from('users')->where(['status' => 'banned'])->all();
+```
+
 ---
 
 ## 🏃 Query Execution
@@ -212,7 +236,7 @@ After building the query, use the following methods to retrieve the results:
 | `avg($column)`    | Calculates the average of a column.                                       |
 | `min($column)`    | Finds the minimum value of a column.                                      |
 | `max($column)`    | Finds the maximum value of a column.                                      |
-| `exists()`        | Checks if any record matches the criteria (returns boolean).              |
+| `exists()`        | Checks if any record matches the criteria (optimized: SELECT 1, v2.0.3)   |
 
 ---
 
@@ -282,7 +306,40 @@ $query->where(['status' => 'active'])  // STR
       ->all();
 ```
 
+### DML Operations (INSERT / UPDATE / DELETE)
+
+The Query Builder also supports DML (Data Manipulation Language) operations:
+
+```php
+// INSERT
+$id = Query::find()->from('products')->insert([
+    'name' => 'New Product',
+    'price' => 29.99
+]);
+
+// UPDATE with conditions
+$affected = Query::find()->from('products')
+    ->where(['status' => 'draft'])
+    ->update(['status' => 'published']);
+
+// DELETE with conditions
+$deleted = Query::find()->from('products')
+    ->where(['status' => 'expired'])
+    ->delete();
+```
+
 ---
 
-**Last Updated:** 2026-02-26
-**Version:** 2.0.2
+## 🌐 Worker Mode Notes (v2.0.3)
+
+### State Safety
+
+- **`paginate()`** now preserves `limit`/`offset` state after execution, allowing safe reuse of the query builder.
+- **`count()`**, **`sum()`**, **`avg()`**, **`min()`**, **`max()`** all save and restore the `select` state internally.
+- **`exists()`** uses `SELECT 1 LIMIT 1` for minimal data transfer and state preservation.
+- Use **`reset()`** to fully clear query builder state when reusing a builder across different queries.
+
+---
+
+**Last Updated:** 2026-02-28
+**Version:** 2.0.3

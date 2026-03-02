@@ -75,18 +75,24 @@ Adds a WHERE condition. This will overwrite previous conditions.
 // Associative array (column = value)
 $query->where(['status' => 'published', 'type' => 'post']);
 
-// Custom operator [operator, column, value]
-$query->where(['>', 'views', 100]);
+// Unified format: [column, operator, value] — works for ALL operators
+$query->where(['views', '>', 100]);
 
-// LIKE condition
-$query->where(['like', 'title', 'announcement']);
+// LIKE — auto-wraps % if not present, auto-converts to ILIKE on PostgreSQL
+$query->where(['title', 'LIKE', 'announcement']);
 
-// IN condition
+// IN condition (Hash format shortcut)
 $query->where(['id' => [1, 2, 3]]);
 
 // BETWEEN condition
-$query->where(['between', 'created_at', ['2023-01-01', '2023-12-31']]);
+$query->where(['created_at', 'BETWEEN', ['2023-01-01', '2023-12-31']]);
+
+// NULL handling
+$query->where(['deleted_at', '=', null]);  // → IS NULL
+$query->where(['verified_at', '!=', null]); // → IS NOT NULL
 ```
+
+> **Note:** Legacy format `['LIKE', column, value]` is still supported for backward compatibility, but the canonical format is `[column, 'LIKE', value]`.
 
 ### `andWhere()` / `orWhere()`
 
@@ -94,7 +100,7 @@ Adds additional conditions with AND or OR operators.
 
 ```php
 $query->where(['status' => 'active'])
-      ->andWhere(['>', 'views', 50])
+      ->andWhere(['views', '>', 50])
       ->orWhere(['is_featured' => 1]);
 ```
 
@@ -341,5 +347,5 @@ $deleted = Query::find()->from('products')
 
 ---
 
-**Last Updated:** 2026-02-28
-**Version:** 2.0.3
+**Last Updated:** 2026-03-02
+**Version:** 2.0.4

@@ -46,10 +46,10 @@ class User extends ActiveRecord
             ->from($this->table)
             ->where([
                 'OR',
-                ['LIKE', 'username', "%$keyword%"],
-                ['LIKE', 'email', "%$keyword%"],
-                ['LIKE', 'status', "%$keyword%"],
-                ['LIKE', 'email_verified_at', "%$keyword%"]
+                ['username', 'LIKE', "%$keyword%"],
+                ['email', 'LIKE', "%$keyword%"],
+                ['status', 'LIKE', "%$keyword%"],
+                ['email_verified_at', 'LIKE', "%$keyword%"]
             ])
             ->limit(100)
             ->all();

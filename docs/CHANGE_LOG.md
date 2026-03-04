@@ -14,6 +14,23 @@
 - **Enhanced Search Coverage**:
   - Switched from a keyword-based text column filter to a true **Global Search** that covers all fillable fields by default.
 
+### ⚡ Auth: Performance & Compatibility
+
+- **Per-Request JWT Decode Cache**:
+  - `verifyToken()` now caches the decoded result per-request. Calling both `Auth::userId()` and `Auth::user()` in the same request no longer decodes the JWT twice.
+- **Per-Request Token Extraction Cache**:
+  - `extractToken()` caches the raw bearer token after the first header lookup, eliminating repeated `$_SERVER` reads within the same request.
+- **`userId()` Deduplication**:
+  - `userId()` now delegates to `user()` instead of duplicating the extract → verify flow. Zero overhead thanks to the per-request cache.
+- **`JWT::$leeway` Set Once**:
+  - Moved `JWT::$leeway = 60` from `verifyToken()` (called per-request) to `init()` (called once per process lifetime).
+- **Weak Secrets as `const`**:
+  - Changed the weak secrets array from a local variable to `private const WEAK_SECRETS`, avoiding array re-allocation.
+- **Shared Hosting: `getallheaders()` Fallback**:
+  - `extractToken()` now falls back to `getallheaders()` when `$_SERVER['HTTP_AUTHORIZATION']` and `REDIRECT_HTTP_AUTHORIZATION` are both empty. This handles Apache `mod_php` and certain shared hosting environments that strip the `Authorization` header from `$_SERVER`.
+- **Worker Mode: `Auth::reset()`**:
+  - Added `reset()` method to clear per-request statics (decoded cache, token cache, extraction flag). Called in `Application::cleanupRequest()` to prevent token/user data from leaking between FrankenPHP worker requests.
+
 ## v2.0.4 (2026-03-02)
 
 ### 🔴 Critical Bug Fix

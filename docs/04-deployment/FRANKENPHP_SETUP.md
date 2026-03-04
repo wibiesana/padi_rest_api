@@ -290,6 +290,3 @@ return [
 ```
 
 ---
-
-**Last Updated:** 2026-02-28  
-**Version:** 2.0.3

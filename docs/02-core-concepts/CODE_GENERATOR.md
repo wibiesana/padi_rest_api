@@ -1,7 +1,5 @@
 # ⚡ Code Generator & CLI
 
-**Padi REST API Framework v2.0.1**
-
 ---
 
 ## Overview

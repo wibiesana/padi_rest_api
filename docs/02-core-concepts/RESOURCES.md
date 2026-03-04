@@ -1,7 +1,5 @@
 # 📦 API Resources Guide
 
-**Padi REST API Framework v1.0.0**
-
 ---
 
 ## Overview

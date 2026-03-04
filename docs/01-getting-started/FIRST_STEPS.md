@@ -1,7 +1,5 @@
 # 🚀 First Steps
 
-**Padi REST API Framework v1.0.0**
-
 ---
 
 ## Quick Start Checklist

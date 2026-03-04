@@ -1,7 +1,5 @@
 # 🎮 Controllers Guide
 
-**Padi REST API Framework v2.0.2**
-
 Controllers in Padi REST API handle HTTP requests, perform business logic, and return responses. They serve as the "brain" of your application's endpoints.
 
 ---
@@ -201,6 +199,3 @@ class ProductController extends Base\ProductController
 4. **Never Edit Base**: Never modify files in `app/Controllers/Base/`. Always override them in your concrete controller.
 
 ---
-
-**Last Updated:** 2026-02-26  
-**Version:** 2.0.2

@@ -198,6 +198,3 @@ gunzip < backup_file.sql.gz | docker compose exec -T mysql mysql -u root -proot_
 - [Nginx Documentation](https://nginx.org/)
 
 ---
-
-**Last Updated:** 2026-02-23  
-**Version:** 2.0.1 (Stable Worker Mode) 🐳🚀

@@ -1,7 +1,5 @@
 # 🔧 Troubleshooting Guide
 
-**Padi REST API Framework v1.0.0**
-
 ---
 
 ## Common Issues

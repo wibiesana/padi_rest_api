@@ -1,7 +1,5 @@
 # 🗃️ ActiveRecord Guide
 
-**Padi REST API Framework v2.0.3**
-
 The `ActiveRecord` class is the heart of the framework's data layer. It provides a powerful, fluent interface for database interactions, relationship management, and automated auditing.
 
 ---
@@ -380,6 +378,3 @@ Atomic insert-or-update for MariaDB/MySQL:
 6. **Use upsert() for sync**: When importing or syncing data, prefer `upsert()` over separate find-then-update logic.
 
 ---
-
-**Last Updated:** 2026-02-28  
-**Version:** 2.0.3

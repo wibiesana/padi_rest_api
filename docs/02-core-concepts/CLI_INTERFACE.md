@@ -1,7 +1,5 @@
 # 🛠️ Padi Console CLI (Command Line Interface)
 
-**Padi REST API Framework v2.0.1**
-
 ---
 
 ## 📖 Overview
@@ -128,6 +126,3 @@ php padi migrate:rollback --step=3
 - **Quick Aliases**: You can use `php padi g` for `generate:crud` and `php padi ga` for `generate:crud-all`.
 
 ---
-
-**Last Updated:** 2026-02-23  
-**Version:** 2.0.1

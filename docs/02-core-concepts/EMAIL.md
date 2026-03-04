@@ -1,7 +1,5 @@
 # 📧 Email Guide
 
-**Padi REST API Framework v1.0.0**
-
 The Email component provides a simple wrapper around [PHPMailer](https://github.com/PHPMailer/PHPMailer) to send HTML and plain-text emails via SMTP.
 
 ---
@@ -119,6 +117,3 @@ php scripts/queue-worker.php
 - Check the log files in `storage/logs/` for any queue or email-related errors.
 
 ---
-
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0

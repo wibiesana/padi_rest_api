@@ -1,7 +1,5 @@
 # 📁 File Upload Guide
 
-**Padi REST API Framework v2.0.2**
-
 The `Core\File` class provides a simple and **secure** way to handle file uploads, deletions, and URL generation.
 
 ---
@@ -181,6 +179,3 @@ $fullUrl = File::url($user['avatar_path']);
 ```
 
 ---
-
-**Last Updated:** 2026-02-26
-**Version:** 2.0.2

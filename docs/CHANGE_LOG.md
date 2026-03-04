@@ -1,5 +1,19 @@
 # CHANGE LOG
 
+## v2.0.5 (2026-03-04)
+
+### 🔍 Code Generator: Runtime Global Search
+
+- **Dynamic Search conditions**:
+  - The generated Base Model now uses a dynamic `foreach ($this->fillable)` loop at runtime for global searching.
+  - This ensures that any changes to the `$fillable` array in the `extend/` (Concrete) Model are automatically reflected in the search logic without needing to re-generate the base code.
+- **`buildSearchConditions()` Method**:
+  - Introduced a new `protected` method in the Base Model template to centralize search logic.
+  - This method combines the dynamic fillable fields with hardcoded related table display columns (joins) detected during generation.
+  - Developers can now easily override this method in the `extend/` directory to implement complex custom search logic while keeping the controller clean.
+- **Enhanced Search Coverage**:
+  - Switched from a keyword-based text column filter to a true **Global Search** that covers all fillable fields by default.
+
 ## v2.0.4 (2026-03-02)
 
 ### 🔴 Critical Bug Fix

@@ -1,7 +1,5 @@
 # ⚡ Performance Optimization Guide
 
-**Padi REST API Framework v2.0.2**
-
 ---
 
 ## Performance Comparison
@@ -114,6 +112,3 @@ QUEUE_SLEEP=3
 ```
 
 ---
-
-**Last Updated:** 2026-02-26
-**Version:** 2.0.2

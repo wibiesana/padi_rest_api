@@ -461,6 +461,3 @@ sudo apt-get install php-sqlite3
 - **Model Base:** `Core\ActiveRecord` (padi-core)
 
 ---
-
-**Last Updated:** 2026-01-22  
-**Version:** 1.0.0

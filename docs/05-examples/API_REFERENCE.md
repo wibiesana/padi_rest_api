@@ -1,7 +1,5 @@
 # 📚 API Reference
 
-**Padi REST API Framework v1.0.0**
-
 ---
 
 ## Standard Response Format

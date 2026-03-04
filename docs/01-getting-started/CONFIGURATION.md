@@ -1,7 +1,5 @@
 # ⚙️ Configuration Guide
 
-**Padi REST API Framework v1.0.0**
-
 ---
 
 ## Environment Variables (.env)

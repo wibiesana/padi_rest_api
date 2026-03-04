@@ -214,6 +214,3 @@ Check the `tests/RBACTest.php` for examples of automated authorization testing.
 - [Error Handling](../03-advanced/ERROR_HANDLING.md)
 
 ---
-
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0

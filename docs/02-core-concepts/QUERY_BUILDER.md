@@ -346,6 +346,3 @@ $deleted = Query::find()->from('products')
 - Use **`reset()`** to fully clear query builder state when reusing a builder across different queries.
 
 ---
-
-**Last Updated:** 2026-03-02
-**Version:** 2.0.4

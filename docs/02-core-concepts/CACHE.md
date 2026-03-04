@@ -1,7 +1,5 @@
 # ⚡ Caching System
 
-**Padi REST API Framework v2.0.2**
-
 The Caching system provides a unified API for various caching backends, allowing you to speed up your application by storing expensive data in a fast storage.
 
 ---
@@ -161,6 +159,3 @@ Cache directory is created with `0750` permissions (owner: rwx, group: rx, other
 5.  **Redis for Production**: Use Redis in production for better performance and automatic TTL handling.
 
 ---
-
-**Last Updated:** 2026-02-26
-**Version:** 2.0.2

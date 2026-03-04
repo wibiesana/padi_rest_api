@@ -252,6 +252,3 @@ In development mode (`APP_DEBUG=true`), all responses include a `debug` section:
 ```
 
 ---
-
-**Last Updated:** 2026-02-09  
-**Version:** 1.0.0

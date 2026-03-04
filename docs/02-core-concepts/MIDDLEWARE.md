@@ -1,7 +1,5 @@
 # 🛡️ Middleware Guide
 
-**Padi REST API Framework v1.0.0**
-
 Middleware provides a convenient mechanism for inspecting and filtering HTTP requests entering your application.
 
 ---
@@ -129,6 +127,3 @@ In traditional PHP (FPM/Apache), `Response::json()` calls `exit;`, which immedia
 In **Worker Mode**, `exit;` is avoided to keep the process alive. Therefore, when a middleware sends a response, it should be the last thing it does. The framework's `Router` is designed to detect if a response has been initiated and will skip the subsequent handler execution.
 
 ---
-
-**Last Updated:** 2026-02-23  
-**Version:** 2.0.1

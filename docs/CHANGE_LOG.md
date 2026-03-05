@@ -31,6 +31,13 @@
 - **Worker Mode: `Auth::reset()`**:
   - Added `reset()` method to clear per-request statics (decoded cache, token cache, extraction flag). Called in `Application::cleanupRequest()` to prevent token/user data from leaking between FrankenPHP worker requests.
 
+### 🐛 Bug Fix: FrankenPHP Worker Mode
+
+- **`frankenphp_handle_request()` Callable Argument**:
+  - Fixed `ArgumentCountError` where `frankenphp_handle_request()` was called without arguments. The FrankenPHP API requires exactly **1 argument**: a callable that contains the request handling logic.
+  - Moved `handleRequest()` and `cleanupRequest()` **inside** the closure passed to `frankenphp_handle_request()`, ensuring PHP superglobals (`$_SERVER`, `$_GET`, etc.) are correctly populated by FrankenPHP before request processing begins.
+  - Added `catch (\Throwable)` inside the closure so exceptions are handled within the proper request context where the response can still be sent to the client.
+
 ## v2.0.4 (2026-03-02)
 
 ### 🔴 Critical Bug Fix

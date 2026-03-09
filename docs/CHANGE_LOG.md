@@ -41,6 +41,13 @@
 - **Recursive Subdirectory Cleanup**:
   - Updated to traverse the new bucket subdirectories and remove empty bucket dirs after cleanup.
 
+### 🔐 Cache: Redis 6+ ACL Support
+
+- **`REDIS_USERNAME` Environment Variable**:
+  - Added support for Redis 6+ ACL authentication (`AUTH username password`).
+  - When both `REDIS_USERNAME` and `REDIS_PASSWORD` are set, Predis uses ACL-based `AUTH`.
+  - Backward compatible: if `REDIS_USERNAME` is empty, only password-based `AUTH` is used (classic Redis < 6 behavior).
+
 ### ⚠️ Breaking Change
 
 - **File cache path structure changed**: Files now stored in `storage/cache/{bucket}/hash.cache` instead of `storage/cache/hash.cache`. Run `Cache::clear()` once after deploying to clean up orphaned flat-directory files.

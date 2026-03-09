@@ -67,20 +67,22 @@ CACHE_DRIVER=redis
 CACHE_L1_MAX=1000
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
+REDIS_USERNAME=
 REDIS_PASSWORD=
 REDIS_DATABASE=0
 REDIS_PREFIX=padi:
 ```
 
-| Variable         | Default     | Description                               |
-| ---------------- | ----------- | ----------------------------------------- |
-| `CACHE_DRIVER`   | `file`      | Cache backend: `file` or `redis`          |
-| `CACHE_L1_MAX`   | `1000`      | Maximum entries in the in-memory L1 cache |
-| `REDIS_HOST`     | `127.0.0.1` | Redis server hostname                     |
-| `REDIS_PORT`     | `6379`      | Redis server port                         |
-| `REDIS_PASSWORD` | _(empty)_   | Redis authentication password             |
-| `REDIS_DATABASE` | `0`         | Redis database number                     |
-| `REDIS_PREFIX`   | `padi:`     | Key namespace prefix for isolation        |
+| Variable         | Default     | Description                                          |
+| ---------------- | ----------- | ---------------------------------------------------- |
+| `CACHE_DRIVER`   | `file`      | Cache backend: `file` or `redis`                     |
+| `CACHE_L1_MAX`   | `1000`      | Maximum entries in the in-memory L1 cache            |
+| `REDIS_HOST`     | `127.0.0.1` | Redis server hostname                                |
+| `REDIS_PORT`     | `6379`      | Redis server port                                    |
+| `REDIS_USERNAME` | _(empty)_   | Redis 6+ ACL username (leave empty for default user) |
+| `REDIS_PASSWORD` | _(empty)_   | Redis authentication password                        |
+| `REDIS_DATABASE` | `0`         | Redis database number                                |
+| `REDIS_PREFIX`   | `padi:`     | Key namespace prefix for isolation                   |
 
 ---
 

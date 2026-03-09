@@ -47,6 +47,6 @@ The complete documentation for Padi REST API has been centralized in our main in
 
 ---
 
-**Version:** 2.0.1  
+**Version:** 2.0.6
 **Status:** Production Ready ✅  
 **Documentation:** [Go to Index →](docs/INDEX.md)

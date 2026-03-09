@@ -1,5 +1,50 @@
 # CHANGE LOG
 
+## v2.0.6 (2026-03-09)
+
+### ⚡ Cache: Two-Tier Architecture Rewrite
+
+- **L1 In-Memory Cache Layer**:
+  - Added a bounded in-memory array cache as L1, sitting in front of Redis/File (L2).
+  - L1 survives across FrankenPHP worker iterations for zero-cost repeated lookups.
+  - Configurable max entries via `CACHE_L1_MAX` env variable (default: 1000).
+  - Bulk eviction (oldest 25%) when limit is exceeded to prevent unbounded memory growth.
+- **Redis Auto-Reconnect (Worker Mode)**:
+  - New `ensureRedisConnection()` method detects dead Redis connections and transparently reconnects via disconnect → connect → ping.
+  - Falls back to file driver if reconnect fails, preventing total cache failure in worker processes.
+- **File Cache Subdirectory Bucketing**:
+  - Cache files are now distributed across 256 subdirectories using 2-char hash prefix (e.g., `storage/cache/ab/abcdef...cache`).
+  - Prevents filesystem performance degradation with 10k+ cache files on ext4/NTFS.
+- **`has()` Optimization**:
+  - Redis: now uses native `EXISTS` command instead of full `get()` + JSON decode.
+  - L1 memory check as fast path before any L2 lookup.
+- **`remember()` Null-Safe**:
+  - Uses sentinel value to distinguish "not cached" from "cached null", preventing infinite callback re-execution when the callback legitimately returns null.
+- **`get()` Default Value**:
+  - Added `$default` parameter (`Cache::get($key, $default)`) instead of always returning null on miss.
+- **`set()` TTL=0 Support**:
+  - `ttl=0` now means "cache forever" (no expiry) instead of being treated as the default TTL.
+
+### 🆕 Cache: New Methods
+
+- **`deleteMany(array $keys)`**: Bulk delete with single Redis `DEL` command. Avoids N+1 delete calls.
+- **`increment(string $key, int $step)`**: Atomic increment via Redis `INCRBY`. File-based read-modify-write fallback.
+- **`decrement(string $key, int $step)`**: Delegates to `increment()` with negative step.
+- **`clearMemory()`**: Clear only L1 in-memory cache without invalidating L2. Useful for forcing re-read after known data changes.
+- **`getMemorySize()`**: Returns current L1 entry count for monitoring/debugging.
+- **`reset()`**: API consistency method for `Application::cleanupRequest()` integration. Intentionally no-op since cache state is designed to persist across worker iterations.
+
+### 🏗️ Cache: Cleanup Optimization
+
+- **`filemtime()` Pre-Filter**:
+  - `cleanup()` now skips files modified more recently than the default TTL without reading their contents, significantly reducing I/O on large cache directories.
+- **Recursive Subdirectory Cleanup**:
+  - Updated to traverse the new bucket subdirectories and remove empty bucket dirs after cleanup.
+
+### ⚠️ Breaking Change
+
+- **File cache path structure changed**: Files now stored in `storage/cache/{bucket}/hash.cache` instead of `storage/cache/hash.cache`. Run `Cache::clear()` once after deploying to clean up orphaned flat-directory files.
+
 ## v2.0.5 (2026-03-04)
 
 ### 🔍 Code Generator: Runtime Global Search

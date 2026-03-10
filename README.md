@@ -1,17 +1,27 @@
-# 🌾 Padi REST API Framework
+<div align="center">
 
-> **"PADI: The Staple Layer for Modern Apps."**
+# 🌾 PADI REST API FRAMEWORK
 
-> _"Stateless enough for workers, but connected enough for performance."_
+**The Industrial-Grade, Zero-Bloat PHP Engine for the Modern Web**
 
-Welcome to the **Padi REST API Framework** - a high-performance, zero-bloat PHP toolkit designed for building professional, production-ready REST APIs.
+[![PHP 8.4+](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://php.net)
+[![FrankenPHP Ready](https://img.shields.io/badge/FrankenPHP-Ready-blueviolet?style=flat-square&logo=go)](https://frankenphp.dev)
+[![Architecture](https://img.shields.io/badge/Architecture-Code_Generation-success?style=flat-square)](#)
 
-## ✨ P.A.D.I. Philosophy
+> **"Stop wrestling with massive frameworks. Start shipping APIs in seconds."**
 
-- **P**erformant: Fast and efficient.
-- **A**daptable: Easy to adapt to various databases and frontends.
-- **D**istributed: Built for distributed systems and microservices architecture.
-- **I**nterface: A standard, reliable data connector for modern applications.
+> _"Stateless enough for high-concurrency workers. Connected enough for enterprise performance."_
+
+</div>
+
+Welcome to the **Padi REST API Framework** — built for developers who crave raw speed, absolute clarity, and an uncompromising Developer Experience (DX). Padi isn't just another PHP framework; it's a meticulously crafted **Code Generation Engine** designed to transform your database schemas into production-ready, fully secured endpoints instantly.
+
+## ✨ The P.A.D.I. Philosophy
+
+- 🚀 **P**erformant: Hyper-optimized execution core that extracts every ounce of speed from modern PHP architectures.
+- 🔌 **A**daptable: Flawlessly bridges the gap between diverse backend databases and blazing-fast frontend ecosystems (Vue, React, Next.js).
+- 🌍 **D**istributed: Engineered from the ground up to thrive in clustered microservices and containerized environments.
+- 🌉 **I**nterface: The ultimate standard, providing iron-clad, reliable data plumbing for your mission-critical applications.
 
 ---
 

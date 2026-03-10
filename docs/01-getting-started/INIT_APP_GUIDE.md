@@ -4,7 +4,7 @@
 
 Ensure your server meets the following requirements before starting the installation:
 
-- **PHP 8.1+**
+- **PHP 8.4+**
 - **Extensions:** `pdo`, `pdo_mysql` (or pgsql/sqlite), `mbstring`, `openssl`, `zlib`, `json`, `tokenizer`
 - **Composer** installed globally
 - **Database:** MySQL, MariaDB, PostgreSQL, or SQLite

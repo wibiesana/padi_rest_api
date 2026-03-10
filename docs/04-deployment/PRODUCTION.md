@@ -44,7 +44,7 @@ Before going live, ensure every item on this list is completed:
 
 ## Server Requirements
 
-- **PHP 8.1+** (PHP 8.2+ recommended)
+- **PHP 8.4+**
 - **Composer** (Latest stable)
 - **MySQL 5.7+** / **MariaDB 10.3+**
 - **Web Server** (Apache, NGINX, or [FrankenPHP](FRANKENPHP_SETUP.md))
@@ -126,6 +126,23 @@ server {
     Header edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure
 </VirtualHost>
 ```
+
+### 4. Shared Hosting (cPanel / DirectAdmin)
+
+Padi REST API is highly compatible with shared hosting environments. The core engine includes **URI Normalization** to handle deployments in subdirectories or behind shared proxies.
+
+**Steps for Shared Hosting:**
+
+1. Upload the entire project directory.
+2. Ensure the `public/` directory is mapped to your domain or subdomain.
+3. If using cPanel, use the **File Manager** to set the `Document Root` to `/public`.
+4. The included `public/.htaccess` will automatically handle routing.
+
+**Shared Hosting Tips:**
+
+- **URI Normalization:** If your API is at `domain.com/api`, Padi will automatically strip `/api` from the request so your routes in `api.php` remain clean (e.g., use `/users` instead of `/api/users`).
+- **PHP Version:** Ensure your hosting panel is set to **PHP 8.4+**.
+- **DB Limits:** Shared hosting often has low `wait_timeout`. The framework's `DatabaseManager` handles this by auto-reconnecting if a connection drops.
 
 ---
 

@@ -6,7 +6,7 @@
 
 ### Server Requirements
 
-- **PHP 8.1+**
+- **PHP 8.4+**
 - **Composer** (Latest version recommended)
 - **Web Server** (Apache, NGINX, or PHP Built-in Server for development)
 

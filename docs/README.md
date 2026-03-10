@@ -11,10 +11,11 @@
 Get your REST API running in 5 minutes!
 
 ```bash
-# 1. Install dependencies
-composer install
+# 1. Create project
+composer create-project wibiesana/padi-rest-api my-api
 
 # 2. Configure environment
+cd my-api
 cp .env.example .env
 # Edit .env with your database credentials
 
@@ -156,7 +157,7 @@ curl http://localhost:8085/
 
 | Task              | Command/Guide                                             |
 | ----------------- | --------------------------------------------------------- |
-| Install framework | `composer install`                                        |
+| Install framework | `composer create-project wibiesana/padi-rest-api`         |
 | Generate CRUD     | `php padi generate:crud products --write --protected=all` |
 | Run migrations    | `php padi migrate --tables=users,posts`                   |
 | Start dev server  | `php padi serve`                                          |
@@ -208,7 +209,7 @@ curl http://localhost:8085/
 
 ### Server Requirements
 
-- **PHP 8.1+**
+- **PHP 8.4+**
 - **Composer**
 - **MySQL 5.7+** / **MariaDB 10.3+**
 - **Web Server** (Apache, NGINX, or FrankenPHP)

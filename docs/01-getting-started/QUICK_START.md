@@ -2,7 +2,7 @@
 
 ## 📝 Prerequisites
 
-- **PHP 8.1+**
+- **PHP 8.4+**
 - **Extensions:** `pdo`, `mbstring`, `openssl`, `zlib`, `json`
 - **Database:** MySQL/MariaDB/PostgreSQL/SQLite
 

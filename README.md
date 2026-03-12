@@ -42,7 +42,7 @@ Padi REST API was born out of a desire for a **lean, zero-bloat experience**. We
 
 The complete documentation for Padi REST API has been centralized in our main index. Please follow the link below to access guides on installation, core concepts, deployment, and performance optimization.
 
-### **[👉 Documentation Index (docs/INDEX.md)](docs/INDEX.md)**
+### **[👉 Documentation Website](https://padisoftware.my.id/)**
 
 ---
 
@@ -59,4 +59,4 @@ The complete documentation for Padi REST API has been centralized in our main in
 
 **Version:** 2.0.6
 **Status:** Production Ready ✅  
-**Documentation:** [Go to Index →](docs/INDEX.md)
+**Documentation:** [Go to Website →](https://padisoftware.my.id/)

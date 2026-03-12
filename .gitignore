@@ -6,3 +6,7 @@ storage/cache/*
 .DS_Store
 Thumbs.db
 server_dump.txt
+
+# Padi Sync Files
+VERSION
+sync-version.*

@@ -49,7 +49,7 @@ class AuthController extends Controller
         $user = $this->model->find($userId);
 
         $token = Auth::generateToken([
-            'user_id' => $user['id'],
+            'user_id' => (int)$user['id'],
             'email' => $user['email'],
             'role' => $user['role']
         ]);

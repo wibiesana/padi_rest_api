@@ -69,6 +69,12 @@ function ask($question, $default = '')
 
 function choice($question, array $options, $default = 1)
 {
+    // Use interactive arrow-key menu from Console class if available
+    if (class_exists('\Wibiesana\Padi\Core\Console')) {
+        return \Wibiesana\Padi\Core\Console::interactiveChoice($question, $options, $default);
+    }
+
+    // Fallback: number input (before autoload is loaded)
     echo PHP_EOL;
     echo Colors::colorize($question, 'cyan') . PHP_EOL;
     echo str_repeat('-', 60) . PHP_EOL;
@@ -158,6 +164,11 @@ function runCommand($command, $description = '')
 // ============================================================================
 
 try {
+    // Load autoload early so Console::interactiveChoice() is available
+    if (file_exists($projectRoot . '/vendor/autoload.php')) {
+        require_once $projectRoot . '/vendor/autoload.php';
+    }
+
     banner();
 
     // Step 1: Check .env.example

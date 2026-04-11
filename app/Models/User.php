@@ -251,4 +251,12 @@ class User extends ActiveRecord
             'remember_token' => $token
         ]);
     }
+
+    /**
+     * Get teacher profile associated with this user
+     */
+    public function teacher()
+    {
+        return $this->hasOne(\App\Models\Teacher::class, 'id', 'id');
+    }
 }

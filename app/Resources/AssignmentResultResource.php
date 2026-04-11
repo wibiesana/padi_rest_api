@@ -27,7 +27,7 @@ class AssignmentResultResource extends Resource
             // Flattened Fields
             'assignment_name' => $this->assignment['name'] ?? null,
             'class_name' => $this->class['name'] ?? null,
-            'createdBy_name' => $this->createdBy['teacher']['name'] ?? $this->createdBy['name'] ?? $this->createdBy['username'] ?? null,
+            'createdBy_name' => $this->createdBy['student']['name'] ?? $this->createdBy['teacher']['name'] ?? $this->createdBy['name'] ?? $this->createdBy['username'] ?? null,
             'updatedBy_name' => $this->updatedBy['username'] ?? null,
 
         ];

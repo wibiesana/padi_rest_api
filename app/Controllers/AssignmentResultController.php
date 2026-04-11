@@ -30,7 +30,7 @@ class AssignmentResultController extends BaseController
 
         // Eager load relations for the results
         if (!empty($results)) {
-            $this->model->with(['assignment.subject', 'assignment.createdBy.teacher', 'createdBy.teacher', 'updatedBy']);
+            $this->model->with(['assignment.subject', 'assignment.createdBy.teacher', 'createdBy.student', 'updatedBy']);
             $this->model->loadRelations($results);
         }
 
@@ -61,7 +61,7 @@ class AssignmentResultController extends BaseController
             foreach ($assignments as $assignment) {
                 if (!in_array($assignment['id'], $submittedAssignmentIds)) {
                     $assignmentModel = new \App\Models\Assignment();
-                    $assignmentModel->with(['createdBy.teacher', 'subject', 'semester']);
+                    $assignmentModel->with(['createdBy.student', 'subject', 'semester']);
                     $assignmentArray = [$assignment];
                     $assignmentModel->loadRelations($assignmentArray);
                     $dataStatus[] = \App\Resources\AssignmentResource::make($assignmentArray[0]);
@@ -82,7 +82,7 @@ class AssignmentResultController extends BaseController
     public function show()
     {
         $id = $this->request->param('id');
-        $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.teacher', 'updatedBy:id,username']);
+        $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
         $result = $this->model->find($id);
         
         if (!$result) {
@@ -128,7 +128,7 @@ class AssignmentResultController extends BaseController
 
         try {
             $id = $this->model->create($validated);
-            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.teacher', 'updatedBy:id,username']);
+            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
             $assignmentResult = $this->model->find($id);
             return $this->created(\App\Resources\AssignmentResultResource::make($assignmentResult));
         } catch (\PDOException $e) {
@@ -146,6 +146,11 @@ class AssignmentResultController extends BaseController
         $assignmentResult = $this->model->find($id);
         if (!$assignmentResult) {
             throw new \Exception('Assignment result not found', 404);
+        }
+
+        // Prevent update if already graded (status 2)
+        if (($assignmentResult['status'] ?? 0) == 2) {
+            throw new \Exception('Cannot edit an assignment that has already been graded', 403);
         }
 
         $user = $this->request->user ?? Auth::user();
@@ -179,7 +184,7 @@ class AssignmentResultController extends BaseController
 
         try {
             $this->model->update($id, $validated);
-            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.teacher', 'updatedBy:id,username']);
+            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
             return \App\Resources\AssignmentResultResource::make($this->model->find($id));
         } catch (\PDOException $e) {
             $this->databaseError('Failed to update assignment submission', $e);
@@ -188,24 +193,122 @@ class AssignmentResultController extends BaseController
 
     /**
      * Get all submissions for a specific assignment (For Teachers)
+     * Shows all students from taught classes + assigned classes, merged with submission data.
      */
     public function submissionsByAssignment()
     {
         $id = $this->request->param('id');
-        
-        $resultsQuery = \App\Models\AssignmentResult::findQuery()
-            ->where(['assignment_id' => $id]);
+        $classroomFilterId = $this->request->query('classroom_id');
 
-        $results = $resultsQuery->all();
+        // 1. Get the assignment to verify it exists and get the creator/teacher
+        $assignmentModel = new \App\Models\Assignment();
+        $assignment = $assignmentModel->find($id);
+        if (!$assignment) {
+            throw new \Exception('Assignment not found', 404);
+        }
+
+        // 2. Get classes: from assignment_class OR classes that have active student results
+        $safeId = (int)$id;
+        
+        // Query assigned classes
+        $assignedClasses = \Wibiesana\Padi\Core\Query::find()
+            ->select('classroom.*')
+            ->from('classroom')
+            ->innerJoin('assignment_class', 'classroom.id = assignment_class.classroom_id')
+            ->where(['assignment_class.assignment_id' => $safeId])
+            ->all();
+
+        // Query classes that have students who already submitted (fallback/comprehensive)
+        $submissionClasses = \Wibiesana\Padi\Core\Query::find()
+            ->select('DISTINCT classroom.*')
+            ->from('classroom')
+            ->innerJoin('classroom_member', 'classroom.id = classroom_member.class_id')
+            ->innerJoin('assignment_result', 'classroom_member.student_id = assignment_result.created_by')
+            ->where(['assignment_result.assignment_id' => $safeId])
+            ->all();
+
+        // Combine and unique by ID
+        $combined = array_merge($assignedClasses, $submissionClasses);
+        $uniqueClasses = [];
+        $seenIds = [];
+        foreach ($combined as $c) {
+            if (!in_array($c['id'], $seenIds)) {
+                $uniqueClasses[] = $c;
+                $seenIds[] = $c['id'];
+            }
+        }
+        $allClasses = array_values($uniqueClasses); // Reset keys for JSON array consistency
+
+        // 3. Determine which classes to query students from
+        $targetClassIds = $classroomFilterId
+            ? [(int)$classroomFilterId]
+            : array_column($allClasses, 'id');
+
+        if (empty($targetClassIds)) {
+            return [
+                'success' => true,
+                'data' => [],
+                'classes' => $allClasses,
+            ];
+        }
+
+        // 4. Get all students in target classes
+        $students = \Wibiesana\Padi\Core\Query::find()
+            ->select('student.*, classroom.name as class_name, classroom_member.class_id')
+            ->from('student')
+            ->innerJoin('classroom_member', 'student.id = classroom_member.student_id')
+            ->innerJoin('classroom', 'classroom_member.class_id = classroom.id')
+            ->where(['IN', 'classroom_member.class_id', $targetClassIds])
+            ->orderBy('student.name ASC')
+            ->all();
+
+        // 5. Get existing submission results for this assignment
+        $results = \Wibiesana\Padi\Core\Query::find()
+            ->select('assignment_result.*')
+            ->from('assignment_result')
+            ->where(['assignment_result.assignment_id' => $safeId])
+            ->all();
+
 
         if (!empty($results)) {
-            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.teacher', 'updatedBy:id,username']);
+            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
             $this->model->loadRelations($results);
+        }
+
+        // 6. Index results by created_by (student user id)
+        $resultsByStudent = [];
+        foreach ($results as $res) {
+            $resultsByStudent[$res['created_by']] = $res;
+        }
+
+        // 7. Merge students with results
+        $finalData = [];
+        foreach ($students as $student) {
+            $studentId = $student['id'];
+            if (isset($resultsByStudent[$studentId])) {
+                $item = \App\Resources\AssignmentResultResource::make($resultsByStudent[$studentId])->resolve();
+                $item['class_name'] = $student['class_name'] ?? null;
+                $finalData[] = $item;
+            } else {
+                $finalData[] = [
+                    'id' => null,
+                    'assignment_id' => $id,
+                    'class_id' => $student['class_id'] ?? null,
+                    'description' => null,
+                    'upload_file' => null,
+                    'score' => null,
+                    'status' => 0,
+                    'created_at' => '-',
+                    'createdBy_name' => $student['name'],
+                    'class_name' => $student['class_name'] ?? null,
+                ];
+            }
         }
 
         return [
             'success' => true,
-            'data' => \App\Resources\AssignmentResultResource::collection($results)
+            'data' => $finalData,
+            'classes' => $allClasses,
         ];
     }
 
@@ -236,7 +339,7 @@ class AssignmentResultController extends BaseController
 
         try {
             $this->model->update($id, $updateData);
-            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.teacher', 'updatedBy:id,username']);
+            $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
             return \App\Resources\AssignmentResultResource::make($this->model->find($id));
         } catch (\PDOException $e) {
             $this->databaseError('Failed to save score', $e);

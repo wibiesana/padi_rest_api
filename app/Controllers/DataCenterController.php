@@ -58,7 +58,7 @@ class DataCenterController extends Controller
             } elseif ($type === 'question-banks' || $type === 'question-bank') {
                 $query->select(['id', 'name', 'exam_event_id']);
             } elseif (in_array($type, ['classes', 'classrooms', 'classroom'])) {
-                $query->select(['id', 'name', 'semester_id', 'teacher_id']);
+                $query->select(['classroom.id', 'classroom.name', 'classroom.semester_id', 'classroom.teacher_id']);
             } elseif ($type === 'teaching-schedules') {
                 $query->select(['id', 'subject_id', 'teacher_id', 'classroom_id', 'semester_id']);
             } elseif (in_array($type, ['students', 'student'])) {
@@ -118,10 +118,20 @@ class DataCenterController extends Controller
             $user = Auth::user();
             $role = is_array($user) ? ($user['role'] ?? null) : ($user->role ?? null);
 
+            $userId = is_array($user) ? ($user['id'] ?? $user['user_id'] ?? null) : ($user->id ?? $user->user_id ?? null);
+
             // We want to avoid filtering semesters by created_by, as they are global resources
             if ($role && $role !== 'superadmin' && $role !== 'admin' && !in_array($type, ['semesters', 'semester', 'subjects', 'subject'])) {
-                if (in_array($type, ['classes', 'classrooms', 'classroom', 'teaching-schedules'])) {
-                    $userId = is_array($user) ? ($user['id'] ?? $user['user_id'] ?? null) : ($user->id ?? $user->user_id ?? null);
+                if (in_array($type, ['classes', 'classrooms', 'classroom'])) {
+                    if ($userId) {
+                        $query->leftJoin('teaching_schedule', 'classroom.id = teaching_schedule.classroom_id')
+                            ->andWhere(['OR',
+                                ['classroom.teacher_id', '=', $userId],
+                                ['teaching_schedule.teacher_id', '=', $userId]
+                            ])
+                            ->groupBy('classroom.id');
+                    }
+                } elseif ($type === 'teaching-schedules') {
                     if ($userId) {
                         $query->andWhere(['teacher_id', '=', $userId]);
                     }

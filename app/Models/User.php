@@ -259,4 +259,12 @@ class User extends ActiveRecord
     {
         return $this->hasOne(\App\Models\Teacher::class, 'id', 'id');
     }
+
+    /**
+     * Get student profile associated with this user
+     */
+    public function student()
+    {
+        return $this->hasOne(\App\Models\Student::class, 'id', 'id');
+    }
 }

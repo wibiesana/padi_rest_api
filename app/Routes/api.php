@@ -393,6 +393,7 @@ $router->group(['prefix' => 'assignment-class', 'middleware' => ['AuthMiddleware
 $router->group(['prefix' => 'assignment-result'], function ($router) {
     // List & view operations
     $router->get('/my-upload', 'AssignmentResultController@myUpload')->middleware('AuthMiddleware');
+    $router->get('/teacher-class-summary', 'AssignmentResultController@teacherClassSummary')->middleware('AuthMiddleware');
     $router->get('/assignment/{id}', 'AssignmentResultController@submissionsByAssignment');
     $router->get('/', 'AssignmentResultController@index');           // List assignment-result with pagination
     $router->get('/all', 'AssignmentResultController@all');         // Get all assignment-result
@@ -405,7 +406,7 @@ $router->group(['prefix' => 'assignment-result'], function ($router) {
 // Modification operations for assignment-result - requires authentication
 $router->group(['prefix' => 'assignment-result', 'middleware' => ['AuthMiddleware']], function ($router) {
     // Modification operations
-    $router->put('/update', 'AssignmentResultController@update');     // Special case for custom frontend update
+    $router->post('/update', 'AssignmentResultController@update');     // Special case for custom frontend update
     $router->put('/give-score/{id}', 'AssignmentResultController@giveScore');
     $router->post('/', 'AssignmentResultController@store');         // Create new item
     $router->put('/{id}', 'AssignmentResultController@update');     // Update item
@@ -616,6 +617,7 @@ $router->group(['prefix' => 'class-semester', 'middleware' => ['AuthMiddleware']
 $router->group(['prefix' => 'classroom'], function ($router) {
     // List & view operations
     $router->get('/teacher-classes', 'ClassroomController@teacherClasses');
+    $router->get('/result-summary', 'ClassroomController@resultSummary')->middleware('AuthMiddleware');
     $router->get('/', 'ClassroomController@index');           // List classroom with pagination
     $router->get('/all', 'ClassroomController@all');         // Get all classroom
     $router->get('/{id}', 'ClassroomController@show');       // Get specific item
@@ -2132,6 +2134,11 @@ $router->group(['prefix' => 'violation-type', 'middleware' => ['AuthMiddleware']
     $router->put('/{id}', 'ViolationTypeController@update');     // Update item
     $router->delete('/{id}', 'ViolationTypeController@destroy'); // Delete item
 });
+
+// ============================================================================
+// UTILS ROUTES (PROTECTED)
+// ============================================================================
+$router->post('/utils/render-content', 'UtilsController@renderContent')->middleware('AuthMiddleware');
 
 
 return $router;

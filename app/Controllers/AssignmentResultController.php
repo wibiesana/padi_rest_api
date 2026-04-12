@@ -84,7 +84,7 @@ class AssignmentResultController extends BaseController
         $id = $this->request->param('id');
         $this->model->with(['assignment.createdBy.teacher', 'assignment.subject', 'createdBy.student', 'updatedBy:id,username']);
         $result = $this->model->find($id);
-        
+
         if (!$result) {
             throw new \Exception('Assignment result not found', 404);
         }
@@ -105,25 +105,52 @@ class AssignmentResultController extends BaseController
             'description' => 'string'
         ]);
 
+        // Validate Deadline
+        $this->checkDeadline($validated['assignment_id']);
+
         // Set user
         $validated['created_by'] = $userId;
         $validated['updated_by'] = $userId;
         $validated['status'] = 1; // Default status Submitted
 
-        // Handle file upload
-        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['file'];
-            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $fileName = time() . '_' . uniqid() . '.' . $extension;
-            $uploadDir = 'uploads/assignments/';
+        // Handle multiple file uploads
+        $uploadedFiles = [];
 
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
+        // Check for 'files' (array) or 'file' (singular)
+        $files = $_FILES['files'] ?? $_FILES['file'] ?? null;
 
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $fileName)) {
-                $validated['upload_file'] = $uploadDir . $fileName;
+        if ($files) {
+            if (isset($files['name']) && is_array($files['name'])) {
+                // Multiple files
+                for ($i = 0; $i < count($files['name']); $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $extension = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
+                        $fileName = time() . '_' . uniqid() . '.' . $extension;
+                        $uploadDir = (defined('PADI_ROOT') ? PADI_ROOT : dirname(dirname(__DIR__))) . '/uploads/assignments/';
+                        $dbPath = 'uploads/assignments/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0750, true);
+                        if (move_uploaded_file($files['tmp_name'][$i], $uploadDir . $fileName)) {
+                            $uploadedFiles[] = $dbPath . $fileName;
+                        }
+                    }
+                }
+            } elseif (isset($files['error']) && $files['error'] === UPLOAD_ERR_OK) {
+                // Single file
+                $extension = pathinfo($files['name'], PATHINFO_EXTENSION);
+                $fileName = time() . '_' . uniqid() . '.' . $extension;
+                $uploadDir = (defined('PADI_ROOT') ? PADI_ROOT : dirname(dirname(__DIR__))) . '/uploads/assignments/';
+                $dbPath = 'uploads/assignments/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0750, true);
+                if (move_uploaded_file($files['tmp_name'], $uploadDir . $fileName)) {
+                    $uploadedFiles[] = $dbPath . $fileName;
+                }
             }
+        }
+
+        if (!empty($uploadedFiles)) {
+            $validated['upload_file'] = (count($uploadedFiles) === 1 && !isset($_FILES['files']))
+                ? $uploadedFiles[0]
+                : json_encode($uploadedFiles);
         }
 
         try {
@@ -141,11 +168,17 @@ class AssignmentResultController extends BaseController
      */
     public function update()
     {
-        $id = $this->request->param('id');
+        $id = $this->request->param('id') ?: $this->request->input('id');
 
         $assignmentResult = $this->model->find($id);
         if (!$assignmentResult) {
-            throw new \Exception('Assignment result not found', 404);
+            $this->error('Assignment result not found with ID: ' . $id, 404);
+            return;
+        }
+
+        // Validate Deadline
+        if (!empty($assignmentResult['assignment_id'])) {
+            $this->checkDeadline($assignmentResult['assignment_id']);
         }
 
         // Prevent update if already graded (status 2)
@@ -162,24 +195,84 @@ class AssignmentResultController extends BaseController
 
         $validated['updated_by'] = $userId;
 
-        // Handle file upload
-        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['file'];
-            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $fileName = time() . '_' . uniqid() . '.' . $extension;
-            $uploadDir = 'uploads/assignments/';
+        // Handle multiple file uploads
+        $newUploadedFiles = [];
 
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            if (move_uploaded_file($file['tmp_name'], $uploadDir . $fileName)) {
-                // Delete old file if exists
-                if (!empty($assignmentResult['upload_file']) && file_exists($assignmentResult['upload_file'])) {
-                    @unlink($assignmentResult['upload_file']);
+        $files = $_FILES['files'] ?? $_FILES['file'] ?? null;
+        if ($files) {
+            if (isset($files['name']) && is_array($files['name'])) {
+                for ($i = 0; $i < count($files['name']); $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $extension = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
+                        $fileName = time() . '_' . uniqid() . '.' . $extension;
+                        $uploadDir = (defined('PADI_ROOT') ? PADI_ROOT : dirname(dirname(__DIR__))) . '/uploads/assignments/';
+                        $dbPath = 'uploads/assignments/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0750, true);
+                        if (move_uploaded_file($files['tmp_name'][$i], $uploadDir . $fileName)) {
+                            $newUploadedFiles[] = $dbPath . $fileName;
+                        }
+                    }
                 }
-                $validated['upload_file'] = $uploadDir . $fileName;
+            } elseif (isset($files['error']) && $files['error'] === UPLOAD_ERR_OK) {
+                // Single file
+                $extension = pathinfo($files['name'], PATHINFO_EXTENSION);
+                $fileName = time() . '_' . uniqid() . '.' . $extension;
+                $uploadDir = (defined('PADI_ROOT') ? PADI_ROOT : dirname(dirname(__DIR__))) . '/uploads/assignments/';
+                $dbPath = 'uploads/assignments/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0750, true);
+                if (move_uploaded_file($files['tmp_name'], $uploadDir . $fileName)) {
+                    $newUploadedFiles[] = $dbPath . $fileName;
+                }
             }
+        }
+
+        // Selective Deletion Logic
+        $existingFilesInput = $this->request->input('existing_files');
+        $filesToKeep = [];
+
+        if ($existingFilesInput !== null) {
+            // Case 1: Frontend sent a specific list of existing files to keep
+            $filesToKeep = json_decode($existingFilesInput, true);
+            if (!is_array($filesToKeep)) {
+                $filesToKeep = !empty($existingFilesInput) ? explode(',', $existingFilesInput) : [];
+            }
+
+            // Clean up files that are NOT in the keep list
+            $oldFilesStr = $assignmentResult['upload_file'] ?? '';
+            $oldFiles = json_decode($oldFilesStr, true);
+            if (!is_array($oldFiles)) $oldFiles = !empty($oldFilesStr) ? [$oldFilesStr] : [];
+
+            foreach ($oldFiles as $oldFile) {
+                if (!in_array($oldFile, $filesToKeep)) {
+                    if (file_exists($oldFile)) @unlink($oldFile);
+                }
+            }
+        } else {
+            // Case 2: Standard behavior (compatibility)
+            // If new files are uploaded, delete ALL old files (legacy behavior)
+            // If no new files, keep old ones (no change)
+            if (!empty($newUploadedFiles)) {
+                if (!empty($assignmentResult['upload_file'])) {
+                    $oldFiles = json_decode($assignmentResult['upload_file'], true);
+                    if (!is_array($oldFiles)) $oldFiles = [$assignmentResult['upload_file']];
+                    foreach ($oldFiles as $oldFile) {
+                        if (file_exists($oldFile)) @unlink($oldFile);
+                    }
+                }
+                $filesToKeep = [];
+            } else {
+                $oldFilesStr = $assignmentResult['upload_file'] ?? '';
+                $filesToKeep = json_decode($oldFilesStr, true);
+                if (!is_array($filesToKeep)) $filesToKeep = !empty($oldFilesStr) ? [$oldFilesStr] : [];
+            }
+        }
+
+        // Final Merge
+        $finalFileList = array_merge($filesToKeep, $newUploadedFiles);
+        if (!empty($finalFileList)) {
+            $validated['upload_file'] = count($finalFileList) === 1 ? $finalFileList[0] : json_encode($finalFileList);
+        } else {
+            $validated['upload_file'] = null;
         }
 
         try {
@@ -209,7 +302,7 @@ class AssignmentResultController extends BaseController
 
         // 2. Get classes: from assignment_class OR classes that have active student results
         $safeId = (int)$id;
-        
+
         // Query assigned classes
         $assignedClasses = \Wibiesana\Padi\Core\Query::find()
             ->select('classroom.*')
@@ -241,7 +334,7 @@ class AssignmentResultController extends BaseController
 
         // 3. Determine which classes to query students from
         $skipData = $this->request->query('skip_data');
-        
+
         $targetClassIds = ($classroomFilterId)
             ? [(int)$classroomFilterId]
             : ($skipData ? [] : array_column($allClasses, 'id'));
@@ -321,7 +414,7 @@ class AssignmentResultController extends BaseController
     {
         $id = $this->request->param('id');
         $assignmentResult = $this->model->find($id);
-        
+
         if (!$assignmentResult) {
             throw new \Exception('Submission not found', 404);
         }
@@ -345,6 +438,78 @@ class AssignmentResultController extends BaseController
             return \App\Resources\AssignmentResultResource::make($this->model->find($id));
         } catch (\PDOException $e) {
             $this->databaseError('Failed to save score', $e);
+        }
+    }
+    /**
+     * Get summary matrix for a specific classroom (For Teachers)
+     * Returns: { students, assignments, matrix }
+     */
+    public function teacherClassSummary()
+    {
+        $classroomId = $this->request->query('classroom_id');
+        if (!$classroomId) {
+            throw new \Exception('Classroom ID is required', 400);
+        }
+
+        // 1. Get all students in the classroom
+        $students = \Wibiesana\Padi\Core\Query::find()
+            ->select('student.id, student.name')
+            ->from('student')
+            ->innerJoin('classroom_member', 'student.id = classroom_member.student_id')
+            ->where(['classroom_member.class_id' => $classroomId])
+            ->orderBy('student.name ASC')
+            ->all();
+
+        // 2. Get all assignments for this classroom
+        $assignments = \Wibiesana\Padi\Core\Query::find()
+            ->select('assignment.id, assignment.name, subject.name as subject_name')
+            ->from('assignment')
+            ->innerJoin('assignment_class', 'assignment.id = assignment_class.assignment_id')
+            ->leftJoin('subject', 'assignment.subject_id = subject.id')
+            ->where(['assignment_class.classroom_id' => $classroomId])
+            ->all();
+
+        // 3. Get all scores for these students and assignments
+        $assignmentIds = array_column($assignments, 'id');
+        $studentIds = array_column($students, 'id');
+
+        $matrix = [];
+        if (!empty($assignmentIds) && !empty($studentIds)) {
+            $scores = \Wibiesana\Padi\Core\Query::find()
+                ->from('assignment_result')
+                ->where(['IN', 'assignment_id', $assignmentIds])
+                ->andWhere(['IN', 'created_by', $studentIds])
+                ->all();
+
+            foreach ($scores as $score) {
+                $matrix[$score['created_by']][$score['assignment_id']] = (float)$score['score'];
+            }
+        }
+
+        return [
+            'students' => $students,
+            'assignments' => $assignments,
+            'matrix' => $matrix
+        ];
+    }
+
+    /**
+     * Check if assignment deadline has passed for students
+     */
+    private function checkDeadline($assignmentId)
+    {
+        $user = $this->request->user ?? Auth::user();
+        $roleId = is_array($user) ? ($user['role'] ?? null) : ($user->role ?? null);
+
+        // Student role (student or 4)
+        if ($roleId === 'student' || (int)$roleId === 4) {
+            $assignment = (new \App\Models\Assignment())->find($assignmentId);
+            if ($assignment && !empty($assignment['end_date'])) {
+                $deadline = strtotime($assignment['end_date']);
+                if ($deadline > 0 && $deadline < time()) {
+                    throw new \Exception('Maaf, waktu pengerjaan tugas ini sudah habis.', 403);
+                }
+            }
         }
     }
 }

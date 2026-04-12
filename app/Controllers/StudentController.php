@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\Base\StudentController as BaseController;
 use Wibiesana\Padi\Core\Database;
+use Wibiesana\Padi\Core\Auth;
 
 class StudentController extends BaseController
 {
@@ -103,6 +104,10 @@ class StudentController extends BaseController
                 // 1. Prepare User Data & Pre-Map Student Data
                 $mappedItems = [];
 
+                $currUserId = Auth::userId();
+                $nowUnix = time();
+                $nowDateTime = date('Y-m-d H:i:s');
+
                 foreach ($items as $item) {
                     // Basic validation
                     if (empty($item['name']) || empty($item['nisn']) || empty($item['nis']) || empty($item['email'])) {
@@ -121,7 +126,10 @@ class StudentController extends BaseController
                         'username' => $username,
                         'password' => password_hash($item['password'] ?? '123456', PASSWORD_BCRYPT),
                         'role' => 'student',
-                        'status' => 'active'
+                        'status' => 'active',
+                        'created_at' => $nowUnix,
+                        'updated_at' => $nowUnix,
+                        // 'created_by' => $currUserId, // users table might not have created_by on some schemas, but let's check
                     ];
 
                     // Map English input keys to Indonesian DB columns for Student
@@ -139,7 +147,10 @@ class StudentController extends BaseController
                         'father_name' => $item['father_name'] ?? null,
                         'mother_name' => $item['mother_name'] ?? null,
                         'status' => $item['status'] ?? 1,
-                        'status' => $item['status'] ?? 1
+                        'created_at' => $nowDateTime,
+                        'updated_at' => $nowDateTime,
+                        'created_by' => $currUserId,
+                        'updated_by' => $currUserId,
                     ];
                 }
 

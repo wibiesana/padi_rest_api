@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\Base\StaffController as BaseController;
 use Wibiesana\Padi\Core\Database;
+use Wibiesana\Padi\Core\Auth;
 
 class StaffController extends BaseController
 {
@@ -103,6 +104,10 @@ class StaffController extends BaseController
                 // 1. Prepare User Data & Pre-Map Staff Data
                 $mappedItems = [];
 
+                $currUserId = Auth::userId();
+                $nowUnix = time();
+                $nowDateTime = date('Y-m-d H:i:s');
+
                 foreach ($items as $item) {
                     // Basic validation
                     if (empty($item['name']) || empty($item['email'])) {
@@ -123,7 +128,9 @@ class StaffController extends BaseController
                         'username' => $username,
                         'password' => password_hash($item['password'] ?? '123456', PASSWORD_BCRYPT),
                         'role' => 'staff',
-                        'status' => 1
+                        'status' => 1,
+                        'created_at' => $nowUnix,
+                        'updated_at' => $nowUnix,
                     ];
 
                     $mappedItems[$username] = [
@@ -140,6 +147,10 @@ class StaffController extends BaseController
                         'address' => $item['address'] ?? null,
                         'job_status' => $item['status'] ?? 'Honorary',
                         'status' => $item['status'] ?? 1,
+                        'created_at' => $nowDateTime,
+                        'updated_at' => $nowDateTime,
+                        'created_by' => $currUserId,
+                        'updated_by' => $currUserId,
                     ];
                 }
 

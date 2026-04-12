@@ -12,6 +12,7 @@ class Student extends BaseModel
     {
         parent::__construct();
         $this->fillable[] = 'id';
+        $this->fillable = array_merge($this->fillable, ['created_at', 'updated_at', 'created_by', 'updated_by']);
     }
 
     /**

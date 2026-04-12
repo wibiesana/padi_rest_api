@@ -19,7 +19,9 @@ class User extends ActiveRecord
         'status',
         'email_verified_at',
         'remember_token',
-        'last_login_at'
+        'last_login_at',
+        'created_at',
+        'updated_at'
     ];
 
     protected array $hidden = ['password'];
@@ -35,7 +37,7 @@ class User extends ActiveRecord
      * 'datetime' = Y-m-d H:i:s (DATETIME/TIMESTAMP columns)
      * 'unix' = integer timestamp (INT/BIGINT columns)
      */
-    protected string $timestampFormat = 'datetime';
+    protected string $timestampFormat = 'unix';
 
     /**
      * Search users
@@ -73,7 +75,7 @@ class User extends ActiveRecord
             $data['role'] = $data['role'] ?? 'user';
         }
 
-        return true; // Return false to stop saving
+        return parent::beforeSave($data, $insert);
     }
 
     /**

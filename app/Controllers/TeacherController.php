@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\Base\TeacherController as BaseController;
 use Wibiesana\Padi\Core\Database;
+use Wibiesana\Padi\Core\Auth;
 
 class TeacherController extends BaseController
 {
@@ -99,6 +100,10 @@ class TeacherController extends BaseController
                 // 1. Prepare User Data & Pre-Map Teacher Data
                 $mappedItems = [];
 
+                $currUserId = Auth::userId();
+                $nowUnix = time();
+                $nowDateTime = date('Y-m-d H:i:s');
+
                 foreach ($items as $item) {
                     // Basic validation
                     if (empty($item['name']) || empty($item['email'])) {
@@ -119,7 +124,9 @@ class TeacherController extends BaseController
                         'username' => $username,
                         'password' => password_hash($item['password'] ?? '123456', PASSWORD_BCRYPT),
                         'role' => 'teacher',
-                        'status' => 'active'
+                        'status' => 'active',
+                        'created_at' => $nowUnix,
+                        'updated_at' => $nowUnix,
                     ];
 
                     $mappedItems[$username] = [
@@ -138,7 +145,11 @@ class TeacherController extends BaseController
                         'job_status' => $item['status'] ?? 'Honorary',
                         'status' => $item['status'] ?? 1,
                         // Teacher uses Shared PK with User
-                        'id' => null
+                        'id' => null,
+                        'created_at' => $nowDateTime,
+                        'updated_at' => $nowDateTime,
+                        'created_by' => $currUserId,
+                        'updated_by' => $currUserId,
                     ];
                 }
 

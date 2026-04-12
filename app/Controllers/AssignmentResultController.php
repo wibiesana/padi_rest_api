@@ -240,9 +240,11 @@ class AssignmentResultController extends BaseController
         $allClasses = array_values($uniqueClasses); // Reset keys for JSON array consistency
 
         // 3. Determine which classes to query students from
-        $targetClassIds = $classroomFilterId
+        $skipData = $this->request->query('skip_data');
+        
+        $targetClassIds = ($classroomFilterId)
             ? [(int)$classroomFilterId]
-            : array_column($allClasses, 'id');
+            : ($skipData ? [] : array_column($allClasses, 'id'));
 
         if (empty($targetClassIds)) {
             return [

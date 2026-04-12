@@ -37,34 +37,57 @@ class AssignmentResultController extends BaseController
         // Data status for available assignments
         $dataStatus = [];
 
-        // Find class for this student
-        $cm = \App\Models\ClassroomMember::findQuery()->where(['student_id' => $userId])->one();
+        // 1. Find all active classrooms for this student that belong to the active semester
+        $classIds = [];
+        if ($semesterId) {
+            $classrooms = \App\Models\Classroom::findQuery()
+                ->select('classroom.id')
+                ->innerJoin('classroom_member', 'classroom.id = classroom_member.class_id')
+                ->where(['classroom_member.student_id' => $userId])
+                ->andWhere(['classroom.semester_id' => $semesterId])
+                ->andWhere(['classroom.status' => 1])
+                ->all();
+            $classIds = array_column($classrooms, 'id');
+        } else {
+            // Fallback for backward compatibility
+            $cms = \App\Models\ClassroomMember::findQuery()->where(['student_id' => $userId])->all();
+            $classIds = array_column($cms, 'class_id');
+        }
 
-        if ($cm && !empty($cm['class_id'])) {
-            $classId = $cm['class_id'];
-
-            // Get all assignments associated with this class
+        if (!empty($classIds)) {
+            // 2. Get all assignments associated with these classrooms
             $assignmentsQuery = \App\Models\Assignment::findQuery()
-                ->select('assignment.*')
+                ->select('DISTINCT assignment.*')
                 ->innerJoin('assignment_class', 'assignment.id = assignment_class.assignment_id')
-                ->where(['assignment_class.classroom_id' => $classId]);
+                ->where(['assignment_class.classroom_id' => $classIds])
+                ->andWhere(['assignment.status' => 1]);
 
             // Filter by semester if provided
             if ($semesterId) {
-                $assignmentsQuery->where(['assignment.semester_id' => $semesterId]);
+                $assignmentsQuery->andWhere(['assignment.semester_id' => $semesterId]);
             }
 
             $assignments = $assignmentsQuery->all();
 
-            // Filter out assignments that are already submitted
+            // 3. Load relations in bulk for all assignments (Proper Eager Loading in Padi Framework)
+            if (!empty($assignments)) {
+                $assignmentModel = new \App\Models\Assignment();
+                $assignmentModel->with(['createdBy.teacher', 'subject', 'semester']);
+                $assignmentModel->loadRelations($assignments);
+            }
+
+            // 4. Filter out assignments that are already submitted
             $submittedAssignmentIds = array_column($results, 'assignment_id');
             foreach ($assignments as $assignment) {
                 if (!in_array($assignment['id'], $submittedAssignmentIds)) {
-                    $assignmentModel = new \App\Models\Assignment();
-                    $assignmentModel->with(['createdBy.student', 'subject', 'semester']);
-                    $assignmentArray = [$assignment];
-                    $assignmentModel->loadRelations($assignmentArray);
-                    $dataStatus[] = \App\Resources\AssignmentResource::make($assignmentArray[0]);
+                    $dataStatus[] = [
+                        'id' => $assignment['id'],
+                        'name' => $assignment['name'],
+                        'start_date' => $assignment['start_date'],
+                        'end_date' => $assignment['end_date'],
+                        'subject_name' => $assignment['subject']['name'] ?? null,
+                        'createdBy_name' => $assignment['createdBy']['teacher']['name'] ?? $assignment['createdBy']['username'] ?? null,
+                    ];
                 }
             }
         }

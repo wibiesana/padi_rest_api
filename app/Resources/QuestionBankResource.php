@@ -23,12 +23,12 @@ class QuestionBankResource extends Resource
             'teacher' => $this->whenLoaded('teacher'),
 
             // Flattened Fields for Display
-            'teacher_name' => $this->teacher['name'] ?? null,
-            'createdBy_name' => $this->createdBy['username'] ?? null,
-            'updatedBy_name' => $this->updatedBy['username'] ?? null,
-            'author' => $this->teacher['name'] ?? null,
-            'creator' => $this->createdBy['username'] ?? null,
-            'editor' => $this->updatedBy['username'] ?? null,
+            'teacher_name' => $this->teacher['name'] ?? $this->teacher_name ?? null,
+            'createdBy_name' => $this->createdBy['username'] ?? $this->createdBy_name ?? null,
+            'updatedBy_name' => $this->updatedBy['username'] ?? $this->updatedBy_name ?? null,
+            'author' => $this->teacher['name'] ?? $this->teacher_name ?? null,
+            'creator' => $this->createdBy['username'] ?? $this->createdBy_name ?? null,
+            'editor' => $this->updatedBy['username'] ?? $this->updatedBy_name ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 

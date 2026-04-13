@@ -6,6 +6,12 @@ use App\Models\Base\QuestionBank as BaseModel;
 
 class QuestionBank extends BaseModel
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->fillable = array_merge($this->fillable, ['created_by', 'updated_by']);
+    }
+
     /**
      * Hook called after records are loaded.
      * Use this to attach virtual attributes like question_count.

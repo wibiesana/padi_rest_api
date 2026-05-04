@@ -19,9 +19,7 @@ class User extends ActiveRecord
         'status',
         'email_verified_at',
         'remember_token',
-        'last_login_at',
-        'created_at',
-        'updated_at'
+        'last_login_at'
     ];
 
     protected array $hidden = ['password'];
@@ -37,7 +35,7 @@ class User extends ActiveRecord
      * 'datetime' = Y-m-d H:i:s (DATETIME/TIMESTAMP columns)
      * 'unix' = integer timestamp (INT/BIGINT columns)
      */
-    protected string $timestampFormat = 'unix';
+    protected string $timestampFormat = 'datetime';
 
     /**
      * Search users
@@ -75,7 +73,7 @@ class User extends ActiveRecord
             $data['role'] = $data['role'] ?? 'user';
         }
 
-        return parent::beforeSave($data, $insert);
+        return true; // Return false to stop saving
     }
 
     /**
@@ -252,21 +250,5 @@ class User extends ActiveRecord
         return $this->update($userId, [
             'remember_token' => $token
         ]);
-    }
-
-    /**
-     * Get teacher profile associated with this user
-     */
-    public function teacher()
-    {
-        return $this->hasOne(\App\Models\Teacher::class, 'id', 'id');
-    }
-
-    /**
-     * Get student profile associated with this user
-     */
-    public function student()
-    {
-        return $this->hasOne(\App\Models\Student::class, 'id', 'id');
     }
 }

@@ -33,10 +33,10 @@ class ExampleRBACController extends Controller
         $this->requireRole('admin');
 
         return [
-            'total_users' => $this->model::findQuery()->count(),
-            'active_users' => $this->model::findQuery()->where('status = :status', ['status' => 1])->count(),
-            'total_teachers' => $this->model::findQuery()->where('role = :role', ['role' => 'teacher'])->count(),
-            'total_students' => $this->model::findQuery()->where('role = :role', ['role' => 'student'])->count(),
+            'total_users' => $this->model::find()->count(),
+            'active_users' => $this->model::find()->where(['status' => 1])->count(),
+            'total_teachers' => $this->model::find()->where(['role' => 'teacher'])->count(),
+            'total_students' => $this->model::find()->where(['role' => 'student'])->count(),
         ];
     }
 
@@ -48,11 +48,11 @@ class ExampleRBACController extends Controller
     {
         $this->requireAnyRole(['admin', 'teacher']);
 
-        $query = $this->model::findQuery();
+        $query = $this->model::find();
 
         // Teachers can only see students
         if ($this->hasRole('teacher')) {
-            $query->where('role = :role', ['role' => 'student']);
+            $query->where(['role' => 'student']);
         }
 
         $users = $query->all();

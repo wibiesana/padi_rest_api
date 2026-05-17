@@ -41,7 +41,7 @@ class UserController extends Controller
      */
     public function all()
     {
-        return $this->model::findQuery()->all();
+        return $this->model::find()->all();
     }
 
     /**

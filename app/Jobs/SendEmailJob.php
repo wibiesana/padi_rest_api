@@ -13,7 +13,11 @@ class SendEmailJob
      */
     public function handle(array $data): void
     {
-        $to = $data['email'];
+        $to = $data['email'] ?? $data['to'] ?? null;
+        if (!$to) {
+            Logger::error("SendEmailJob failed: No recipient email provided");
+            return;
+        }
         $subject = $data['subject'];
         $body = $data['body'];
 

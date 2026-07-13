@@ -8,6 +8,8 @@ use Wibiesana\Padi\Core\Realtime;
 /**
  * Example Realtime Controller
  * 
+ * NOTE: This is a demo file. You can safely delete it in production if not needed.
+ * 
  * Showcases how to broadcast real-time updates and events using FrankenPHP Mercure:
  * 1. Broadcasting to a public channel (e.g., chat room)
  * 2. Broadcasting private messages (e.g., specific user alerts)

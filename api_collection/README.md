@@ -14,9 +14,10 @@ For complete usage guide of Postman Collections, see:
 
 These collections are for built-in functionality and should exist before others:
 
-- `auth_api_collection.json` - Authentication endpoints (Login, Register, Password Reset)
+- `auth_api_collection.json` - Authentication endpoints (Login, Register, Profile)
 - `user_api_collection.json` - User management endpoints
 - `site_api_collection.json` - Site information and health check endpoints
+- `examples_api_collection.json` - Examples of RBAC and Real-time SSE endpoints
 
 ## 🚀 Quick Start
 

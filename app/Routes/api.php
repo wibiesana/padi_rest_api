@@ -66,4 +66,25 @@ $router->group(['prefix' => 'users', 'middleware' => ['AuthMiddleware']], functi
 });
 
 
+// ============================================================================
+// DEMO & EXAMPLE ROUTES (PROTECTED)
+// ============================================================================
+// Examples showcasing Role-Based Access Control and Real-time SSE broadcasting.
+// NOTE: You can safely delete this entire group block and its controllers if not needed.
+
+$router->group(['prefix' => 'examples', 'middleware' => ['AuthMiddleware']], function ($router) {
+    // RBAC Examples
+    $router->get('/rbac/stats', 'ExampleRBACController@getStats');
+    $router->get('/rbac/users', 'ExampleRBACController@listUsers');
+    $router->get('/rbac/my-profile', 'ExampleRBACController@getMyProfile');
+    $router->put('/rbac/my-profile', 'ExampleRBACController@updateMyProfile');
+    $router->post('/rbac/students', 'ExampleRBACController@createStudent');
+
+    // Real-time SSE Examples
+    $router->post('/realtime/chat', 'ExampleRealtimeController@broadcastChatMessage');
+    $router->post('/realtime/notify', 'ExampleRealtimeController@sendPrivateNotification');
+    $router->post('/realtime/alert', 'ExampleRealtimeController@sendSystemAlert');
+    $router->post('/realtime/token', 'ExampleRealtimeController@getCustomSubscribeToken');
+});
+
 return $router;

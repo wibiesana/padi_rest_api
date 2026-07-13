@@ -9,6 +9,8 @@ use App\Models\User;
 /**
  * Simple RBAC Controller Example
  * 
+ * NOTE: This is a demo file. You can safely delete it in production if not needed.
+ * 
  * Demonstrates three common RBAC patterns:
  * 1. Admin-only access
  * 2. Role-based access (admin + teacher)

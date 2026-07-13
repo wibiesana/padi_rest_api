@@ -54,22 +54,29 @@ class AuthController extends Controller
             'role' => $user['role']
         ]);
 
-        // Push Welcome Email Job to Queue
-        Queue::push(\App\Jobs\SendEmailJob::class, [
-            'email' => $user['email'],
-            'subject' => 'Welcome to ' . (Env::get('APP_NAME', 'Our API')),
-            'body' => 'Thank you for registering!'
-        ]);
+        // Push Welcome Email Job to Queue only if enabled in .env
+        $sendWelcomeEmail = filter_var(Env::get('SEND_WELCOME_EMAIL', false), FILTER_VALIDATE_BOOLEAN);
+        $message = 'Registration successful.';
+
+        if ($sendWelcomeEmail) {
+            Queue::push(\App\Jobs\SendEmailJob::class, [
+                'email' => $user['email'],
+                'subject' => 'Welcome to ' . (Env::get('APP_NAME', 'Our API')),
+                'body' => 'Thank you for registering!'
+            ]);
+            $message .= ' Welcome email will be sent shortly.';
+        }
 
         $this->setStatusCode(201);
         $response = [
             'user' => $user,
             'token' => $token,
-            'message' => 'Registration successful. Welcome email will be sent shortly.'
+            'message' => $message
         ];
 
-        // Add real-time Mercure subscription info if enabled
-        if (Env::get('MERCURE_ENABLED', false)) {
+        // Add real-time Mercure subscription info if enabled and configured
+        $mercureEnabled = filter_var(Env::get('MERCURE_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+        if ($mercureEnabled && !empty(Env::get('MERCURE_HUB_URL'))) {
             $response['realtime'] = [
                 'hub_url' => \Wibiesana\Padi\Core\Realtime::getHubUrl(),
                 'token' => \Wibiesana\Padi\Core\Realtime::generateSubscriberJwt(["user-notifications-{$user['id']}"])
@@ -163,8 +170,9 @@ class AuthController extends Controller
             $response['expires_in'] = 365 * 24 * 60 * 60; // 365 days (1 year) in seconds
         }
 
-        // Add real-time Mercure subscription info if enabled
-        if (Env::get('MERCURE_ENABLED', false)) {
+        // Add real-time Mercure subscription info if enabled and configured
+        $mercureEnabled = filter_var(Env::get('MERCURE_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+        if ($mercureEnabled && !empty(Env::get('MERCURE_HUB_URL'))) {
             $response['realtime'] = [
                 'hub_url' => \Wibiesana\Padi\Core\Realtime::getHubUrl(),
                 'token' => \Wibiesana\Padi\Core\Realtime::generateSubscriberJwt(["user-notifications-{$user['id']}"])

@@ -23,10 +23,11 @@ class SendEmailJob
 
         Logger::info("Job SendEmailJob started for: " . $to);
 
-        // Simulation of sending email
-        Email::send($to, $subject, $body);
-
-
-        Logger::info("Job SendEmailJob completed for: " . $to);
+        try {
+            Email::send($to, $subject, $body);
+            Logger::info("Job SendEmailJob completed for: " . $to);
+        } catch (\Throwable $e) {
+            Logger::warning("SendEmailJob skipped or failed: " . $e->getMessage());
+        }
     }
 }

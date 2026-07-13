@@ -2,12 +2,22 @@
     # Global options
     admin off
     auto_https off
+    # Order Mercure middleware
+    frankenphp
+    order mercure after encode
 }
 
 # HTTP server - Standard Mode
 :8085 {
     # Root directory
     root * /app/public
+
+    # Enable Mercure Hub
+    mercure {
+        publisher_jwt "padi_mercure_publisher_secret_key_change_me_in_prod"
+        subscriber_jwt "padi_mercure_subscriber_secret_key_change_me_in_prod"
+        anonymous
+    }
 
     # Enable PHP (standard mode - no worker)
     php_server

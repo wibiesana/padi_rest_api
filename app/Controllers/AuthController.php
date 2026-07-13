@@ -62,11 +62,21 @@ class AuthController extends Controller
         ]);
 
         $this->setStatusCode(201);
-        return [
+        $response = [
             'user' => $user,
             'token' => $token,
             'message' => 'Registration successful. Welcome email will be sent shortly.'
         ];
+
+        // Add real-time Mercure subscription info if enabled
+        if (Env::get('MERCURE_ENABLED', false)) {
+            $response['realtime'] = [
+                'hub_url' => \Wibiesana\Padi\Core\Realtime::getHubUrl(),
+                'token' => \Wibiesana\Padi\Core\Realtime::generateSubscriberJwt(["user-notifications-{$user['id']}"])
+            ];
+        }
+
+        return $response;
     }
 
     /**
@@ -151,6 +161,14 @@ class AuthController extends Controller
         if ($rememberToken) {
             $response['remember_token'] = $rememberToken;
             $response['expires_in'] = 365 * 24 * 60 * 60; // 365 days (1 year) in seconds
+        }
+
+        // Add real-time Mercure subscription info if enabled
+        if (Env::get('MERCURE_ENABLED', false)) {
+            $response['realtime'] = [
+                'hub_url' => \Wibiesana\Padi\Core\Realtime::getHubUrl(),
+                'token' => \Wibiesana\Padi\Core\Realtime::generateSubscriberJwt(["user-notifications-{$user['id']}"])
+            ];
         }
 
         return $response;

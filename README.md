@@ -49,6 +49,7 @@ The complete documentation for Padi REST API has been centralized in our main in
 ## 🚀 Quick Features
 
 - ⚡ **FrankenPHP Ready**: 3-10x performance boost with native worker mode.
+- 📡 **Real-time Pub/Sub**: Native integration with FrankenPHP Mercure Hub.
 - 🪶 **Zero-Bloat**: Built with a lean-and-mean philosophy for maximum clarity.
 - 🐘 **PHP 8.4+ Support**: Modern, type-safe, and future-ready codebase.
 - 🛠️ **Auto CRUD Generator**: Go from database schema to API in seconds.
@@ -57,6 +58,6 @@ The complete documentation for Padi REST API has been centralized in our main in
 
 ---
 
-**Version:** 2.0.13
+**Version:** 2.1.0
 **Status:** Production Ready ✅  
 **Documentation:** [Go to Website →](https://padisoftware.my.id/)

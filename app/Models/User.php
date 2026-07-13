@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Wibiesana\Padi\Core\ActiveRecord;
-use Wibiesana\Padi\Core\Query;
 
 
 class User extends ActiveRecord
@@ -42,8 +41,7 @@ class User extends ActiveRecord
      */
     public function search(string $keyword): array
     {
-        return Query::find()
-            ->from($this->table)
+        return static::find()
             ->where([
                 'OR',
                 ['username', 'LIKE', "%$keyword%"],
@@ -158,16 +156,6 @@ class User extends ActiveRecord
         return $results[0] ?? null;
     }
 
-    /**
-     * Create new user
-     * @param array $data
-     * @return int|string - New user ID
-     */
-    public function createUser(array $data): int|string
-    {
-        // Logic is now handled by beforeSave hook
-        return $this->create($data);
-    }
 
     /**
      * Mark email as verified

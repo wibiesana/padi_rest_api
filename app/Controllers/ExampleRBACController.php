@@ -55,17 +55,7 @@ class ExampleRBACController extends Controller
             $query->where(['role' => 'student']);
         }
 
-        $users = $query->all();
-
-        // Remove sensitive data for non-admins
-        if (!$this->isAdmin()) {
-            $users = array_map(function ($user) {
-                unset($user['password'], $user['remember_token']);
-                return $user;
-            }, $users);
-        }
-
-        return $users;
+        return $query->all();
     }
 
     /**
@@ -74,21 +64,8 @@ class ExampleRBACController extends Controller
      */
     public function getMyProfile()
     {
-        $userId = $this->request->user->user_id ?? null;
-
-        if (!$userId) {
-            throw new \Exception('Authentication required', 401);
-        }
-
-        $user = $this->model->find($userId);
-
-        if (!$user) {
-            throw new \Exception('User not found', 404);
-        }
-
-        unset($user['password'], $user['remember_token']);
-
-        return $user;
+        $userId = $this->request->user->user_id;
+        return User::findOrFail($userId);
     }
 
     /**
@@ -97,11 +74,7 @@ class ExampleRBACController extends Controller
      */
     public function updateMyProfile()
     {
-        $userId = $this->request->user->user_id ?? null;
-
-        if (!$userId) {
-            throw new \Exception('Authentication required', 401);
-        }
+        $userId = $this->request->user->user_id;
 
         $validated = $this->validate([
             'username' => 'max:50|unique:users,username,' . $userId,
@@ -115,7 +88,7 @@ class ExampleRBACController extends Controller
 
         $this->model->update($userId, $validated);
 
-        return $this->model->find($userId);
+        return User::findOrFail($userId);
     }
 
     /**

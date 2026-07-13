@@ -40,7 +40,7 @@ class RateLimitMiddleware
         }
 
         // Filter requests within time window
-        $requests = array_filter($requests, fn($timestamp) => $timestamp > $windowStart);
+        $requests = array_values(array_filter($requests, fn($timestamp) => $timestamp > $windowStart));
 
         if (count($requests) >= $this->maxRequests) {
             throw new \Exception('Too many requests. Please try again later.', 429);
@@ -48,6 +48,6 @@ class RateLimitMiddleware
 
         // Add current request
         $requests[] = $now;
-        file_put_contents($cacheFile, json_encode($requests));
+        file_put_contents($cacheFile, json_encode($requests), LOCK_EX);
     }
 }

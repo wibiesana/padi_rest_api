@@ -51,13 +51,7 @@ class UserController extends Controller
     public function show()
     {
         $id = $this->request->param('id');
-        $user = $this->model->find($id);
-
-        if (!$user) {
-            throw new \Exception('User not found', 404);
-        }
-
-        return $user;
+        return User::findOrFail($id);
     }
 
     /**
@@ -94,16 +88,12 @@ class UserController extends Controller
     public function update()
     {
         $id = $this->request->param('id');
-        $user = $this->model->find($id);
-
-        if (!$user) {
-            throw new \Exception('User not found', 404);
-        }
+        User::findOrFail($id);
 
         $validated = $this->validate([
             'username' => 'string|max:50|unique:users,username,' . $id,
-            'email' => 'required|string|max:255|email|unique:users,email,' . $id,
-            'password' => 'required|string|max:255',
+            'email' => 'string|max:255|email|unique:users,email,' . $id,
+            'password' => 'string|max:255',
             'role' => 'string|max:50',
             'status' => 'integer',
             'email_verified_at' => 'email',
@@ -114,7 +104,7 @@ class UserController extends Controller
 
         try {
             $this->model->update($id, $validated);
-            return $this->model->find($id);
+            return User::findOrFail($id);
         } catch (\PDOException $e) {
             $this->databaseError('Failed to update user', $e);
         }
@@ -127,11 +117,7 @@ class UserController extends Controller
     public function destroy()
     {
         $id = $this->request->param('id');
-        $user = $this->model->find($id);
-
-        if (!$user) {
-            throw new \Exception('User not found', 404);
-        }
+        User::findOrFail($id);
 
         try {
             $this->model->delete($id);
@@ -140,56 +126,15 @@ class UserController extends Controller
             $this->databaseError('Failed to delete user', $e);
         }
     }
+
     /**
      * Override methods here to add custom logic.
-     * Examples of flexible response formats:
+     *
+     * Response format examples:
+     *   return $data;                                        — Auto-wrapped by Router
+     *   return $this->created($data);                        — HTTP 201
+     *   return $this->noContent();                           — HTTP 204
+     *   return $this->simple($data, 'success', 'CODE');      — {status, code, item}
+     *   return $this->raw($data);                            — Raw passthrough
      */
-
-    // Example 1: Direct return array
-    public function indexSimple()
-    {
-        return $this->model->all();
-    }
-
-    // Example 2: Return with custom status
-    public function createQuick()
-    {
-        $data = $this->request->all();
-        $id = $this->model->create($data);
-
-        // Auto status 201 for created
-        return $this->created($this->model->find($id));
-    }
-
-    // Example 3: Simple format response
-    public function viewSimple()
-    {
-        $id = $this->request->param('id');
-        $user = $this->model->find($id);
-
-        if (!$user) {
-            return $this->simple(null, 'error', 'USER_NOT_FOUND', 404);
-        }
-
-        return $this->simple($user, 'success', 'USER_FOUND');
-    }
-
-    // Example 4: Raw data return
-    public function rawData()
-    {
-        $users = $this->model->all();
-        return $this->raw($users);
-    }
-
-    // Example 5: Custom response structure
-    public function customFormat()
-    {
-        $users = $this->model->all();
-        return [
-            'status' => 'success',
-            'code' => 'SUCCESS',
-            'data' => $users,
-            'timestamp' => date('Y-m-d H:i:s')
-        ];
-    }
 }

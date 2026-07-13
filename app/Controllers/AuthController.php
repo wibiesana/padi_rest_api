@@ -45,7 +45,7 @@ class AuthController extends Controller
         unset($validated['password_confirmation']);
         $validated['role'] = 'user';
 
-        $userId = $this->model->createUser($validated);
+        $userId = $this->model->create($validated);
         $user = $this->model->find($userId);
 
         $token = Auth::generateToken([
@@ -63,8 +63,6 @@ class AuthController extends Controller
 
         $this->setStatusCode(201);
         return [
-            'id' => $user['id'],
-            'user_id' => $user['id'],
             'user' => $user,
             'token' => $token,
             'message' => 'Registration successful. Welcome email will be sent shortly.'
@@ -116,19 +114,7 @@ class AuthController extends Controller
         $user['last_login_at'] = $now; // Update in memory to avoid extra query
 
         // Check if remember me is requested
-        $rememberMeInput = $validated['remember_me'] ?? null;
-        if ($rememberMeInput === null) {
-            $rememberMeInput = $this->request->input('remember_me');
-        }
-
-        $rememberMe = false;
-        if ($rememberMeInput !== null) {
-            if (is_bool($rememberMeInput)) {
-                $rememberMe = $rememberMeInput;
-            } else {
-                $rememberMe = in_array(strtolower((string)$rememberMeInput), ['true', '1', 'yes', 'on']);
-            }
-        }
+        $rememberMe = filter_var($validated['remember_me'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         // Set token expiration based on remember me
         // 1 year = 31536000 seconds
@@ -241,7 +227,6 @@ class AuthController extends Controller
         return [
             'user' => $user,
             'token' => $token,
-            'remember_token' => $validated['remember_token'],
             'expires_in' => 365 * 24 * 60 * 60, // 365 days (1 year)
             'message' => 'Token refreshed successfully'
         ];

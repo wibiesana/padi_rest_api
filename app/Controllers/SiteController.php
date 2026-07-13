@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use Wibiesana\Padi\Core\Controller;
-use Wibiesana\Padi\Core\Response;
 use Wibiesana\Padi\Core\Env;
 
 class SiteController extends Controller
@@ -11,31 +10,29 @@ class SiteController extends Controller
     /**
      * Display API information
      */
-    public function index(): void
+    public function index()
     {
-        $response = new Response();
-        $response->json([
+        return [
             'success' => true,
             'aplikasi' => Env::get('APP_NAME', 'Padi REST API'),
             'status' => 'Up and running',
             'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        ];
     }
 
     /**
      * Health check endpoint
      */
-    public function health(): void
+    public function health()
     {
-        $response = new Response();
-        $response->json([
+        return [
             'success' => true,
             'environment' => Env::get('APP_ENV', 'production'),
             'debug' => Env::get('APP_DEBUG', 'false') === 'true',
             'message' => Env::get('APP_NAME', 'Padi REST API') . ' is running',
             'version' => Env::get('APP_VERSION', '2.0.0'),
             'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        ];
     }
 
     /**

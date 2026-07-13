@@ -26,8 +26,6 @@ class SendEmailJob
         // Simulation of sending email
         Email::send($to, $subject, $body);
 
-        // For demonstration, we'll just sleep a bit
-        sleep(2);
 
         Logger::info("Job SendEmailJob completed for: " . $to);
     }

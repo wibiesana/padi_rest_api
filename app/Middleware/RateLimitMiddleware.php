@@ -5,49 +5,40 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use Wibiesana\Padi\Core\Request;
+use Wibiesana\Padi\Core\Env;
+use Wibiesana\Padi\Core\Cache;
 
 class RateLimitMiddleware
 {
     private int $maxRequests;
     private int $windowSize;
-    private string $cacheDir;
 
     public function __construct()
     {
-        $this->maxRequests = (int)($_ENV['RATE_LIMIT_MAX'] ?? 60);
-        $this->windowSize = (int)($_ENV['RATE_LIMIT_WINDOW'] ?? 60);
-        $this->cacheDir = dirname(__DIR__, 2) . '/storage/cache/ratelimit/';
+        $this->maxRequests = (int)Env::get('RATE_LIMIT_MAX', 60);
+        $this->windowSize  = (int)Env::get('RATE_LIMIT_WINDOW', 60);
     }
 
     public function handle(Request $request): void
     {
-        $ip = $request->ip();
+        $ip  = $request->ip();
         $key = 'rate_limit_' . md5($ip);
-        $cacheFile = $this->cacheDir . $key;
 
-        // Create cache directory if not exists
-        if (!is_dir($this->cacheDir)) {
-            mkdir($this->cacheDir, 0755, true);
-        }
-
-        $now = time();
+        $now         = time();
         $windowStart = $now - $this->windowSize;
 
-        // Get request history
-        $requests = [];
-        if (file_exists($cacheFile)) {
-            $requests = json_decode(file_get_contents($cacheFile), true) ?? [];
-        }
+        // Get request history from Cache (supports Redis or File, no race condition)
+        $requests = Cache::get($key, []);
 
-        // Filter requests within time window
+        // Filter requests within sliding window
         $requests = array_values(array_filter($requests, fn($timestamp) => $timestamp > $windowStart));
 
         if (count($requests) >= $this->maxRequests) {
             throw new \Exception('Too many requests. Please try again later.', 429);
         }
 
-        // Add current request
+        // Add current request timestamp and persist
         $requests[] = $now;
-        file_put_contents($cacheFile, json_encode($requests), LOCK_EX);
+        Cache::set($key, $requests, $this->windowSize + 10);
     }
 }

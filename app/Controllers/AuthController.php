@@ -11,6 +11,9 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    /** Remember-me token lifetime: 365 days (in seconds) */
+    private const REMEMBER_ME_TTL = 365 * 24 * 60 * 60;
+
     private User $model;
 
     public function __construct(?Request $request = null)
@@ -26,16 +29,11 @@ class AuthController extends Controller
     public function register()
     {
         $validated = $this->validate([
-            'username' => 'min:3|max:50|unique:users,username',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
+            'username'             => 'required|min:3|max:50|unique:users,username',
+            'email'                => 'required|email|unique:users,email',
+            'password'             => 'required|min:8|confirmed',
             'password_confirmation' => 'required'
         ]);
-
-        // Validate password confirmation matches
-        if ($validated['password'] !== $validated['password_confirmation']) {
-            throw new \Exception('Password confirmation does not match', 422);
-        }
 
         // Additional password complexity validation
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/', $validated['password'])) {
@@ -93,9 +91,9 @@ class AuthController extends Controller
     public function login()
     {
         $validated = $this->validate([
-            'username' => 'required', // Can be email or username
-            'password' => 'required',
-            'remember_me' => '' // Optional
+            'username'    => 'required',          // Can be email or username
+            'password'    => 'required',
+            'remember_me' => 'sometimes|boolean' // Optional
         ]);
 
         // Determine if login is email or username
@@ -134,8 +132,7 @@ class AuthController extends Controller
         $rememberMe = filter_var($validated['remember_me'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         // Set token expiration based on remember me
-        // 1 year = 31536000 seconds
-        $expiration = $rememberMe ? 31536000 : 3600;
+        $expiration = $rememberMe ? self::REMEMBER_ME_TTL : 3600;
 
         if (Env::get('APP_DEBUG') === 'true') {
             error_log("[Auth] Login request - User: " . $user['username'] . ", Remember Me: " . ($rememberMe ? 'YES' : 'NO') . ", Expiration: " . $expiration);
@@ -167,7 +164,7 @@ class AuthController extends Controller
 
         if ($rememberToken) {
             $response['remember_token'] = $rememberToken;
-            $response['expires_in'] = 365 * 24 * 60 * 60; // 365 days (1 year) in seconds
+            $response['expires_in']     = self::REMEMBER_ME_TTL;
         }
 
         // Add real-time Mercure subscription info if enabled and configured
@@ -251,10 +248,10 @@ class AuthController extends Controller
         unset($user['password']);
 
         return [
-            'user' => $user,
-            'token' => $token,
-            'expires_in' => 365 * 24 * 60 * 60, // 365 days (1 year)
-            'message' => 'Token refreshed successfully'
+            'user'       => $user,
+            'token'      => $token,
+            'expires_in' => self::REMEMBER_ME_TTL,
+            'message'    => 'Token refreshed successfully'
         ];
     }
 }

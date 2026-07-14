@@ -61,15 +61,15 @@ class UserController extends Controller
     public function store()
     {
         $validated = $this->validate([
-            'username' => 'string|max:50|unique:users,username',
-            'email' => 'required|string|max:255|email|unique:users,email',
-            'password' => 'required|string|max:255',
-            'role' => 'string|max:50',
-            'status' => 'integer',
-            'email_verified_at' => 'email',
-            'remember_token' => 'string|max:100',
-            'created_by' => 'integer',
-            'updated_by' => 'integer'
+            'username'          => 'string|max:50|unique:users,username',
+            'email'             => 'required|string|max:255|email|unique:users,email',
+            'password'          => 'required|string|max:255',
+            'role'              => 'string|max:50',
+            'status'            => 'integer',
+            'email_verified_at' => 'nullable|date',
+            'remember_token'    => 'string|max:100',
+            'created_by'        => 'integer',
+            'updated_by'        => 'integer'
         ]);
 
         try {
@@ -91,15 +91,15 @@ class UserController extends Controller
         User::findOrFail($id);
 
         $validated = $this->validate([
-            'username' => 'string|max:50|unique:users,username,' . $id,
-            'email' => 'string|max:255|email|unique:users,email,' . $id,
-            'password' => 'string|max:255',
-            'role' => 'string|max:50',
-            'status' => 'integer',
-            'email_verified_at' => 'email',
-            'remember_token' => 'string|max:100',
-            'created_by' => 'integer',
-            'updated_by' => 'integer'
+            'username'          => 'string|max:50|unique:users,username,' . $id,
+            'email'             => 'string|max:255|email|unique:users,email,' . $id,
+            'password'          => 'string|max:255',
+            'role'              => 'string|max:50',
+            'status'            => 'integer',
+            'email_verified_at' => 'nullable|date',
+            'remember_token'    => 'string|max:100',
+            'created_by'        => 'integer',
+            'updated_by'        => 'integer'
         ]);
 
         try {

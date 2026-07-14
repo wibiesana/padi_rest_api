@@ -130,29 +130,39 @@ class User extends ActiveRecord
 
     /**
      * Find active user by email
+     * Accepts status = 1 (integer) or 'active' (string), consistent with isActive()
      * @param string $email
      * @return array|null
      */
     public function findActiveByEmail(string $email): ?array
     {
-        $results = $this->where([
-            'email' => $email,
-            'status' => 'active'
-        ]);
+        $results = static::find()
+            ->where([
+                ['email', '=', $email],
+                'AND',
+                ['OR', ['status', '=', 1], ['status', '=', 'active']]
+            ])
+            ->limit(1)
+            ->all();
         return $results[0] ?? null;
     }
 
     /**
      * Find active user by username
+     * Accepts status = 1 (integer) or 'active' (string), consistent with isActive()
      * @param string $username
      * @return array|null
      */
     public function findActiveByUsername(string $username): ?array
     {
-        $results = $this->where([
-            'username' => $username,
-            'status' => 'active'
-        ]);
+        $results = static::find()
+            ->where([
+                ['username', '=', $username],
+                'AND',
+                ['OR', ['status', '=', 1], ['status', '=', 'active']]
+            ])
+            ->limit(1)
+            ->all();
         return $results[0] ?? null;
     }
 

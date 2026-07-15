@@ -364,8 +364,27 @@ try {
 
     if ($generateChoice == 1) {
         echo PHP_EOL;
+        $realtimeChoice = choice("Enable real-time SSE broadcasting (Mercure) for CRUD?", [
+            1 => 'No, standard CRUD only',
+            2 => 'Yes, generate with real-time ORM hooks'
+        ], 1);
+
+        $realtimeOpt = '';
+        if ($realtimeChoice == 2) {
+            $realtimeOpt = ' --realtime';
+            $syncChoice = choice("Should real-time broadcasts be processed asynchronously via Queue?", [
+                1 => 'Yes, use background Queue (asynchronous)',
+                2 => 'No, publish directly (synchronous)'
+            ], 1);
+            if ($syncChoice == 2) {
+                $realtimeOpt .= ' --realtime-sync=false';
+            } else {
+                $realtimeOpt .= ' --realtime-sync=true';
+            }
+        }
+
         info("Generating CRUD for all tables...");
-        $crudCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud-all --write --overwrite';
+        $crudCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud-all --write --overwrite' . $realtimeOpt;
         $crudSuccess = runCommand($crudCmd);
         if ($crudSuccess) {
             success("CRUD generation completed");
@@ -380,18 +399,36 @@ try {
     } elseif ($generateChoice == 2) {
         echo PHP_EOL;
         info("Available tables:");
-        runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' -l'); // Note: You might want to add a 'list-tables' command to Console.php if not present, otherwise fallback to DB query here or handle otherwise. Better to just let them type. For now I keep it but be aware. Let's change it.
-        // runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' check-tables'); // Assuming padi doesn't have list anymore, maybe just ask.
+        runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' -l');
 
         echo PHP_EOL;
 
         $tables = ask("Enter table names (comma separated)", "");
         if ($tables) {
+            $realtimeChoice = choice("Enable real-time SSE broadcasting (Mercure) for CRUD?", [
+                1 => 'No, standard CRUD only',
+                2 => 'Yes, generate with real-time ORM hooks'
+            ], 1);
+
+            $realtimeOpt = '';
+            if ($realtimeChoice == 2) {
+                $realtimeOpt = ' --realtime';
+                $syncChoice = choice("Should real-time broadcasts be processed asynchronously via Queue?", [
+                    1 => 'Yes, use background Queue (asynchronous)',
+                    2 => 'No, publish directly (synchronous)'
+                ], 1);
+                if ($syncChoice == 2) {
+                    $realtimeOpt .= ' --realtime-sync=false';
+                } else {
+                    $realtimeOpt .= ' --realtime-sync=true';
+                }
+            }
+
             $tableList = array_map('trim', explode(',', $tables));
             $allSuccess = true;
             foreach ($tableList as $table) {
                 info("Generating CRUD for $table...");
-                $result = runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud ' . escapeshellarg($table) . ' --write');
+                $result = runCommand('php ' . escapeshellarg($projectRoot . '/padi') . ' generate:crud ' . escapeshellarg($table) . ' --write' . $realtimeOpt);
                 if (!$result) {
                     error("Failed to generate CRUD for table: $table");
                     $allSuccess = false;

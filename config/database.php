@@ -88,7 +88,20 @@ return [
         // SQLite Connection
         'sqlite' => [
             'driver' => 'sqlite',
-            'database' => Env::get('SQLITE_DATABASE', dirname(__DIR__, 2) . '/database/database.sqlite'),
+            'database' => (function() {
+                $db = Env::get('SQLITE_DATABASE');
+                if (!$db) {
+                    return dirname(__DIR__, 2) . '/database/database.sqlite';
+                }
+                if ($db === ':memory:') {
+                    return $db;
+                }
+                // Check if it's already an absolute path (starts with / or \ or a drive letter like C:)
+                $isAbsolute = strspn($db, '/\\', 0, 1) > 0 
+                    || (strlen($db) > 1 && $db[1] === ':');
+                
+                return $isAbsolute ? $db : (dirname(__DIR__, 2) . '/' . $db);
+            })(),
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

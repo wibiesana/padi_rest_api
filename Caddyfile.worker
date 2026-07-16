@@ -10,18 +10,27 @@
 # HTTP server - Worker Mode
 :8085 {
     # Root directory
-    root * /app/public
+    root * {$PUBLIC_ROOT:/app/public}
 
     # Enable Mercure Hub (Can be safely deleted if not using realtime)
     mercure {
         publisher_jwt "padi_mercure_publisher_secret_key_change_me_in_prod"
         subscriber_jwt "padi_mercure_subscriber_secret_key_change_me_in_prod"
         anonymous
+        cors_origins *
+        transport bolt {
+            path {$MERCURE_DB_PATH:mercure.db}
+        }
+    }
+
+    # Define matcher to prevent PHP intercepting Mercure
+    @notMercure {
+        not path /.well-known/mercure*
     }
 
     # Enable PHP with FrankenPHP worker mode for maximum performance
-    php_server {
-        worker /app/public/index.php 10
+    php_server @notMercure {
+        worker {$WORKER_INDEX_PATH:/app/public/index.php} 10
     }
 
     # Enable file server for static assets

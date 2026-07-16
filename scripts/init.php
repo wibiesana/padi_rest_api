@@ -101,7 +101,7 @@ function banner()
 
 ╔════════════════════════════════════════════════════════════════╗
 ║             Padi REST API Framework - Setup Wizard             ║
-║                        Version 2.1.1                             ║
+║                        Version 2.1.2                             ║
 ║                    Powered by PHP CLI                          ║
 ╚════════════════════════════════════════════════════════════════╝
 

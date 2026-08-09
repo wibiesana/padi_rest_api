@@ -300,39 +300,17 @@ try {
     echo Colors::colorize("[6/8] Database Migrations", 'yellow') . PHP_EOL;
 
     $migrateChoice = choice("Migration options:", [
-        1 => 'Migrate base tables only (users, password_resets)',
-        2 => 'Migrate with examples (users, password_resets, posts, comments, tags)',
-        3 => 'Skip migrations'
+        1 => 'Run migrations (users, password_resets)',
+        2 => 'Skip migrations'
     ], 1);
 
     if ($migrateChoice == 1) {
         echo PHP_EOL;
-        info("Running base migrations...");
-        $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' migrate --tables=users,password_resets';
-        $migrationSuccess = runCommand($migrationCmd);
-        if ($migrationSuccess) {
-            success("Base migrations completed");
-        } else {
-            error("Migration failed!");
-            warning("Troubleshooting:");
-            echo "  • Ensure database connection is working" . PHP_EOL;
-            echo "  • Check if migration files exist in database/migrations/" . PHP_EOL;
-            echo "  • Review error messages above" . PHP_EOL;
-            echo PHP_EOL;
-
-            $continue = ask("Continue to next step? (y/n)", 'y');
-            if (strtolower($continue) !== 'y') {
-                error("Setup aborted.");
-                exit(1);
-            }
-        }
-    } elseif ($migrateChoice == 2) {
-        echo PHP_EOL;
-        info("Running all migrations...");
+        info("Running migrations...");
         $migrationCmd = 'php ' . escapeshellarg($projectRoot . '/padi') . ' migrate';
         $migrationSuccess = runCommand($migrationCmd);
         if ($migrationSuccess) {
-            success("All migrations completed");
+            success("Migrations completed");
         } else {
             error("Migration failed!");
             warning("Troubleshooting:");

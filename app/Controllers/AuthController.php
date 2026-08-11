@@ -43,7 +43,7 @@ class AuthController extends Controller
         unset($validated['password_confirmation']);
         $validated['role'] = 'user';
 
-        $userId = $this->model->create($validated);
+        $userId = User::create($validated);
         $user = $this->model->find($userId);
 
         $token = Auth::generateToken([

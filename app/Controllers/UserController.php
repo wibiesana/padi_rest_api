@@ -73,7 +73,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $id = $this->model->create($validated);
+            $id = User::create($validated);
             $user = $this->model->find($id);
             return $this->created($user);
         } catch (\PDOException $e) {
@@ -103,7 +103,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $this->model->update($id, $validated);
+            User::update($id, $validated);
             return User::findOrFail($id);
         } catch (\PDOException $e) {
             $this->databaseError('Failed to update user', $e);
@@ -120,7 +120,7 @@ class UserController extends Controller
         User::findOrFail($id);
 
         try {
-            $this->model->delete($id);
+            User::delete($id);
             return $this->noContent();
         } catch (\PDOException $e) {
             $this->databaseError('Failed to delete user', $e);

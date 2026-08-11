@@ -110,7 +110,7 @@ class ExampleRBACController extends Controller
         $validated['role'] = 'student';
         $validated['status'] = 1;
 
-        $id = $this->model->create($validated);
+        $id = User::create($validated);
 
         $this->setStatusCode(201);
         return $this->model->find($id);

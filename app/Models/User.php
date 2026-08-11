@@ -37,22 +37,6 @@ class User extends ActiveRecord
     protected string $timestampFormat = 'unix';
 
     /**
-     * Search users
-     */
-    public function search(string $keyword): array
-    {
-        return static::find()
-            ->where([
-                'OR',
-                ['username', 'LIKE', "%$keyword%"],
-                ['email', 'LIKE', "%$keyword%"],
-                ['status', 'LIKE', "%$keyword%"],
-                ['email_verified_at', 'LIKE', "%$keyword%"]
-            ])
-            ->limit(100)
-            ->all();
-    }
-    /**
      * Automatically hash password and set defaults before saving
      */
     protected function beforeSave(array &$data, bool $insert): bool

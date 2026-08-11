@@ -10,7 +10,7 @@
     },
     "require": {
         "php": ">=8.4",
-        "wibiesana/padi-core": "^2.1.5"
+        "wibiesana/padi-core": "^2.1.6"
     },
     "autoload": {
         "psr-4": {

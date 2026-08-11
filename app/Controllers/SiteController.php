@@ -30,7 +30,7 @@ class SiteController extends Controller
             'environment' => Env::get('APP_ENV', 'production'),
             'debug' => Env::get('APP_DEBUG', 'false') === 'true',
             'message' => Env::get('APP_NAME', 'Padi REST API') . ' is running',
-            'version' => Env::get('APP_VERSION', '2.1.6'),
+            'version' => Env::get('APP_VERSION', '2.1.7'),
             'timestamp' => date('Y-m-d H:i:s')
         ];
     }

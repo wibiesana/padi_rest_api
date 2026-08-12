@@ -89,9 +89,10 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'database' => (function() {
-                $db = Env::get('SQLITE_DATABASE');
+                $db = Env::get('SQLITE_DATABASE') ?? Env::get('DB_DATABASE');
+                $root = defined('PADI_ROOT') ? PADI_ROOT : dirname(__DIR__);
                 if (!$db) {
-                    return dirname(__DIR__, 2) . '/database/database.sqlite';
+                    return $root . '/database/database.sqlite';
                 }
                 if ($db === ':memory:') {
                     return $db;
@@ -100,7 +101,7 @@ return [
                 $isAbsolute = strspn($db, '/\\', 0, 1) > 0 
                     || (strlen($db) > 1 && $db[1] === ':');
                 
-                return $isAbsolute ? $db : (dirname(__DIR__, 2) . '/' . $db);
+                return $isAbsolute ? $db : ($root . '/' . ltrim($db, '/\\'));
             })(),
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

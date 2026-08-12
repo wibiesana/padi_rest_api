@@ -87,4 +87,5 @@ $router->group(['prefix' => 'examples', 'middleware' => ['AuthMiddleware']], fun
     $router->post('/realtime/token', 'ExampleRealtimeController@getCustomSubscribeToken');
 });
 
+
 return $router;

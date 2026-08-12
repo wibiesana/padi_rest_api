@@ -83,7 +83,7 @@ class User extends ActiveRecord
         }
     }
 
-    protected function beforeDelete($id): bool
+    protected function beforeDelete(int|string|array $id): bool
     {
         // Prevent deleting admin users
         if ($id == 1) return false;

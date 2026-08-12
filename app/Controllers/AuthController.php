@@ -44,7 +44,7 @@ class AuthController extends Controller
         $validated['role'] = 'user';
 
         $userId = User::create($validated);
-        $user = $this->model->find($userId);
+        $user = User::findOrFail($userId);
 
         $token = Auth::generateToken([
             'user_id' => (int)$user['id'],

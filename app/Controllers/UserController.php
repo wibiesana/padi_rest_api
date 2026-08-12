@@ -74,7 +74,7 @@ class UserController extends Controller
 
         try {
             $id = User::create($validated);
-            $user = $this->model->find($id);
+            $user = User::findOrFail($id);
             return $this->created($user);
         } catch (\PDOException $e) {
             $this->databaseError('Failed to create user', $e);

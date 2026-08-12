@@ -113,6 +113,6 @@ class ExampleRBACController extends Controller
         $id = User::create($validated);
 
         $this->setStatusCode(201);
-        return $this->model->find($id);
+        return User::findOrFail($id);
     }
 }

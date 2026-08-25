@@ -20,11 +20,11 @@ return new class
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
                 status VARCHAR(20) DEFAULT 'active',
-                email_verified_at INTEGER,
-                remember_token VARCHAR(100),
-                last_login_at INTEGER,
-                created_by INTEGER,
-                updated_by INTEGER,
+                email_verified_at INTEGER NULL,
+                remember_token VARCHAR(100) NULL,
+                last_login_at INTEGER NULL,
+                created_by INTEGER NULL,
+                updated_by INTEGER NULL,
                 created_at INTEGER DEFAULT (strftime('%s', 'now')),
                 updated_at INTEGER DEFAULT (strftime('%s', 'now')),
                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
@@ -48,13 +48,13 @@ return new class
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
                 status VARCHAR(20) DEFAULT 'active',
-                email_verified_at TIMESTAMP,
-                remember_token VARCHAR(100),
-                last_login_at TIMESTAMP,
-                created_by INTEGER,
-                updated_by INTEGER,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                email_verified_at BIGINT NULL,
+                remember_token VARCHAR(100) NULL,
+                last_login_at BIGINT NULL,
+                created_by INTEGER NULL,
+                updated_by INTEGER NULL,
+                created_at BIGINT NULL,
+                updated_at BIGINT NULL,
                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
                 FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
             )";
@@ -68,25 +68,6 @@ return new class
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_created_by ON users(created_by)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_users_updated_by ON users(updated_by)");
-
-            // Create trigger for updated_at
-            $db->exec("
-                CREATE OR REPLACE FUNCTION update_updated_at_column()
-                RETURNS TRIGGER AS \$\$
-                BEGIN
-                    NEW.updated_at = CURRENT_TIMESTAMP;
-                    RETURN NEW;
-                END;
-                \$\$ language 'plpgsql';
-            ");
-
-            $db->exec("
-                DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-                CREATE TRIGGER update_users_updated_at 
-                    BEFORE UPDATE ON users 
-                    FOR EACH ROW 
-                    EXECUTE FUNCTION update_updated_at_column();
-            ");
         } else {
             // MySQL/MariaDB
             $sql = "CREATE TABLE IF NOT EXISTS users (
@@ -96,13 +77,13 @@ return new class
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
                 status VARCHAR(20) DEFAULT 'active',
-                email_verified_at TIMESTAMP NULL,
-                remember_token VARCHAR(100),
-                last_login_at TIMESTAMP NULL,
+                email_verified_at BIGINT NULL,
+                remember_token VARCHAR(100) NULL,
+                last_login_at BIGINT NULL,
                 created_by INT NULL,
                 updated_by INT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at BIGINT NULL,
+                updated_at BIGINT NULL,
                 INDEX idx_users_email (email),
                 INDEX idx_users_username (username),
                 INDEX idx_users_status (status),

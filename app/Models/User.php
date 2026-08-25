@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Wibiesana\Padi\Core\ActiveRecord;
-use Wibiesana\Padi\Core\DatabaseManager;
 
 
 class User extends ActiveRecord
@@ -31,25 +30,9 @@ class User extends ActiveRecord
     protected bool $useAudit = true;
 
     /**
-     * Timestamp format — auto-detected based on active database driver:
-     * - 'datetime' = Y-m-d H:i:s  → MySQL, PostgreSQL (TIMESTAMP/DATETIME columns)
-     * - 'unix'     = integer epoch → SQLite (INTEGER columns)
-     *
-     * Cached in a static property so DatabaseManager::getDriver() is called
-     * only once per process lifecycle (worker mode safe).
+     * Timestamp format: 'unix' (Integer epoch timestamp for SQLite, MySQL, and PostgreSQL)
      */
-    protected string $timestampFormat = 'datetime';
-
-    /** @var string|null Cached driver-resolved timestamp format (persists across worker iterations) */
-    private static ?string $resolvedTimestampFormat = null;
-
-    public function __construct()
-    {
-        parent::__construct();
-        // Resolve once per process; subsequent instantiations reuse the cached value
-        self::$resolvedTimestampFormat ??= DatabaseManager::getDriver() === 'sqlite' ? 'unix' : 'datetime';
-        $this->timestampFormat = self::$resolvedTimestampFormat;
-    }
+    protected string $timestampFormat = 'unix';
 
     /**
      * Automatically hash password and set defaults before saving
@@ -174,7 +157,7 @@ class User extends ActiveRecord
     public function markEmailAsVerified(int|string $userId): bool
     {
         return $this->update($userId, [
-            'email_verified_at' => date('Y-m-d H:i:s')
+            'email_verified_at' => time()
         ]);
     }
 
@@ -186,7 +169,7 @@ class User extends ActiveRecord
     public function updateLastLogin(int|string $userId): bool
     {
         return $this->update($userId, [
-            'last_login_at' => date('Y-m-d H:i:s')
+            'last_login_at' => time()
         ]);
     }
 

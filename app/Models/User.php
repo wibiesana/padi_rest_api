@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Wibiesana\Padi\Core\ActiveRecord;
+use Wibiesana\Padi\Core\DatabaseManager;
 
 
 class User extends ActiveRecord
@@ -30,11 +31,25 @@ class User extends ActiveRecord
     protected bool $useAudit = true;
 
     /**
-     * Timestamp format: 'datetime'
-     * 'datetime' = Y-m-d H:i:s (DATETIME/TIMESTAMP columns)
-     * 'unix' = integer timestamp (INT/BIGINT columns)
+     * Timestamp format — auto-detected based on active database driver:
+     * - 'datetime' = Y-m-d H:i:s  → MySQL, PostgreSQL (TIMESTAMP/DATETIME columns)
+     * - 'unix'     = integer epoch → SQLite (INTEGER columns)
+     *
+     * Cached in a static property so DatabaseManager::getDriver() is called
+     * only once per process lifecycle (worker mode safe).
      */
-    protected string $timestampFormat = 'unix';
+    protected string $timestampFormat = 'datetime';
+
+    /** @var string|null Cached driver-resolved timestamp format (persists across worker iterations) */
+    private static ?string $resolvedTimestampFormat = null;
+
+    public function __construct()
+    {
+        parent::__construct();
+        // Resolve once per process; subsequent instantiations reuse the cached value
+        self::$resolvedTimestampFormat ??= DatabaseManager::getDriver() === 'sqlite' ? 'unix' : 'datetime';
+        $this->timestampFormat = self::$resolvedTimestampFormat;
+    }
 
     /**
      * Automatically hash password and set defaults before saving

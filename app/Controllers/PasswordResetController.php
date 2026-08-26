@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Models\PasswordReset;
+use App\Models\User;
 use Wibiesana\Padi\Core\Controller;
-
+use Wibiesana\Padi\Core\Env;
 
 class PasswordResetController extends Controller
 {
@@ -17,7 +19,7 @@ class PasswordResetController extends Controller
             'email' => 'required|email'
         ]);
 
-        $userModel = new \App\Models\User();
+        $userModel = new User();
         $user = $userModel->findByEmail($validated['email']);
 
         if (!$user) {
@@ -30,9 +32,9 @@ class PasswordResetController extends Controller
         $token = bin2hex(random_bytes(32));
         $expiresAt = time() + 3600; // 1 hour expiration in unix timestamp
 
-        $passwordResetModel = new \App\Models\PasswordReset();
+        $passwordResetModel = new PasswordReset();
         $passwordResetModel->deleteByEmail($validated['email']);
-        $passwordResetModel->create([
+        PasswordReset::create([
             'email' => $validated['email'],
             'token' => $token,
             'expires_at' => $expiresAt
@@ -44,7 +46,7 @@ class PasswordResetController extends Controller
             'message' => 'If your email is registered, you will receive a password reset link shortly.'
         ];
 
-        if (\Wibiesana\Padi\Core\Env::get('APP_DEBUG') === 'true') {
+        if (Env::get('APP_DEBUG') === 'true') {
             $data['debug_token'] = $token;
         }
 
@@ -68,14 +70,14 @@ class PasswordResetController extends Controller
             throw new \Exception('Password confirmation does not match', 422);
         }
 
-        $passwordResetModel = new \App\Models\PasswordReset();
+        $passwordResetModel = new PasswordReset();
         $resetEntry = $passwordResetModel->findValidToken($validated['email'], $validated['token']);
 
         if (!$resetEntry) {
             throw new \Exception('Invalid or expired reset token', 400);
         }
 
-        $userModel = new \App\Models\User();
+        $userModel = new User();
         $user = $userModel->findByEmail($validated['email']);
 
         if (!$user) {
@@ -83,7 +85,7 @@ class PasswordResetController extends Controller
         }
 
         // Update password (ActiveRecord beforeSave will handle hashing)
-        $userModel->update($user['id'], [
+        User::update($user['id'], [
             'password' => $validated['password']
         ]);
 

@@ -24,7 +24,7 @@ class PasswordReset extends ActiveRecord
             ->where([
                 'email' => $email,
                 'token' => $token,
-                ['expires_at', '>', date('Y-m-d H:i:s')]
+                ['expires_at', '>', time()]
             ])
             ->one();
 

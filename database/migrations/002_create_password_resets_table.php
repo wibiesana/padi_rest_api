@@ -10,9 +10,9 @@ return [
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     email VARCHAR(255) NOT NULL,
                     token VARCHAR(255) NOT NULL,
-                    expires_at DATETIME NOT NULL,
+                    expires_at INTEGER NOT NULL,
                     created_by INTEGER NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at INTEGER DEFAULT (strftime('%s', 'now')),
                     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
                 );
             ");
@@ -26,9 +26,9 @@ return [
                     id SERIAL PRIMARY KEY,
                     email VARCHAR(255) NOT NULL,
                     token VARCHAR(255) NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
+                    expires_at BIGINT NOT NULL,
                     created_by INT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at BIGINT NULL,
                     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
                 );
             ");
@@ -43,9 +43,9 @@ return [
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     email VARCHAR(255) NOT NULL,
                     token VARCHAR(255) NOT NULL,
-                    expires_at DATETIME NOT NULL,
+                    expires_at BIGINT NOT NULL,
                     created_by INT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at BIGINT NULL,
                     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
                     INDEX idx_email (email),
                     INDEX idx_token (token),

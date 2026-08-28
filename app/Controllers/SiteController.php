@@ -30,7 +30,7 @@ class SiteController extends Controller
             'environment' => Env::get('APP_ENV', 'production'),
             'debug' => Env::get('APP_DEBUG', 'false') === 'true',
             'message' => Env::get('APP_NAME', 'Padi REST API') . ' is running',
-            'version' => Env::get('APP_VERSION', '2.1.10'),
+            'version' => Env::get('APP_VERSION', '2.1.11'),
             'timestamp' => date('Y-m-d H:i:s')
         ];
     }
@@ -43,7 +43,7 @@ class SiteController extends Controller
         return [
             'site_name' => Env::get('APP_NAME', 'Padi REST API'),
             'description' => 'A RESTful API built with PHP',
-            'version' => Env::get('APP_VERSION', '2.1.10'),
+            'version' => Env::get('APP_VERSION', '2.1.11'),
             'author' => 'Padi Team',
             'environment' => Env::get('APP_ENV', 'production'),
             'timestamp' => date('Y-m-d H:i:s')

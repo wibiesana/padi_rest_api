@@ -43,7 +43,7 @@ class SiteController extends Controller
         return [
             'site_name' => Env::get('APP_NAME', 'Padi REST API'),
             'description' => 'A RESTful API built with PHP',
-            'version' => Env::get('APP_VERSION', '2.0.0'),
+            'version' => Env::get('APP_VERSION', '2.1.10'),
             'author' => 'Padi Team',
             'environment' => Env::get('APP_ENV', 'production'),
             'timestamp' => date('Y-m-d H:i:s')

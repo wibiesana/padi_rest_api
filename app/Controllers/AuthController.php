@@ -150,11 +150,11 @@ class AuthController extends Controller
         if ($rememberMe) {
             $rememberToken = $this->model->generateRememberToken();
             $this->model->setRememberToken($user['id'], $rememberToken);
-            $user['remember_token'] = $rememberToken; // Update in memory
         }
 
-        // Remove password from response
-        unset($user['password']);
+        // Hide sensitive fields (password, remember_token, etc.) from user response
+        $user = $this->model->hideFields($user);
+        unset($user['password'], $user['remember_token']);
 
         $response = [
             'user' => $user,
@@ -244,8 +244,9 @@ class AuthController extends Controller
         $this->model->updateLastLogin($user['id']);
         $user['last_login_at'] = $now; // Update in memory to avoid extra query
 
-        // Remove password from response
-        unset($user['password']);
+        // Hide sensitive fields (password, remember_token, etc.) from user response
+        $user = $this->model->hideFields($user);
+        unset($user['password'], $user['remember_token']);
 
         return [
             'user'       => $user,

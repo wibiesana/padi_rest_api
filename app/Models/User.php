@@ -21,7 +21,10 @@ class User extends ActiveRecord
         'last_login_at'
     ];
 
-    protected array $hidden = ['password'];
+    protected array $hidden = [
+        'password',
+        'remember_token'
+    ];
 
     /**
      * Audit fields detected: created_at, updated_at, created_by, updated_by
